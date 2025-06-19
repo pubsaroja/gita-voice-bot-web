@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gita Voice Bot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 2rem;
+      text-align: center;
+    }
+    #response {
+      font-size: 1.2rem;
+      margin: 1rem 0;
+    }
+    button {
+      font-size: 1rem;
+      padding: 1rem 2rem;
+      margin-top: 2rem;
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bhagavad Gita Voice Bot 🎙️</h1>
+  <p>Press the button and speak: <strong>"zero", "chapter 5", "next", or "full"</strong></p>
+  <button onclick="startListening()">🎤 Speak Now</button>
+
+  <div id="response"></div>
+  <audio id="audio" controls autoplay style="margin-top: 1rem;"></audio>
+
+  <script>
+    const webhookUrl = "https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
+    const responseDiv = document.getElementById("response");
+    const audioEl = document.getElementById("audio");
+
+    function startListening() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "en-IN";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      responseDiv.textContent = "Listening...";
+      recognition.start();
+
+      recognition.onresult = async (event) => {
+        const text = event.results[0][0].transcript.toLowerCase();
+        responseDiv.innerHTML = `<em>You said:</em> <strong>${text}</strong><br/>Thinking...`;
+
+        const payload = {
+          queryResult: {
+            intent: { displayName: detectIntentFromText(text) },
+            parameters: { chapter: parseInt(text.replace(/\D/g, '')) || 1 }
+          },
+          session: "browser-session"
+        };
+
+        try {
+          const res = await fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await res.json();
+          const reply = data.fulfillmentText || "No response.";
+          responseDiv.innerHTML += `<br/><strong>Bot:</strong> ${reply}`;
+
+          const media = data.payload?.google?.richResponse?.items?.find(i => i.mediaResponse);
+          if (media) {
+            const audioUrl = media.mediaResponse.mediaObjects[0].contentUrl;
+            audioEl.src = audioUrl;
+            audioEl.play();
+          }
+        } catch (err) {
+          console.error(err);
+          responseDiv.innerHTML += `<br/><span style="color:red;">Failed to reach server.</span>`;
+        }
+      };
+
+      recognition.onerror = (err) => {
+        responseDiv.textContent = `Error: ${err.error}`;
+      };
+    }
+
+    function detectIntentFromText(text) {
+      if (text.includes("zero")) return "ZeroIntent";
+      if (text.includes("chapter")) return "ChapterIntent";
+      if (text.includes("full")) return "FullIntent";
+      if (text.includes("next")) return "NextIntent";
+      return "UnknownIntent";
+    }
+  </script>
+</body>
+</html>
