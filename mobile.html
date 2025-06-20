@@ -2,83 +2,106 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gita Voice Bot (Mobile)</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
+      font-family: sans-serif;
       padding: 2rem;
+      background: #fafafa;
       text-align: center;
     }
-    input {
-      font-size: 1rem;
-      padding: 0.7rem;
+    input[type="text"] {
+      padding: 1rem;
       width: 80%;
-      margin: 1rem 0;
+      font-size: 1.2rem;
       border-radius: 8px;
       border: 1px solid #ccc;
     }
     button {
-      font-size: 1rem;
-      padding: 0.7rem 1.5rem;
-      background: #4caf50;
+      padding: 1rem 2rem;
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      background: #007BFF;
       color: white;
       border: none;
       border-radius: 8px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #45a049;
     }
     #response {
+      margin-top: 2rem;
       font-size: 1.2rem;
-      margin: 2rem 0;
+    }
+    audio {
+      margin-top: 1rem;
     }
   </style>
 </head>
 <body>
-  <h1>Bhagavad Gita Voice Bot 🎙️</h1>
-  <p>Type or tap mic in keyboard: <strong>zero, chapter 5, next, full</strong></p>
+  <h2>Bhagavad Gita Voice Bot (Mobile)</h2>
+  <p>Type commands like <strong>zero</strong>, <strong>chapter 5</strong>, <strong>next</strong>, or <strong>full</strong></p>
 
-  <input id="commandInput" type="text" placeholder="Type or speak here..." inputmode="text" />
-  <br />
-  <button onclick="sendCommand()">▶️ Send</button>
+  <input id="command" type="text" placeholder="Enter your command..." />
+  <br/>
+  <button onclick="sendText()">▶ Submit</button>
 
   <div id="response"></div>
-  <audio id="audio" controls autoplay style="margin-top: 1rem;"></audio>
+  <audio id="audio" controls autoplay style="display:none;"></audio>
 
   <script>
-    const webhookUrl = "https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
+    // Auto-detect webhook URL
+    const isLocal = location.hostname === "localhost" || location.hostname.startsWith("192.168.");
+    const webhookUrl = isLocal
+      ? "http://192.168.1.7:8080/webhook"  // Replace with your actual LAN IP
+      : "https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
+
     const responseDiv = document.getElementById("response");
     const audioEl = document.getElementById("audio");
 
-    function detectIntentFromText(text) {
-      text = text.toLowerCase();
-      if (text.includes("zero")) return "ZeroIntent";
-      if (text.includes("chapter")) return "ChapterIntent";
-      if (text.includes("full")) return "FullIntent";
-      if (text.includes("next")) return "NextIntent";
-      return "UnknownIntent";
-    }
-
-    async function sendCommand() {
-      const input = document.getElementById("commandInput");
-      const text = input.value.trim();
+    async function sendText() {
+      const text = document.getElementById("command").value.trim().toLowerCase();
       if (!text) return;
 
-      responseDiv.innerHTML = `<em>You said:</em> <strong>${text}</strong><br/>Thinking...`;
+      responseDiv.innerHTML = `<em>You typed:</em> <strong>${text}</strong><br/>Thinking...`;
 
       const payload = {
         queryResult: {
           intent: { displayName: detectIntentFromText(text) },
           parameters: { chapter: parseInt(text.replace(/\D/g, '')) || 1 }
         },
-        session: "browser-session"
+        session: "mobile-debug"
       };
 
       try {
         const res = await fetch(webhookUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        const reply = data.fulfillmentText || "No response.";
+        responseDiv.innerHTML += `<br/><strong>Bot:</strong> ${reply}`;
+
+        const media = data.payload?.google?.richResponse?.items?.find(i => i.mediaResponse);
+        if (media) {
+          const audioUrl = media.mediaResponse.mediaObjects[0].contentUrl;
+          audioEl.src = audioUrl;
+          audioEl.style.display = "block";
+          audioEl.play();
+        }
+      } catch (err) {
+        console.error(err);
+        responseDiv.innerHTML += `<br/><span style="color:red;">❌ Failed to reach server</span>`;
+      }
+    }
+
+    function detectIntentFromText(text) {
+      if (text.includes("zero")) return "ZeroIntent";
+      if (text.includes("chapter")) return "ChapterIntent";
+      if (text.includes("full")) return "FullIntent";
+      if (text.includes("next")) return "NextIntent";
+      return "UnknownIntent";
+    }
+  </script>
+</body>
+</html>
