@@ -1,135 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gita Voice Bot</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      padding: 2rem;
-      text-align: center;
-    }
-    h1 { color: #4caf50; }
-    #response {
-      font-size: 1.2rem;
-      margin: 1rem 0;
-    }
-    button {
-      font-size: 1rem;
-      padding: 0.8rem 2rem;
-      margin: 0.5rem;
-      background: #4caf50;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    button:hover { background: #45a049; }
-    input[type="text"] {
-      width: 70%;
-      font-size: 1rem;
-      padding: 0.5rem;
-      margin: 1rem 0.5rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    audio { margin-top: 1rem; width: 90%; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bhagavad Gita Voice Bot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+        }
+        .input-container {
+            margin: 20px 0;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 200px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #response {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
+    <h1>Bhagavad Gita Voice Bot 🎙️</h1>
+    <p>Speak or type: "zero", "chapter 5", "full", "next"</p>
+    <div class="input-container">
+        <input type="text" id="commandInput" placeholder="Type command here">
+        <button onclick="sendCommand()">Send</button>
+    </div>
+    <button onclick="startVoice()">🎤 Speak Now</button>
+    <div id="response"></div>
 
-  <h1>Bhagavad Gita Voice Bot 🎙️</h1>
-  <p>Speak or type: <strong>"zero", "chapter 5", "full", "next"</strong></p>
+    <script>
+        // Webhook URL (replace with your actual webhook URL)
+        const WEBHOOK_URL = "YOUR_WEBHOOK_URL_HERE"; // Update with your deployed webhook URL
 
-  <button onclick="startListening()">🎤 Speak Now</button><br>
+        // Send text command
+        async function sendCommand() {
+            const input = document.getElementById("commandInput").value.trim().toLowerCase();
+            if (!input) return;
 
-  <input id="txtCmd" type="text" placeholder="Type your command...">
-  <button onclick="sendText()">Send</button>
+            const payload = {
+                queryResult: {
+                    queryText: input,
+                    intent: { displayName: getIntentName(input) },
+                    parameters: getParameters(input),
+                    outputContexts: []
+                },
+                session: "session-" + Date.now()
+            };
 
-  <div id="response"></div>
-  <audio id="audio" controls autoplay></audio>
-
-  <script>
-    // Auto-detect if running locally
-    const isLocal = location.hostname === "localhost" || location.hostname.startsWith("192.");
-    const webhookUrl = isLocal
-      ? "http://" + location.hostname + ":8080/webhook"
-      : "https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
-
-    const responseDiv = document.getElementById("response");
-    const audioEl = document.getElementById("audio");
-
-    function detectIntent(text) {
-      if (text.includes("zero")) return "ZeroIntent";
-      if (text.includes("chapter")) return "ChapterIntent";
-      if (text.includes("full")) return "FullIntent";
-      if (text.includes("next")) return "NextIntent";
-      return "UnknownIntent";
-    }
-
-    function startListening() {
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = "en-IN";
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-
-      responseDiv.textContent = "🎤 Listening...";
-      recognition.start();
-
-      recognition.onresult = (event) => {
-        const text = event.results[0][0].transcript.toLowerCase().trim();
-        handleRequest(text);
-      };
-
-      recognition.onerror = (event) => {
-        responseDiv.textContent = `❌ Error: ${event.error}`;
-      };
-    }
-
-    function sendText() {
-      const box = document.getElementById("txtCmd");
-      const text = box.value.trim().toLowerCase();
-      if (!text) return;
-      box.value = "";
-      handleRequest(text);
-    }
-
-    function handleRequest(text) {
-      responseDiv.innerHTML = `<em>You said:</em> <strong>${text}</strong><br/>⏳ Thinking...`;
-
-      const payload = {
-        queryResult: {
-          intent: { displayName: detectIntent(text) },
-          parameters: { chapter: parseInt(text.replace(/\D/g, '')) || 1 }
-        },
-        session: "browser-session"
-      };
-
-      fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
-      .then(res => res.json())
-      .then(data => {
-        const reply = data.fulfillmentText || "No response.";
-        responseDiv.innerHTML += `<br><strong>Bot:</strong> ${reply}`;
-
-        const mediaItem = data.payload?.google?.richResponse?.items?.find(i => i.mediaResponse);
-        if (mediaItem) {
-          const audioUrl = mediaItem.mediaResponse.mediaObjects[0].contentUrl;
-          audioEl.src = audioUrl;
-          audioEl.play();
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                displayResponse(data);
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById("response").innerText = "Error processing command.";
+            }
         }
-      })
-      .catch(err => {
-        console.error(err);
-        responseDiv.innerHTML += `<br><span style="color:red;">❌ Failed to reach server.</span>`;
-      });
-    }
-  </script>
 
+        // Map text input to intent
+        function getIntentName(input) {
+            if (input === "zero") return "ZeroIntent";
+            if (input === "full") return "FullIntent";
+            if (input === "next") return "NextIntent";
+            if (input.startsWith("chapter")) return "ChapterIntent";
+            return "UnknownIntent";
+        }
+
+        // Extract parameters from input
+        function getParameters(input) {
+            if (input.startsWith("chapter")) {
+                const match = input.match(/chapter\s+(\d+)/);
+                return match ? { chapter: parseInt(match[1]) } : {};
+            }
+            return {};
+        }
+
+        // Display response
+        function displayResponse(data) {
+            const responseDiv = document.getElementById("response");
+            const text = data.fulfillmentText || "No response received.";
+            const media = data.payload?.google?.richResponse?.items?.find(item => item.mediaResponse)?.mediaResponse?.mediaObjects?.[0];
+            responseDiv.innerHTML = text;
+            if (media?.contentUrl) {
+                responseDiv.innerHTML += `<br><audio controls><source src="${media.contentUrl}" type="audio/mpeg"></audio>`;
+            }
+        }
+
+        // Voice recognition
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = "en-US";
+        recognition.interimResults = false;
+
+        recognition.onresult = async function(event) {
+            const transcript = event.results[0][0].transcript.trim().toLowerCase();
+            document.getElementById("commandInput").value = transcript;
+            await sendCommand();
+        };
+
+        recognition.onerror = function(event) {
+            console.error("Speech recognition error:", event.error);
+            document.getElementById("response").innerText = "Error with voice recognition.";
+        };
+
+        function startVoice() {
+            recognition.start();
+        }
+
+        // Allow Enter key to submit
+        document.getElementById("commandInput").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                sendCommand();
+            }
+        });
+    </script>
 </body>
 </html>
