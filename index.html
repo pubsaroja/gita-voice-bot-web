@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32,11 +33,11 @@
 </head>
 <body>
   <h1>Bhagavad Gita Voice Bot 🎙️</h1>
-  <p>Press the button and speak: <strong>"zero", "chapter 5", "next", or "full"</strong></p>
+  <p>Speak: <strong>"zero", "chapter 5", "next", "full"</strong></p>
   <button onclick="startListening()">🎤 Speak Now</button>
-
   <div id="response"></div>
-  <audio id="audio" controls autoplay style="margin-top: 1rem;"></audio>
+  <audio id="audio" controls style="margin-top: 1rem;"></audio>
+  <button onclick="document.getElementById('audio').play()">🔊 Play Again</button>
 
   <script>
     const webhookUrl = "https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
@@ -44,6 +45,11 @@
     const audioEl = document.getElementById("audio");
 
     function startListening() {
+      if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+        responseDiv.innerHTML = "<span style='color:red;'>Voice recognition not supported.</span>";
+        return;
+      }
+
       const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
       recognition.lang = "en-IN";
       recognition.interimResults = false;
@@ -79,11 +85,14 @@
           if (media) {
             const audioUrl = media.mediaResponse.mediaObjects[0].contentUrl;
             audioEl.src = audioUrl;
-            audioEl.play();
+            audioEl.play().catch(err => {
+              responseDiv.innerHTML += `<br/><span style='color:red;'>Autoplay blocked. Tap 🔊 below.</span>`;
+              console.warn("Autoplay error:", err);
+            });
           }
         } catch (err) {
           console.error(err);
-          responseDiv.innerHTML += `<br/><span style="color:red;">Failed to reach server.</span>`;
+          responseDiv.innerHTML += `<br/><span style='color:red;'>Failed to reach server.</span>`;
         }
       };
 
