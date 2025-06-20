@@ -65,8 +65,17 @@
             ? "http://localhost:8080/webhook"
             : "https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
 
+        // Unlock audio context for autoplay
+        function unlockAudioContext() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }
+
         // Send text command
         async function sendCommand() {
+            unlockAudioContext();
             const input = document.getElementById("commandInput").value.trim().toLowerCase();
             if (!input) return;
 
@@ -132,7 +141,9 @@
                 responseDiv.appendChild(audio);
 
                 // Detect if autoplay is blocked
-                audio.play().catch(error => {
+                audio.play().then(() => {
+                    audio.muted = false; // Ensure audio is not muted
+                }).catch(error => {
                     console.error("Autoplay blocked:", error);
                     autoplayMessage.style.display = "block";
                 });
@@ -157,6 +168,7 @@
         };
 
         function startVoice() {
+            unlockAudioContext();
             recognition.start();
         }
 
