@@ -1,4 +1,4 @@
-<!-- index.html -->
+<!-- index.html (desktop voice version) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,108 +6,86 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gita Voice Bot</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      padding: 2rem;
-      text-align: center;
-    }
-    #response {
-      font-size: 1.2rem;
-      margin: 1rem 0;
-    }
-    button {
-      font-size: 1rem;
-      padding: 1rem 2rem;
-      margin-top: 2rem;
-      background: #4caf50;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #45a049;
-    }
+    body {font-family: Arial, sans-serif;background: #f2f2f2;padding: 2rem;text-align: center;}
+    #response {font-size: 1.2rem;margin: 1rem 0;}
+    button {font-size: 1rem;padding: 1rem 2rem;margin-top: 2rem;background: #4caf50;color: #fff;border: none;border-radius: 8px;cursor: pointer;}
+    button:hover {background: #45a049;}
   </style>
 </head>
 <body>
-  <h1>Bhagavad Gita Voice Bot 🎙️</h1>
-  <p>Speak: <strong>"zero", "chapter 5", "next", "full"</strong></p>
-  <button onclick="startListening()">🎤 Speak Now</button>
+  <h1>Bhagavad Gita Voice Bot 🎙️</h1>
+  <p>Speak: <strong>"zero", "chapter 5", "next", "full"</strong></p>
+  <button onclick="startListening()">🎤 Speak Now</button>
   <div id="response"></div>
-  <audio id="audio" controls style="margin-top: 1rem;"></audio>
-  <button onclick="document.getElementById('audio').play()">🔊 Play Again</button>
+  <audio id="audio" controls style="margin-top:1rem;"></audio>
+  <button onclick="document.getElementById('audio').play()">🔊 Play Again</button>
 
   <script>
-    const webhookUrl = "https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
-    const responseDiv = document.getElementById("response");
-    const audioEl = document.getElementById("audio");
+    const webhookUrl="https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
+    const responseDiv=document.getElementById("response");
+    const audioEl=document.getElementById("audio");
 
-    function startListening() {
-      if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
-        responseDiv.innerHTML = "<span style='color:red;'>Voice recognition not supported.</span>";
-        return;
-      }
-
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = "en-IN";
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-
-      responseDiv.textContent = "Listening...";
-      recognition.start();
-
-      recognition.onresult = async (event) => {
-        const text = event.results[0][0].transcript.toLowerCase();
-        responseDiv.innerHTML = `<em>You said:</em> <strong>${text}</strong><br/>Thinking...`;
-
-        const payload = {
-          queryResult: {
-            intent: { displayName: detectIntentFromText(text) },
-            parameters: { chapter: parseInt(text.replace(/\D/g, '')) || 1 }
-          },
-          session: "browser-session"
-        };
-
-        try {
-          const res = await fetch(webhookUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          });
-
-          const data = await res.json();
-          const reply = data.fulfillmentText || "No response.";
-          responseDiv.innerHTML += `<br/><strong>Bot:</strong> ${reply}`;
-
-          const media = data.payload?.google?.richResponse?.items?.find(i => i.mediaResponse);
-          if (media) {
-            const audioUrl = media.mediaResponse.mediaObjects[0].contentUrl;
-            audioEl.src = audioUrl;
-            audioEl.play().catch(err => {
-              responseDiv.innerHTML += `<br/><span style='color:red;'>Autoplay blocked. Tap 🔊 below.</span>`;
-              console.warn("Autoplay error:", err);
-            });
-          }
-        } catch (err) {
-          console.error(err);
-          responseDiv.innerHTML += `<br/><span style='color:red;'>Failed to reach server.</span>`;
-        }
-      };
-
-      recognition.onerror = (err) => {
-        responseDiv.textContent = `Error: ${err.error}`;
-      };
+    function startListening(){
+      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+      if(!SR){responseDiv.innerHTML="<span style='color:red;'>Voice recognition not supported.</span>";return;}
+      const recog=new SR();
+      recog.lang="en-IN";recog.interimResults=false;recog.maxAlternatives=1;
+      responseDiv.textContent="Listening...";recog.start();
+      recog.onresult=e=>handleText(e.results[0][0].transcript.toLowerCase());
+      recog.onerror=e=>responseDiv.textContent=`Error: ${e.error}`;
     }
 
-    function detectIntentFromText(text) {
-      if (text.includes("zero")) return "ZeroIntent";
-      if (text.includes("chapter")) return "ChapterIntent";
-      if (text.includes("full")) return "FullIntent";
-      if (text.includes("next")) return "NextIntent";
-      return "UnknownIntent";
+    async function handleText(text){
+      responseDiv.innerHTML=`<em>You said:</em> <strong>${text}</strong><br/>Thinking...`;
+      const payload={queryResult:{intent:{displayName:detectIntent(text)},parameters:{chapter:parseInt(text.replace(/\D/g,''))||1}},session:"desktop-session"};
+      try{
+        const res=await fetch(webhookUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+        const data=await res.json();
+        responseDiv.innerHTML+=`<br/><strong>Bot:</strong> ${data.fulfillmentText}`;
+        const media=data.payload?.google?.richResponse?.items?.find(i=>i.mediaResponse);
+        if(media){const url=media.mediaResponse.mediaObjects[0].contentUrl;audioEl.src=url;audioEl.play().catch(()=>responseDiv.innerHTML+="<br/><i>Tap 🔊 to play.</i>");}
+      }catch(err){console.error(err);responseDiv.innerHTML+="<br/><span style='color:red;'>Server error.</span>";}
     }
+
+    function detectIntent(t){t=t||"";if(t.includes("zero"))return"ZeroIntent";if(t.includes("chapter"))return"ChapterIntent";if(t.includes("full"))return"FullIntent";if(t.includes("next"))return"NextIntent";return"UnknownIntent";}
+  </script>
+</body>
+</html>
+
+<!-- mobile.html (text‑only input, Android friendly) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gita Voice Bot 📱</title>
+  <style>
+    body {font-family: Arial, sans-serif;background:#f9f9f9;padding:1rem;text-align:center;}
+    input,button {padding:0.7rem;font-size:1rem;margin:0.4rem;width:80%;max-width:320px;}
+    button {background:#4caf50;color:#fff;border:none;border-radius:8px;cursor:pointer;}
+    button:hover {background:#45a049;}
+    #response{font-size:1.1rem;margin-top:1rem;}
+  </style>
+</head>
+<body>
+  <h2>Gita Voice Bot 📱 (Text Mode)</h2>
+  <input id="cmd" type="text" placeholder="Type 'zero', 'chapter 5' …" />
+  <button onclick="send()">▶️ Send</button>
+  <div id="response"></div>
+  <audio id="audio" controls style="margin-top:1rem;"></audio>
+
+  <script>
+    const url="https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
+    const rsp=document.getElementById("response");const aud=document.getElementById("audio");
+    async function send(){const txt=document.getElementById("cmd").value.trim().toLowerCase();if(!txt)return; rsp.innerHTML=`<em>You said:</em> <strong>${txt}</strong><br/>Thinking…`;
+      const body={queryResult:{intent:{displayName:intent(txt)},parameters:{chapter:parseInt(txt.replace(/\D/g,''))||1}},session:"mobile-session"};
+      try{const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+        const data=await res.json();rsp.innerHTML+=`<br/><strong>Bot:</strong> ${data.fulfillmentText}`;
+        const m=data.payload?.google?.richResponse?.items?.find(i=>i.mediaResponse);
+        if(m){aud.src=m.mediaResponse.mediaObjects[0].contentUrl;aud.play().catch(()=>rsp.innerHTML+="<br/><i>Tap play ▶️ on audio.</i>");}
+      }catch(e){rsp.innerHTML+="<br/><span style='color:red;'>Error contacting server.</span>";}
+    }
+    const intent=t=>t.includes("zero")?"ZeroIntent":t.includes("chapter")?"ChapterIntent":t.includes("full")?"FullIntent":t.includes("next")?"NextIntent":"UnknownIntent";
   </script>
 </body>
 </html>
