@@ -39,6 +39,12 @@
             font-size: 18px;
             color: #333;
         }
+        #autoplay-message {
+            color: #ff4444;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -50,6 +56,7 @@
     </div>
     <button onclick="startVoice()">🎤 Speak Now</button>
     <div id="response"></div>
+    <div id="autoplay-message">Your browser may have blocked autoplay. Click the audio player to start.</div>
 
     <script>
         // Webhook URL
@@ -84,6 +91,7 @@
             } catch (error) {
                 console.error("Error:", error);
                 document.getElementById("response").innerText = "Error processing command.";
+                document.getElementById("autoplay-message").style.display = "none";
             }
         }
 
@@ -108,11 +116,26 @@
         // Display response
         function displayResponse(data) {
             const responseDiv = document.getElementById("response");
+            const autoplayMessage = document.getElementById("autoplay-message");
             const text = data.fulfillmentText || "No response received.";
             const media = data.payload?.google?.richResponse?.items?.find(item => item.mediaResponse)?.mediaResponse?.mediaObjects?.[0];
+            
             responseDiv.innerHTML = text;
+            autoplayMessage.style.display = "none";
+
             if (media?.contentUrl) {
-                responseDiv.innerHTML += `<br><audio controls><source src="${media.contentUrl}" type="audio/mpeg"></audio>`;
+                const audio = document.createElement("audio");
+                audio.controls = true;
+                audio.autoplay = true;
+                audio.src = media.contentUrl;
+                audio.type = "audio/mpeg";
+                responseDiv.appendChild(audio);
+
+                // Detect if autoplay is blocked
+                audio.play().catch(error => {
+                    console.error("Autoplay blocked:", error);
+                    autoplayMessage.style.display = "block";
+                });
             }
         }
 
@@ -130,6 +153,7 @@
         recognition.onerror = function(event) {
             console.error("Speech recognition error:", event.error);
             document.getElementById("response").innerText = "Error with voice recognition.";
+            document.getElementById("autoplay-message").style.display = "none";
         };
 
         function startVoice() {
