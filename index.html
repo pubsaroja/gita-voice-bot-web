@@ -74,18 +74,73 @@
   <div id="response"></div>
   <audio id="audio" controls style="margin-top:1rem;"></audio>
 
-  <script>
-    const url="https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
-    const rsp=document.getElementById("response");const aud=document.getElementById("audio");
-    async function send(){const txt=document.getElementById("cmd").value.trim().toLowerCase();if(!txt)return; rsp.innerHTML=`<em>You said:</em> <strong>${txt}</strong><br/>Thinking…`;
-      const body={queryResult:{intent:{displayName:intent(txt)},parameters:{chapter:parseInt(txt.replace(/\D/g,''))||1}},session:"mobile-session"};
-      try{const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
-        const data=await res.json();rsp.innerHTML+=`<br/><strong>Bot:</strong> ${data.fulfillmentText}`;
-        const m=data.payload?.google?.richResponse?.items?.find(i=>i.mediaResponse);
-        if(m){aud.src=m.mediaResponse.mediaObjects[0].contentUrl;aud.play().catch(()=>rsp.innerHTML+="<br/><i>Tap play ▶️ on audio.</i>");}
-      }catch(e){rsp.innerHTML+="<br/><span style='color:red;'>Error contacting server.</span>";}
-    }
-    const intent=t=>t.includes("zero")?"ZeroIntent":t.includes("chapter")?"ChapterIntent":t.includes("full")?"FullIntent":t.includes("next")?"NextIntent":"UnknownIntent";
-  </script>
+<script>
+  // Auto-detect whether to use local or cloud URL
+  const isLocal = location.hostname === "localhost" || location.hostname.startsWith("192.168.");
+  const webhookUrl = isLocal
+    ? "http://192.168.1.7:8080/webhook"  // Use your local IP
+    : "https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
+
+  const responseDiv = document.getElementById("response");
+  const audioEl = document.getElementById("audio");
+
+  function startListening() {
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "en-IN";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    responseDiv.textContent = "Listening...";
+    recognition.start();
+
+    recognition.onresult = async (event) => {
+      const text = event.results[0][0].transcript.toLowerCase();
+      responseDiv.innerHTML = `<em>You said:</em> <strong>${text}</strong><br/>Thinking...`;
+
+      const payload = {
+        queryResult: {
+          intent: { displayName: detectIntentFromText(text) },
+          parameters: { chapter: parseInt(text.replace(/\D/g, '')) || 1 }
+        },
+        session: "browser-session"
+      };
+
+      try {
+        const res = await fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+        const reply = data.fulfillmentText || "No response.";
+        responseDiv.innerHTML += `<br/><strong>Bot:</strong> ${reply}`;
+
+        const media = data.payload?.google?.richResponse?.items?.find(i => i.mediaResponse);
+        if (media) {
+          const audioUrl = media.mediaResponse.mediaObjects[0].contentUrl;
+          audioEl.src = audioUrl;
+          audioEl.play();
+        }
+      } catch (err) {
+        console.error(err);
+        responseDiv.innerHTML += `<br/><span style="color:red;">❌ Failed to reach server</span>`;
+      }
+    };
+
+    recognition.onerror = (err) => {
+      responseDiv.textContent = `Error: ${err.error}`;
+    };
+  }
+
+  function detectIntentFromText(text) {
+    if (text.includes("zero")) return "ZeroIntent";
+    if (text.includes("chapter")) return "ChapterIntent";
+    if (text.includes("full")) return "FullIntent";
+    if (text.includes("next")) return "NextIntent";
+    return "UnknownIntent";
+  }
+</script>
+
 </body>
 </html>
