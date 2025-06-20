@@ -1,146 +1,135 @@
-<!-- index.html (desktop voice version) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gita Voice Bot</title>
   <style>
-    body {font-family: Arial, sans-serif;background: #f2f2f2;padding: 2rem;text-align: center;}
-    #response {font-size: 1.2rem;margin: 1rem 0;}
-    button {font-size: 1rem;padding: 1rem 2rem;margin-top: 2rem;background: #4caf50;color: #fff;border: none;border-radius: 8px;cursor: pointer;}
-    button:hover {background: #45a049;}
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 2rem;
+      text-align: center;
+    }
+    h1 { color: #4caf50; }
+    #response {
+      font-size: 1.2rem;
+      margin: 1rem 0;
+    }
+    button {
+      font-size: 1rem;
+      padding: 0.8rem 2rem;
+      margin: 0.5rem;
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover { background: #45a049; }
+    input[type="text"] {
+      width: 70%;
+      font-size: 1rem;
+      padding: 0.5rem;
+      margin: 1rem 0.5rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    audio { margin-top: 1rem; width: 90%; }
   </style>
 </head>
 <body>
-  <h1>Bhagavad Gita Voice Bot 🎙️</h1>
-  <p>Speak: <strong>"zero", "chapter 5", "next", "full"</strong></p>
-  <button onclick="startListening()">🎤 Speak Now</button>
+
+  <h1>Bhagavad Gita Voice Bot 🎙️</h1>
+  <p>Speak or type: <strong>"zero", "chapter 5", "full", "next"</strong></p>
+
+  <button onclick="startListening()">🎤 Speak Now</button><br>
+
+  <input id="txtCmd" type="text" placeholder="Type your command...">
+  <button onclick="sendText()">Send</button>
+
   <div id="response"></div>
-  <audio id="audio" controls style="margin-top:1rem;"></audio>
-  <button onclick="document.getElementById('audio').play()">🔊 Play Again</button>
+  <audio id="audio" controls autoplay></audio>
 
   <script>
-    const webhookUrl="https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
-    const responseDiv=document.getElementById("response");
-    const audioEl=document.getElementById("audio");
+    // Auto-detect if running locally
+    const isLocal = location.hostname === "localhost" || location.hostname.startsWith("192.");
+    const webhookUrl = isLocal
+      ? "http://" + location.hostname + ":8080/webhook"
+      : "https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
 
-    function startListening(){
-      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-      if(!SR){responseDiv.innerHTML="<span style='color:red;'>Voice recognition not supported.</span>";return;}
-      const recog=new SR();
-      recog.lang="en-IN";recog.interimResults=false;recog.maxAlternatives=1;
-      responseDiv.textContent="Listening...";recog.start();
-      recog.onresult=e=>handleText(e.results[0][0].transcript.toLowerCase());
-      recog.onerror=e=>responseDiv.textContent=`Error: ${e.error}`;
+    const responseDiv = document.getElementById("response");
+    const audioEl = document.getElementById("audio");
+
+    function detectIntent(text) {
+      if (text.includes("zero")) return "ZeroIntent";
+      if (text.includes("chapter")) return "ChapterIntent";
+      if (text.includes("full")) return "FullIntent";
+      if (text.includes("next")) return "NextIntent";
+      return "UnknownIntent";
     }
 
-    async function handleText(text){
-      responseDiv.innerHTML=`<em>You said:</em> <strong>${text}</strong><br/>Thinking...`;
-      const payload={queryResult:{intent:{displayName:detectIntent(text)},parameters:{chapter:parseInt(text.replace(/\D/g,''))||1}},session:"desktop-session"};
-      try{
-        const res=await fetch(webhookUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-        const data=await res.json();
-        responseDiv.innerHTML+=`<br/><strong>Bot:</strong> ${data.fulfillmentText}`;
-        const media=data.payload?.google?.richResponse?.items?.find(i=>i.mediaResponse);
-        if(media){const url=media.mediaResponse.mediaObjects[0].contentUrl;audioEl.src=url;audioEl.play().catch(()=>responseDiv.innerHTML+="<br/><i>Tap 🔊 to play.</i>");}
-      }catch(err){console.error(err);responseDiv.innerHTML+="<br/><span style='color:red;'>Server error.</span>";}
+    function startListening() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "en-IN";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      responseDiv.textContent = "🎤 Listening...";
+      recognition.start();
+
+      recognition.onresult = (event) => {
+        const text = event.results[0][0].transcript.toLowerCase().trim();
+        handleRequest(text);
+      };
+
+      recognition.onerror = (event) => {
+        responseDiv.textContent = `❌ Error: ${event.error}`;
+      };
     }
 
-    function detectIntent(t){t=t||"";if(t.includes("zero"))return"ZeroIntent";if(t.includes("chapter"))return"ChapterIntent";if(t.includes("full"))return"FullIntent";if(t.includes("next"))return"NextIntent";return"UnknownIntent";}
-  </script>
-</body>
-</html>
+    function sendText() {
+      const box = document.getElementById("txtCmd");
+      const text = box.value.trim().toLowerCase();
+      if (!text) return;
+      box.value = "";
+      handleRequest(text);
+    }
 
-<!-- mobile.html (text‑only input, Android friendly) -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gita Voice Bot 📱</title>
-  <style>
-    body {font-family: Arial, sans-serif;background:#f9f9f9;padding:1rem;text-align:center;}
-    input,button {padding:0.7rem;font-size:1rem;margin:0.4rem;width:80%;max-width:320px;}
-    button {background:#4caf50;color:#fff;border:none;border-radius:8px;cursor:pointer;}
-    button:hover {background:#45a049;}
-    #response{font-size:1.1rem;margin-top:1rem;}
-  </style>
-</head>
-<body>
-  <h2>Gita Voice Bot 📱 (Text Mode)</h2>
-  <input id="cmd" type="text" placeholder="Type 'zero', 'chapter 5' …" />
-  <button onclick="send()">▶️ Send</button>
-  <div id="response"></div>
-  <audio id="audio" controls style="margin-top:1rem;"></audio>
-
-<script>
-  // Auto-detect whether to use local or cloud URL
-  const isLocal = location.hostname === "localhost" || location.hostname.startsWith("192.168.");
-  const webhookUrl = isLocal
-    ? "http://192.168.1.7:8080/webhook"  // Use your local IP
-    : "https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
-
-  const responseDiv = document.getElementById("response");
-  const audioEl = document.getElementById("audio");
-
-  function startListening() {
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = "en-IN";
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    responseDiv.textContent = "Listening...";
-    recognition.start();
-
-    recognition.onresult = async (event) => {
-      const text = event.results[0][0].transcript.toLowerCase();
-      responseDiv.innerHTML = `<em>You said:</em> <strong>${text}</strong><br/>Thinking...`;
+    function handleRequest(text) {
+      responseDiv.innerHTML = `<em>You said:</em> <strong>${text}</strong><br/>⏳ Thinking...`;
 
       const payload = {
         queryResult: {
-          intent: { displayName: detectIntentFromText(text) },
+          intent: { displayName: detectIntent(text) },
           parameters: { chapter: parseInt(text.replace(/\D/g, '')) || 1 }
         },
         session: "browser-session"
       };
 
-      try {
-        const res = await fetch(webhookUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-
-        const data = await res.json();
+      fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(data => {
         const reply = data.fulfillmentText || "No response.";
-        responseDiv.innerHTML += `<br/><strong>Bot:</strong> ${reply}`;
+        responseDiv.innerHTML += `<br><strong>Bot:</strong> ${reply}`;
 
-        const media = data.payload?.google?.richResponse?.items?.find(i => i.mediaResponse);
-        if (media) {
-          const audioUrl = media.mediaResponse.mediaObjects[0].contentUrl;
+        const mediaItem = data.payload?.google?.richResponse?.items?.find(i => i.mediaResponse);
+        if (mediaItem) {
+          const audioUrl = mediaItem.mediaResponse.mediaObjects[0].contentUrl;
           audioEl.src = audioUrl;
           audioEl.play();
         }
-      } catch (err) {
+      })
+      .catch(err => {
         console.error(err);
-        responseDiv.innerHTML += `<br/><span style="color:red;">❌ Failed to reach server</span>`;
-      }
-    };
-
-    recognition.onerror = (err) => {
-      responseDiv.textContent = `Error: ${err.error}`;
-    };
-  }
-
-  function detectIntentFromText(text) {
-    if (text.includes("zero")) return "ZeroIntent";
-    if (text.includes("chapter")) return "ChapterIntent";
-    if (text.includes("full")) return "FullIntent";
-    if (text.includes("next")) return "NextIntent";
-    return "UnknownIntent";
-  }
-</script>
+        responseDiv.innerHTML += `<br><span style="color:red;">❌ Failed to reach server.</span>`;
+      });
+    }
+  </script>
 
 </body>
 </html>
