@@ -53,7 +53,9 @@
 
     <script>
         // Webhook URL (replace with your actual webhook URL)
-        const WEBHOOK_URL = "YOUR_WEBHOOK_URL_HERE"; // Update with your deployed webhook URL
+            const webhookUrl = isLocal
+      ? "http://" + location.hostname + ":8080/webhook"
+      : "https://gita-voice-bot-504694669439.us-central1.run.app/webhook";// Update with your deployed webhook URL
 
         // Send text command
         async function sendCommand() {
