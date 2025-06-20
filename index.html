@@ -106,7 +106,7 @@
 
         // Map text input to intent
         function getIntentName(input) {
-            if (input === "zero") return "ZeroIntent";
+            if (input === "zero" || input === "0") return "ZeroIntent";
             if (input === "full") return "FullIntent";
             if (input === "next") return "NextIntent";
             if (input.startsWith("chapter")) return "ChapterIntent";
@@ -142,7 +142,7 @@
 
                 // Detect if autoplay is blocked
                 audio.play().then(() => {
-                    audio.muted = false; // Ensure audio is not muted
+                    audio.muted = false;
                 }).catch(error => {
                     console.error("Autoplay blocked:", error);
                     autoplayMessage.style.display = "block";
@@ -156,7 +156,9 @@
         recognition.interimResults = false;
 
         recognition.onresult = async function(event) {
-            const transcript = event.results[0][0].transcript.trim().toLowerCase();
+            let transcript = event.results[0][0].transcript.trim().toLowerCase();
+            // Normalize "0" to "zero" for voice input
+            if (transcript === "0") transcript = "zero";
             document.getElementById("commandInput").value = transcript;
             await sendCommand();
         };
