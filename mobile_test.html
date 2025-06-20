@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Gita Voice Bot - Mobile Test</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 2rem; }
+    input, button { font-size: 1rem; padding: 0.5rem; width: 80%; margin: 1rem auto; }
+    #response { margin-top: 2rem; font-size: 1.2rem; }
+  </style>
+</head>
+<body>
+  <h2>📖 Gita Voice Bot (Test)</h2>
+  <p>Type commands like <strong>zero</strong>, <strong>chapter 3</strong>, <strong>full</strong>, <strong>next</strong>.</p>
+  <input type="text" id="inputText" placeholder="Type command here..." />
+  <button onclick="sendToBot()">Send</button>
+  <div id="response"></div>
+  <audio id="audio" controls style="margin-top: 1rem;"></audio>
+
+  <script>
+    const SERVER_URL = "http://192.168.1.7:8080/webhook"; // 👈 Replace with your Flask IP
+
+    async function sendToBot() {
+      const text = document.getElementById("inputText").value.toLowerCase();
+      const responseDiv = document.getElementById("response");
+      const audioEl = document.getElementById("audio");
+
+      const payload = {
+        queryResult: {
+          intent: { displayName: detectIntent(text) },
+          parameters: { chapter: parseInt(text.replace(/\D/g, '')) || 1 }
+        },
+        session: "mobile-debug"
+      };
+
+      responseDiv.innerHTML = `<em>Sending:</em> <b>${text}</b>...`;
+
+      try {
+        const res = await fetch(SERVER_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        const msg = data.fulfillmentText || "No reply";
+        responseDiv.innerHTML += `<br/><strong>Bot:</strong> ${msg}`;
+
+        const media = data.payload?.google?.richResponse?.items?.find(i => i.mediaResponse);
+        if (media) {
+          const audioUrl = media.mediaResponse.mediaObjects[0].contentUrl;
+          audioEl.src = audioUrl;
+          audioEl.play();
+        }
+      } catch (e) {
+        console.error(e);
+        responseDiv.innerHTML += "<br/><span style='color:red;'>❌ Failed to reach server</span>";
+      }
+    }
+
+    function detectIntent(text) {
+      if (text.includes("zero")) return "ZeroIntent";
+      if (text.includes("chapter")) return "ChapterIntent";
+      if (text.includes("full")) return "FullIntent";
+      if (text.includes("next")) return "NextIntent";
+      return "UnknownIntent";
+    }
+  </script>
+</body>
+</html>
