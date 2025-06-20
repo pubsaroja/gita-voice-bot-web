@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gita Voice Bot (Mobile Debug)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      padding: 1rem;
+      text-align: center;
+    }
+    input, button {
+      padding: 0.75rem;
+      font-size: 1rem;
+      margin: 0.5rem;
+      width: 80%;
+      max-width: 300px;
+    }
+    #response {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+    }
+    #debug {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #cc0000;
+      text-align: left;
+      background: #fff;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      max-width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h2>📱 Gita Voice Bot (Mobile Debug)</h2>
+  <input id="userInput" type="text" placeholder="Type 'zero', 'chapter 5', etc." />
+  <button onclick="sendText()">▶️ Send</button>
+  <div id="response"></div>
+  <audio id="audio" controls autoplay style="margin-top: 1rem;"></audio>
+  <div id="debug"></div>
+
+  <script>
+    const webhookUrl = "https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
+
+    async function sendText() {
+      const text = document.getElementById("userInput").value.trim().toLowerCase();
+      const responseDiv = document.getElementById("response");
+      const debugDiv = document.getElementById("debug");
+      const audioEl = document.getElementById("audio");
+
+      responseDiv.innerHTML = `<em>You said:</em> <strong>${text}</strong><br/>Thinking...`;
+      debugDiv.textContent = "";
+
+      const payload = {
+        queryResult: {
+          intent: { displayName: detectIntentFromText(text) },
+          parameters: { chapter: parseInt(text.replace(/\D/g, '')) || 1 }
+        },
+        session: "mobile-debug"
+      };
+
+      try {
+        const res = await fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          responseDiv.innerHTML += `<br/><span style='color:red;'>Server error: ${res.status}</span>`;
+          debugDiv.textContent = await res.text();
+          return;
+        }
+
+        const data = await res.json();
+        const reply = data.fulfillmentText || "No response.";
+        responseDiv.innerHTML += `<br/><strong>Bot:</strong> ${reply}`;
+
+        const media = data.payload?.google?.richResponse?.items?.find(i => i.mediaResponse);
+        if (media) {
+          const audioUrl = media.mediaResponse.mediaObjects[0].contentUrl;
+          audioEl.src = audioUrl;
+          audioEl.play().catch(err => {
+            debugDiv.textContent = "Autoplay failed: " + err.message;
+          });
+        } else {
+          debugDiv.textContent = "No audio media found in response.";
+        }
+
+        debugDiv.textContent += "\n\nRaw Response:\n" + JSON.stringify(data, null, 2);
+
+      } catch (err) {
+        responseDiv.innerHTML += `<br/><span style='color:red;'>Failed to reach server.</span>`;
+        debugDiv.textContent = "Fetch error: " + err.message;
+      }
+    }
+
+    function detectIntentFromText(text) {
+      if (text.includes("zero")) return "ZeroIntent";
+      if (text.includes("chapter")) return "ChapterIntent";
+      if (text.includes("full")) return "FullIntent";
+      if (text.includes("next")) return "NextIntent";
+      return "UnknownIntent";
+    }
+  </script>
+</body>
+</html>
