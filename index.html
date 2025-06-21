@@ -59,6 +59,49 @@
     <div id="autoplay-message">Your browser may have blocked autoplay. Click the audio player to start.</div>
 
     <script>
+        // Add at the top of the <script> section
+let lastContext = [];
+
+// Update sendCommand
+async function sendCommand() {
+    unlockAudioContext();
+    const input = document.getElementById("commandInput").value.trim().toLowerCase();
+    if (!input) return;
+
+    const payload = {
+        queryResult: {
+            queryText: input,
+            intent: { displayName: getIntentName(input) },
+            parameters: getParameters(input),
+            outputContexts: lastContext.length ? lastContext : []
+        },
+        session: "session-" + Date.now()
+    };
+
+    try {
+        const response = await fetch(WEBHOOK_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        // Update context with response context
+        if (data.outputContexts && data.outputContexts.length) {
+            lastContext = data.outputContexts.map(ctx => ({
+                name: ctx.name,
+                lifespanCount: ctx.lifespanCount,
+                parameters: ctx.parameters
+            }));
+        }
+        console.log("Payload sent:", payload);
+        console.log("Context received:", lastContext);
+        displayResponse(data);
+    } catch (error) {
+        console.error("Error:", error);
+        document.getElementById("response").innerText = "Error processing command.";
+        document.getElementById("autoplay-message").style.display = "none";
+    }
+}
         // Webhook URL
         const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
         const WEBHOOK_URL = isLocal
