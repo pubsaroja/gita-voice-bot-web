@@ -100,4 +100,355 @@
             <option value="4">Chapter 4</option>
             <option value="5">Chapter 5</option>
             <option value="6">Chapter 6</option>
-            <option value="7">Chapter
+            <option value="7">Chapter 7</option>
+            <option value="8">Chapter 8</option>
+            <option value="9">Chapter 9</option>
+            <option value="10">Chapter 10</option>
+            <option value="11">Chapter 11</option>
+            <option value="12">Chapter 12</option>
+            <option value="13">Chapter 13</option>
+            <option value="14">Chapter 14</option>
+            <option value="15">Chapter 15</option>
+            <option value="16">Chapter 16</option>
+            <option value="17">Chapter 17</option>
+            <option value="18">Chapter 18</option>
+        </select>
+        <div id="shloka-text">Shloka text will appear here.</div>
+    </div>
+    <button onclick="startVoice()">🎤 Speak Now</button>
+    <div id="response"></div>
+    <div id="autoplay-message">Your browser may have blocked autoplay or the audio file is invalid. Click the audio player or the button below to start.</div>
+    <button id="play-audio-button" onclick="playCurrentAudio()">Play Audio</button>
+
+    <script>
+        // Webhook URL
+        const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+        const WEBHOOK_URL = isLocal
+            ? "http://localhost:8080/webhook"
+            : "https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
+
+        // Fallback audio URL
+        const FALLBACK_AUDIO_URL = "https://storage.googleapis.com/xai-public-assets/audio/sample.mp3";
+
+        // Shloka text file URL
+        const SHLOKA_FILE_URL = "https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/maintenance/BG_Sringeri.xlsx";
+
+        // Persist context
+        let lastContext = [];
+        let currentAudio = null;
+        let recognition = null;
+        let shlokas = [];
+
+        // Load shloka text
+        async function loadShlokaText() {
+            try {
+                const response = await fetch(SHLOKA_FILE_URL);
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const data = XLSX.utils.sheet_to_json(sheet);
+                shlokas = data.map(row => ({
+                    chapter: parseInt(row.Chapter),
+                    verse: parseInt(row.Verse),
+                    text: row.Text || "Text not available"
+                }));
+                console.log("Loaded shlokas:", shlokas.length);
+            } catch (error) {
+                console.error("Error loading shloka text:", error);
+                document.getElementById("shloka-text").innerText = "Error loading shloka text.";
+            }
+        }
+
+        // Get shloka text by chapter and verse
+        function getShlokaText(chapter, verse) {
+            const shloka = shlokas.find(s => s.chapter === chapter && s.verse === verse);
+            return shloka ? shloka.text : "Shloka text not found.";
+        }
+
+        // Initialize speech recognition
+        function initRecognition() {
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "en-US";
+            recognition.interimResults = false;
+            recognition.continuous = false;
+
+            recognition.onresult = async function(event) {
+                let transcript = event.results[0][0].transcript;
+                console.log("Raw voice transcript:", JSON.stringify(transcript));
+                transcript = normalizeInput(transcript);
+                console.log("Normalized transcript:", transcript);
+                await sendCommand(transcript);
+            };
+
+            recognition.onerror = function(event) {
+                console.error("Speech recognition error:", event.error);
+                document.getElementById("response").innerText = `Voice recognition error: ${event.error}. Please try again or click 'Speak Now'.`;
+                document.getElementById("autoplay-message").style.display = "none";
+                document.getElementById("play-audio-button").style.display = "none";
+                recognition.stop();
+                setTimeout(initRecognition, 1000);
+            };
+
+            recognition.onend = function() {
+                console.log("Speech recognition ended");
+                recognition.stop();
+            };
+        }
+
+        // Unlock audio context
+        function unlockAudioContext() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioContext.state === 'suspended') {
+                audioContext.resume().then(() => {
+                    console.log("Audio context resumed");
+                }).catch(error => {
+                    console.error("Error resuming audio context:", error);
+                });
+            }
+        }
+
+        // Normalize input
+        function normalizeInput(input) {
+            input = input.trim().toLowerCase().replace(/[^a-z0-9\s]/g, '');
+            console.log("After trimming and cleaning:", input);
+            if (input.match(/^0+$/) || input.match(/zero|oh|zeroo|zer0|ohh|o|zeros|ohhh|zro/)) {
+                console.log(`Normalized "${input}" to "zero"`);
+                return "zero";
+            }
+            if (input.match(/^full$/) || input.match(/ful|fuul|fulls|fl/)) {
+                console.log(`Normalized "${input}" to "full"`);
+                return "full";
+            }
+            return input;
+        }
+
+        // Validate audio URL
+        async function validateAudioUrl(url) {
+            try {
+                const response = await fetch(url, { method: 'HEAD', mode: 'cors' });
+                if (!response.ok) {
+                    console.error(`Audio URL inaccessible: ${response.status} ${response.statusText}`);
+                    return false;
+                }
+                const contentType = response.headers.get('Content-Type');
+                if (!contentType.includes('audio/mpeg') && !contentType.includes('audio/mp3')) {
+                    console.error(`Invalid content type: ${contentType}`);
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error("Error validating audio URL:", error);
+                return false;
+            }
+        }
+
+        // Play current audio manually
+        async function playCurrentAudio() {
+            if (currentAudio && currentAudio.src) {
+                console.log("Attempting manual playback for:", currentAudio.src);
+                let audioUrl = currentAudio.src;
+                let isValid = await validateAudioUrl(audioUrl);
+                if (!isValid) {
+                    console.log("Trying fallback audio URL:", FALLBACK_AUDIO_URL);
+                    audioUrl = FALLBACK_AUDIO_URL;
+                    isValid = await validateAudioUrl(audioUrl);
+                    if (!isValid) {
+                        document.getElementById("response").innerText = "Audio file is invalid or inaccessible.";
+                        document.getElementById("play-audio-button").style.display = "none";
+                        return;
+                    }
+                    currentAudio.src = audioUrl;
+                }
+                currentAudio.currentTime = 0;
+                currentAudio.load();
+                currentAudio.play().then(() => {
+                    currentAudio.muted = false;
+                    document.getElementById("autoplay-message").style.display = "none";
+                    document.getElementById("play-audio-button").style.display = "none";
+                    console.log("Manual audio playback started");
+                }).catch(error => {
+                    console.error("Manual play error:", error);
+                    document.getElementById("response").innerText = `Error playing audio: ${error.message}`;
+                    document.getElementById("play-audio-button").style.display = "none";
+                });
+            } else {
+                console.error("No valid audio element to play");
+                document.getElementById("response").innerText = "No audio available to play.";
+                document.getElementById("play-audio-button").style.display = "none";
+            }
+        }
+
+        // Send command
+        async function sendCommand(input) {
+            unlockAudioContext();
+            if (!input) return;
+
+            const payload = {
+                session: "session-" + Date.now(),
+                queryResult: {
+                    queryText: input,
+                    intent: { displayName: getIntentName(input) },
+                    parameters: getParameters(input),
+                    outputContexts: lastContext
+                }
+            };
+
+            console.log("Sending payload:", JSON.stringify(payload, null, 2));
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                console.log("Webhook response:", JSON.stringify(data, null, 2));
+                if (data.outputContexts && data.outputContexts.length) {
+                    lastContext = data.outputContexts.map(ctx => ({
+                        name: ctx.name,
+                        lifespanCount: ctx.lifespanCount,
+                        parameters: ctx.parameters
+                    }));
+                }
+                console.log("Received context:", JSON.stringify(lastContext, null, 2));
+                await displayResponse(data);
+            } catch (error) {
+                console.error("Fetch error:", error);
+                document.getElementById("response").innerText = "Error processing command.";
+                document.getElementById("autoplay-message").style.display = "none";
+                document.getElementById("play-audio-button").style.display = "none";
+            }
+        }
+
+        // Send command with specific value
+        function sendCommandWithValue(value) {
+            sendCommand(value);
+        }
+
+        // Send chapter command
+        function sendChapterCommand() {
+            const chapter = document.getElementById("chapterSelect").value;
+            if (chapter) {
+                sendCommand(`chapter ${chapter}`);
+                document.getElementById("chapterSelect").value = "";
+            }
+        }
+
+        // Map input to intent
+        function getIntentName(input) {
+            input = input.trim();
+            if (input === "zero" || input.match(/^0+$/) || input.match(/oh|zeroo|zer0|ohh|o|zeros|ohhh|zro/)) {
+                console.log("Mapped to ZeroIntent");
+                return "ZeroIntent";
+            }
+            if (input === "full" || input.match(/ful|fuul|fulls|fl/)) {
+                console.log("Mapped to FullIntent");
+                return "FullIntent";
+            }
+            if (input === "next") {
+                console.log("Mapped to NextIntent");
+                return "NextIntent";
+            }
+            if (input.startsWith("chapter")) {
+                console.log("Mapped to ChapterIntent");
+                return "ChapterIntent";
+            }
+            console.log("Mapped to UnknownIntent");
+            return "UnknownIntent";
+        }
+
+        // Extract parameters
+        function getParameters(input) {
+            if (input.startsWith("chapter")) {
+                const match = input.match(/chapter\s+(\d+)/);
+                return match ? { chapter: parseInt(match[1]) } : {};
+            }
+            return {};
+        }
+
+        // Display response
+        async function displayResponse(data) {
+            const responseDiv = document.getElementById("response");
+            const autoplayMessage = document.getElementById("autoplay-message");
+            const playButton = document.getElementById("play-audio-button");
+            const shlokaTextDiv = document.getElementById("shloka-text");
+            const text = data.fulfillmentText || "No response received.";
+            
+            responseDiv.innerHTML = text;
+            autoplayMessage.style.display = "none";
+            playButton.style.display = "none";
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.remove();
+                currentAudio = null;
+            }
+
+            // Extract chapter and verse from context
+            let chapter = null;
+            let verse = null;
+            if (lastContext && lastContext.length) {
+                const params = lastContext[0].parameters || {};
+                chapter = params.chapter ? parseInt(params.chapter) : null;
+                verse = params.verse ? parseInt(params.verse) : null;
+            }
+
+            // Display shloka text
+            if (chapter && verse) {
+                shlokaTextDiv.innerText = getShlokaText(chapter, verse);
+            } else {
+                shlokaTextDiv.innerText = "Shloka text not available.";
+            }
+
+            if (data.payload?.google?.richResponse?.items?.find(item => item.mediaResponse)?.mediaResponse?.mediaObjects?.[0]?.contentUrl) {
+                let audioUrl = data.payload.google.richResponse.items.find(item => item.mediaResponse).mediaResponse.mediaObjects[0].contentUrl;
+                let isValid = await validateAudioUrl(audioUrl);
+                if (!isValid) {
+                    console.log("Trying fallback audio URL:", FALLBACK_AUDIO_URL);
+                    audioUrl = FALLBACK_AUDIO_URL;
+                    isValid = await validateAudioUrl(audioUrl);
+                    if (!isValid) {
+                        responseDiv.innerHTML = `${text}<br>Audio file is invalid or inaccessible.`;
+                        return;
+                    }
+                }
+
+                const audio = document.createElement("audio");
+                audio.controls = true;
+                audio.autoplay = true;
+                audio.src = audioUrl;
+                audio.type = "audio/mpeg";
+                audio.style.display = "block";
+                responseDiv.appendChild(audio);
+                currentAudio = audio;
+
+                audio.play().then(() => {
+                    audio.muted = false;
+                    console.log("Audio playing successfully");
+                }).catch(error => {
+                    console.error("Autoplay blocked:", error);
+                    autoplayMessage.style.display = "block";
+                    playButton.style.display = "inline-block";
+                    responseDiv.innerHTML = `${text}<br>Autoplay blocked: ${error.message}`;
+                });
+            }
+        }
+
+        // Initialize recognition and load shlokas
+        initRecognition();
+        loadShlokaText();
+
+        // Start voice recognition
+        function startVoice() {
+            unlockAudioContext();
+            try {
+                recognition.start();
+                console.log("Speech recognition started");
+            } catch (error) {
+                console.error("Error starting recognition:", error);
+                initRecognition();
+                setTimeout(() => recognition.start(), 1000);
+            }
+        }
+    </script>
+</body>
+</html>
