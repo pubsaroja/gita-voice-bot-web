@@ -111,7 +111,7 @@
                 document.getElementById("autoplay-message").style.display = "none";
                 document.getElementById("play-audio-button").style.display = "none";
                 recognition.stop();
-                initRecognition();
+                setTimeout(initRecognition, 1000); // Restart after 1s
             };
 
             recognition.onend = function() {
@@ -124,7 +124,11 @@
         function unlockAudioContext() {
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             if (audioContext.state === 'suspended') {
-                audioContext.resume();
+                audioContext.resume().then(() => {
+                    console.log("Audio context resumed");
+                }).catch(error => {
+                    console.error("Error resuming audio context:", error);
+                });
             }
         }
 
@@ -145,7 +149,10 @@
 
         // Play current audio manually
         function playCurrentAudio() {
-            if (currentAudio) {
+            if (currentAudio && currentAudio.src) {
+                console.log("Attempting manual playback for:", currentAudio.src);
+                currentAudio.currentTime = 0;
+                currentAudio.load(); // Reload to reset state
                 currentAudio.play().then(() => {
                     currentAudio.muted = false;
                     document.getElementById("autoplay-message").style.display = "none";
@@ -153,7 +160,12 @@
                     console.log("Manual audio playback started");
                 }).catch(error => {
                     console.error("Manual play error:", error);
+                    document.getElementById("response").innerText = "Error playing audio. Please try again.";
                 });
+            } else {
+                console.error("No valid audio element to play");
+                document.getElementById("response").innerText = "No audio available to play.";
+                document.getElementById("play-audio-button").style.display = "none";
             }
         }
 
@@ -239,10 +251,15 @@
             const playButton = document.getElementById("play-audio-button");
             const text = data.fulfillmentText || "No response received.";
             
+            // Clear previous audio
             responseDiv.innerHTML = text;
             autoplayMessage.style.display = "none";
             playButton.style.display = "none";
-            currentAudio = null;
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.remove();
+                currentAudio = null;
+            }
 
             if (data.payload?.google?.richResponse?.items?.find(item => item.mediaResponse)?.mediaResponse?.mediaObjects?.[0]?.contentUrl) {
                 const audio = document.createElement("audio");
@@ -277,7 +294,7 @@
             } catch (error) {
                 console.error("Error starting recognition:", error);
                 initRecognition();
-                recognition.start();
+                setTimeout(() => recognition.start(), 1000);
             }
         }
 
