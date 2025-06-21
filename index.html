@@ -131,7 +131,7 @@
         const FALLBACK_AUDIO_URL = "https://storage.googleapis.com/xai-public-assets/audio/sample.mp3";
 
         // Shloka text file URL
-        const SHLOKA_FILE_URL = "https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/maintenance/BG_Sringeri.txt";
+        const SHLOKA_FILE_URL = "https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt";
 
         // Persist context
         let lastContext = [];
@@ -141,36 +141,47 @@
         // Load shloka text
         async function loadShlokaText() {
             try {
-                const response = await fetch(SHLOKA_FILE_URL);
-                if (!response.ok) throw new Error(`Failed to fetch BG_Sringeri.txt: ${response.status}`);
+                const response = await fetch(SHLOKA_FILE_URL, { timeout: 10000 });
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch BG_Sringeri.txt: ${response.status} ${response.statusText}`);
+                }
                 const text = await response.text();
                 const lines = text.split('\n');
                 shlokas = [];
-                const regexPatterns = [
-                    /^Chapter (\d+) Verse (\d+): (.+)$/, // Chapter 1 Verse 1: text
-                    /^(\d+)\.(\d+)\s+(.+)$/,            // 1.1 text
-                    /^(\d+):(\d+)\s+(.+)$/,             // 1:1 text
-                ];
+                const regex = /^(\d+)\.(\d+)\s+(.+)$/;
+                console.log("First 10 lines of BG_Sringeri.txt:");
+                lines.slice(0, 10).forEach((line, i) => console.log(`Line ${i+1}: ${JSON.stringify(line.trim())}`));
+
+                let currentShloka = null;
                 for (const line of lines) {
-                    for (const regex of regexPatterns) {
-                        const match = line.trim().match(regex);
-                        if (match) {
-                            shlokas.push({
-                                chapter: parseInt(match[1]),
-                                verse: parseInt(match[2]),
-                                text: match[3].trim()
-                            });
-                            break;
+                    const trimmedLine = line.trim();
+                    if (!trimmedLine || trimmedLine.startsWith('#') || trimmedLine.startsWith('//')) continue;
+
+                    const match = trimmedLine.match(regex);
+                    if (match) {
+                        if (currentShloka) {
+                            shlokas.push(currentShloka);
                         }
+                        currentShloka = {
+                            chapter: parseInt(match[1]),
+                            verse: parseInt(match[2]),
+                            text: match[3].trim()
+                        };
+                    } else if (currentShloka) {
+                        currentShloka.text += ' ' + trimmedLine;
                     }
                 }
+                if (currentShloka) {
+                    shlokas.push(currentShloka);
+                }
+
                 console.log("Loaded shlokas:", shlokas.length, shlokas.slice(0, 5));
                 if (shlokas.length === 0) {
                     document.getElementById("shloka-text").innerText = "No shlokas found in text file. Check format.";
                 }
             } catch (error) {
                 console.error("Error loading shloka text:", error);
-                document.getElementById("shloka-text").innerText = "Error loading shloka text.";
+                document.getElementById("shloka-text").innerText = `Error loading shloka text: ${error.message}`;
             }
         }
 
