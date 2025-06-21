@@ -58,6 +58,10 @@
         #play-audio-button:hover {
             background-color: #1976D2;
         }
+        audio {
+            margin-top: 10px;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -82,6 +86,39 @@
         // Persist context
         let lastContext = [];
         let currentAudio = null;
+        let recognition = null;
+
+        // Initialize speech recognition
+        function initRecognition() {
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "en-US";
+            recognition.interimResults = false;
+            recognition.continuous = false;
+
+            recognition.onresult = async function(event) {
+                let transcript = event.results[0][0].transcript.trim().toLowerCase();
+                console.log("Voice transcript:", transcript);
+                transcript = normalizeInput(transcript);
+                console.log("Normalized transcript:", transcript);
+                document.getElementById("commandInput").value = transcript;
+                recognition.stop();
+                await sendCommand();
+            };
+
+            recognition.onerror = function(event) {
+                console.error("Speech recognition error:", event.error);
+                document.getElementById("response").innerText = `Voice recognition error: ${event.error}. Please try again.`;
+                document.getElementById("autoplay-message").style.display = "none";
+                document.getElementById("play-audio-button").style.display = "none";
+                recognition.stop();
+                initRecognition(); // Reinitialize on error
+            };
+
+            recognition.onend = function() {
+                console.log("Speech recognition ended");
+                recognition.stop();
+            };
+        }
 
         // Unlock audio context for autoplay
         function unlockAudioContext() {
@@ -95,7 +132,7 @@
         function normalizeInput(input) {
             input = input.trim().toLowerCase();
             // Handle variations of "zero"
-            if (input.match(/^0+$/) || input.match(/zero|oh|zeroo|zer0/)) {
+            if (input.match(/^0+$/) || input.match(/zero|oh|zeroo|zer0|ohh|o|zeros/)) {
                 console.log(`Normalized "${input}" to "zero"`);
                 return "zero";
             }
@@ -109,6 +146,7 @@
                     currentAudio.muted = false;
                     document.getElementById("autoplay-message").style.display = "none";
                     document.getElementById("play-audio-button").style.display = "none";
+                    console.log("Manual audio playback started");
                 }).catch(error => {
                     console.error("Manual play error:", error);
                 });
@@ -159,7 +197,7 @@
 
         // Map input to intent
         function getIntentName(input) {
-            if (input === "zero" || input.match(/^0+$/) || input.match(/oh|zeroo|zer0/)) return "ZeroIntent";
+            if (input === "zero" || input.match(/^0+$/) || input.match(/oh|zeroo|zer0|ohh|o|zeros/)) return "ZeroIntent";
             if (input === "full") return "FullIntent";
             if (input === "next") return "NextIntent";
             if (input.startsWith("chapter")) return "ChapterIntent";
@@ -181,7 +219,6 @@
             const autoplayMessage = document.getElementById("autoplay-message");
             const playButton = document.getElementById("play-audio-button");
             const text = data.fulfillmentText || "No response received.";
-            const media = data.payload?.google?.richResponse?.items?.find(item => item.mediaResponse)?.mediaResponse?.mediaObjects?.[0];
             
             // Clear previous content
             responseDiv.innerHTML = text;
@@ -189,12 +226,13 @@
             playButton.style.display = "none";
             currentAudio = null;
 
-            if (media?.contentUrl) {
+            if (data.payload?.google?.richResponse?.items?.find(item => item.mediaResponse)?.mediaResponse?.mediaObjects?.[0]?.contentUrl) {
                 const audio = document.createElement("audio");
                 audio.controls = true;
                 audio.autoplay = true;
-                audio.src = media.contentUrl;
+                audio.src = data.payload.google.richResponse.items.find(item => item.mediaResponse).mediaResponse.mediaObjects[0].contentUrl;
                 audio.type = "audio/mpeg";
+                audio.style.display = "block"; // Ensure visibility
                 responseDiv.appendChild(audio);
                 currentAudio = audio;
 
@@ -209,30 +247,20 @@
             }
         }
 
-        // Voice recognition
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.lang = "en-US";
-        recognition.interimResults = false;
+        // Initialize recognition on page load
+        initRecognition();
 
-        recognition.onresult = async function(event) {
-            let transcript = event.results[0][0].transcript.trim().toLowerCase();
-            console.log("Voice transcript:", transcript);
-            transcript = normalizeInput(transcript);
-            console.log("Normalized transcript:", transcript);
-            document.getElementById("commandInput").value = transcript;
-            await sendCommand();
-        };
-
-        recognition.onerror = function(event) {
-            console.error("Speech recognition error:", event.error);
-            document.getElementById("response").innerText = "Error with voice recognition.";
-            document.getElementById("autoplay-message").style.display = "none";
-            document.getElementById("play-audio-button").style.display = "none";
-        };
-
+        // Start voice recognition
         function startVoice() {
             unlockAudioContext();
-            recognition.start();
+            try {
+                recognition.start();
+                console.log("Speech recognition started");
+            } catch (error) {
+                console.error("Error starting recognition:", error);
+                initRecognition();
+                recognition.start();
+            }
         }
 
         // Allow Enter key to submit
