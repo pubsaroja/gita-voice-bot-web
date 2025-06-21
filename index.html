@@ -146,30 +146,43 @@
                 const text = await response.text();
                 const lines = text.split('\n');
                 shlokas = [];
-                const regex = /^Chapter (\d+) Verse (\d+): (.+)$/;
+                let currentShloka = null;
+                const regex = /^(\d+)\.(\d+)\s+(.+)$/;
                 for (const line of lines) {
                     const match = line.match(regex);
                     if (match) {
-                        shlokas.push({
+                        if (currentShloka) {
+                            shlokas.push(currentShloka);
+                        }
+                        currentShloka = {
                             chapter: parseInt(match[1]),
                             verse: parseInt(match[2]),
                             text: match[3].trim()
-                        });
+                        };
+                    } else if (currentShloka && line.trim()) {
+                        currentShloka.text += '\n' + line.trim();
                     }
                 }
-                console.log("Loaded shlokas:", shlokas.length);
+                if (currentShloka) {
+                    shlokas.push(currentShloka);
+                }
+                console.log("Loaded shlokas:", shlokas.length, shlokas.slice(0, 2));
                 if (shlokas.length === 0) {
                     document.getElementById("shloka-text").innerText = "No shlokas found in text file.";
+                    document.getElementById("shloka-text").style.display = "block";
                 }
             } catch (error) {
                 console.error("Error loading shloka text:", error);
                 document.getElementById("shloka-text").innerText = "Error loading shloka text.";
+                document.getElementById("shloka-text").style.display = "block";
             }
         }
 
         // Get shloka text by chapter and verse
         function getShlokaText(chapter, verse) {
+            console.log("Searching for shloka: chapter =", chapter, "verse =", verse);
             const shloka = shlokas.find(s => s.chapter === chapter && s.verse === verse);
+            console.log("Found shloka:", shloka);
             return shloka ? shloka.text : "Shloka text not found.";
         }
 
