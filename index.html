@@ -45,6 +45,19 @@
             margin-top: 10px;
             display: none;
         }
+        #play-audio-button {
+            display: none;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #play-audio-button:hover {
+            background-color: #1976D2;
+        }
     </style>
 </head>
 <body>
@@ -56,7 +69,8 @@
     </div>
     <button onclick="startVoice()">🎤 Speak Now</button>
     <div id="response"></div>
-    <div id="autoplay-message">Your browser may have blocked autoplay. Click the audio player to start.</div>
+    <div id="autoplay-message">Your browser may have blocked autoplay. Click the audio player or the button below to start.</div>
+    <button id="play-audio-button" onclick="playCurrentAudio()">Play Audio</button>
 
     <script>
         // Webhook URL
@@ -67,6 +81,7 @@
 
         // Persist context
         let lastContext = [];
+        let currentAudio = null;
 
         // Unlock audio context for autoplay
         function unlockAudioContext() {
@@ -79,9 +94,25 @@
         // Normalize input (voice or text)
         function normalizeInput(input) {
             input = input.trim().toLowerCase();
-            // Convert "0", "zero", or similar to "zero"
-            if (input.match(/^0+$/) || input === "zero") return "zero";
+            // Handle variations of "zero"
+            if (input.match(/^0+$/) || input.match(/zero|oh|zeroo|zer0/)) {
+                console.log(`Normalized "${input}" to "zero"`);
+                return "zero";
+            }
             return input;
+        }
+
+        // Play current audio manually
+        function playCurrentAudio() {
+            if (currentAudio) {
+                currentAudio.play().then(() => {
+                    currentAudio.muted = false;
+                    document.getElementById("autoplay-message").style.display = "none";
+                    document.getElementById("play-audio-button").style.display = "none";
+                }).catch(error => {
+                    console.error("Manual play error:", error);
+                });
+            }
         }
 
         // Send text command
@@ -109,7 +140,6 @@
                     body: JSON.stringify(payload)
                 });
                 const data = await response.json();
-                // Update context
                 if (data.outputContexts && data.outputContexts.length) {
                     lastContext = data.outputContexts.map(ctx => ({
                         name: ctx.name,
@@ -123,12 +153,13 @@
                 console.error("Error:", error);
                 document.getElementById("response").innerText = "Error processing command.";
                 document.getElementById("autoplay-message").style.display = "none";
+                document.getElementById("play-audio-button").style.display = "none";
             }
         }
 
         // Map input to intent
         function getIntentName(input) {
-            if (input === "zero" || input.match(/^0+$/)) return "ZeroIntent";
+            if (input === "zero" || input.match(/^0+$/) || input.match(/oh|zeroo|zer0/)) return "ZeroIntent";
             if (input === "full") return "FullIntent";
             if (input === "next") return "NextIntent";
             if (input.startsWith("chapter")) return "ChapterIntent";
@@ -148,11 +179,15 @@
         function displayResponse(data) {
             const responseDiv = document.getElementById("response");
             const autoplayMessage = document.getElementById("autoplay-message");
+            const playButton = document.getElementById("play-audio-button");
             const text = data.fulfillmentText || "No response received.";
             const media = data.payload?.google?.richResponse?.items?.find(item => item.mediaResponse)?.mediaResponse?.mediaObjects?.[0];
             
+            // Clear previous content
             responseDiv.innerHTML = text;
             autoplayMessage.style.display = "none";
+            playButton.style.display = "none";
+            currentAudio = null;
 
             if (media?.contentUrl) {
                 const audio = document.createElement("audio");
@@ -161,12 +196,15 @@
                 audio.src = media.contentUrl;
                 audio.type = "audio/mpeg";
                 responseDiv.appendChild(audio);
+                currentAudio = audio;
 
                 audio.play().then(() => {
                     audio.muted = false;
+                    console.log("Audio playing successfully");
                 }).catch(error => {
                     console.error("Autoplay blocked:", error);
                     autoplayMessage.style.display = "block";
+                    playButton.style.display = "inline-block";
                 });
             }
         }
@@ -189,6 +227,7 @@
             console.error("Speech recognition error:", event.error);
             document.getElementById("response").innerText = "Error with voice recognition.";
             document.getElementById("autoplay-message").style.display = "none";
+            document.getElementById("play-audio-button").style.display = "none";
         };
 
         function startVoice() {
