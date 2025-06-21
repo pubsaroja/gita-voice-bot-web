@@ -96,8 +96,8 @@
             recognition.continuous = false;
 
             recognition.onresult = async function(event) {
-                let transcript = event.results[0][0].transcript.trim().toLowerCase();
-                console.log("Voice transcript:", transcript);
+                let transcript = event.results[0][0].transcript;
+                console.log("Raw voice transcript:", transcript);
                 transcript = normalizeInput(transcript);
                 console.log("Normalized transcript:", transcript);
                 document.getElementById("commandInput").value = transcript;
@@ -111,7 +111,7 @@
                 document.getElementById("autoplay-message").style.display = "none";
                 document.getElementById("play-audio-button").style.display = "none";
                 recognition.stop();
-                initRecognition(); // Reinitialize on error
+                initRecognition();
             };
 
             recognition.onend = function() {
@@ -130,11 +130,15 @@
 
         // Normalize input (voice or text)
         function normalizeInput(input) {
-            input = input.trim().toLowerCase();
-            // Handle variations of "zero"
-            if (input.match(/^0+$/) || input.match(/zero|oh|zeroo|zer0|ohh|o|zeros/)) {
+            input = input.trim().toLowerCase().replace(/[^a-z0-9\s]/g, '');
+            console.log("After trimming and cleaning:", input);
+            if (input.match(/^0+$/) || input.match(/zero|oh|zeroo|zer0|ohh|o|zeros|ohhh/)) {
                 console.log(`Normalized "${input}" to "zero"`);
                 return "zero";
+            }
+            if (input === "full" || input.match(/ful|fuul|fulls/)) {
+                console.log(`Normalized "${input}" to "full"`);
+                return "full";
             }
             return input;
         }
@@ -178,6 +182,7 @@
                     body: JSON.stringify(payload)
                 });
                 const data = await response.json();
+                console.log("Webhook response:", JSON.stringify(data, null, 2));
                 if (data.outputContexts && data.outputContexts.length) {
                     lastContext = data.outputContexts.map(ctx => ({
                         name: ctx.name,
@@ -188,7 +193,7 @@
                 console.log("Received context:", JSON.stringify(lastContext, null, 2));
                 displayResponse(data);
             } catch (error) {
-                console.error("Error:", error);
+                console.error("Fetch error:", error);
                 document.getElementById("response").innerText = "Error processing command.";
                 document.getElementById("autoplay-message").style.display = "none";
                 document.getElementById("play-audio-button").style.display = "none";
@@ -197,10 +202,23 @@
 
         // Map input to intent
         function getIntentName(input) {
-            if (input === "zero" || input.match(/^0+$/) || input.match(/oh|zeroo|zer0|ohh|o|zeros/)) return "ZeroIntent";
-            if (input === "full") return "FullIntent";
-            if (input === "next") return "NextIntent";
-            if (input.startsWith("chapter")) return "ChapterIntent";
+            if (input === "zero" || input.match(/^0+$/) || input.match(/oh|zeroo|zer0|ohh|o|zeros|ohhh/)) {
+                console.log("Mapped to ZeroIntent");
+                return "ZeroIntent";
+            }
+            if (input === "full" || input.match(/ful|fuul|fulls/)) {
+                console.log("Mapped to FullIntent");
+                return "FullIntent";
+            }
+            if (input === "next") {
+                console.log("Mapped to NextIntent");
+                return "NextIntent";
+            }
+            if (input.startsWith("chapter")) {
+                console.log("Mapped to ChapterIntent");
+                return "ChapterIntent";
+            }
+            console.log("Mapped to UnknownIntent");
             return "UnknownIntent";
         }
 
@@ -220,7 +238,6 @@
             const playButton = document.getElementById("play-audio-button");
             const text = data.fulfillmentText || "No response received.";
             
-            // Clear previous content
             responseDiv.innerHTML = text;
             autoplayMessage.style.display = "none";
             playButton.style.display = "none";
@@ -232,7 +249,7 @@
                 audio.autoplay = true;
                 audio.src = data.payload.google.richResponse.items.find(item => item.mediaResponse).mediaResponse.mediaObjects[0].contentUrl;
                 audio.type = "audio/mpeg";
-                audio.style.display = "block"; // Ensure visibility
+                audio.style.display = "block";
                 responseDiv.appendChild(audio);
                 currentAudio = audio;
 
@@ -247,7 +264,7 @@
             }
         }
 
-        // Initialize recognition on page load
+        // Initialize recognition
         initRecognition();
 
         // Start voice recognition
