@@ -86,13 +86,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Bhagavad Gita <br>Voice Bot 🎙️</h1>
+    <h1>Bhagavad Gita <br>Bot 🎵</h1>
     <p><br>Developed by Dr.P.Udayabhaskar</p>
-    <p>Speak: "zero", "chapter 5", "full", "next"</p>
+    <p>Request a random Shloka from Srimad Bhagavdgita</p>
     <div class="container">
-        <button onclick="sendCommandWithValue('zero')">Browse Random Verse</button>
-        <button onclick="sendCommandWithValue('full')">Play Entire Verse</button>
-        <button onclick="sendCommandWithValue('next')">Play Next Verse</button>
+        <button onclick="sendCommandWithValue('zero')">Browse Random Shloka</button>
+        <button onclick="sendCommandWithValue('full')">Play Entire Shloka</button>
+        <button onclick="sendCommandWithValue('next')">Play Next Shloka</button>
         <select id="chapterSelect" onchange="sendChapterCommand()">
             <option value="" selected disabled>Select Chapter</option>
             <option value="1">Chapter 1</option>
@@ -116,7 +116,6 @@
         </select>
         <div id="shloka-text">Shloka text will appear here.</div>
     </div>
-    <button onclick="startVoice()">🎤 Speak Now</button>
     <div id="response"></div>
     <div id="autoplay-message">Your browser may have blocked autoplay or the audio file is invalid. Click the audio player or the button below to start.</div>
     <button id="play-audio-button" onclick="playCurrentAudio()">Play Audio</button>
@@ -137,7 +136,6 @@
         // Persist context
         let lastContext = [];
         let currentAudio = null;
-        let recognition = null;
         let shlokas = [];
 
         // Load shloka text
@@ -148,9 +146,8 @@
                 const text = await response.text();
                 const lines = text.split('\n');
                 shlokas = [];
-                // Try multiple regex patterns
                 const regexPatterns = [
-                    /^Chapter (\d+) Verse (\d+): (.+)$/, // Original: Chapter 1 Verse 1: text
+                    /^Chapter (\d+) Verse (\d+): (.+)$/, // Chapter 1 Verse 1: text
                     /^(\d+)\.(\d+)\s+(.+)$/,            // 1.1 text
                     /^(\d+):(\d+)\s+(.+)$/,             // 1:1 text
                 ];
@@ -183,36 +180,6 @@
             return shloka ? shloka.text : "Shloka text not found.";
         }
 
-        // Initialize speech recognition
-        function initRecognition() {
-            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = "en-US";
-            recognition.interimResults = false;
-            recognition.continuous = false;
-
-            recognition.onresult = async function(event) {
-                let transcript = event.results[0][0].transcript;
-                console.log("Raw voice transcript:", JSON.stringify(transcript));
-                transcript = normalizeInput(transcript);
-                console.log("Normalized transcript:", transcript);
-                await sendCommand(transcript);
-            };
-
-            recognition.onerror = function(event) {
-                console.error("Speech recognition error:", event.error);
-                document.getElementById("response").innerText = `Voice recognition error: ${event.error}. Please try again or click 'Speak Now'.`;
-                document.getElementById("autoplay-message").style.display = "none";
-                document.getElementById("play-audio-button").style.display = "none";
-                recognition.stop();
-                setTimeout(initRecognition, 1000);
-            };
-
-            recognition.onend = function() {
-                console.log("Speech recognition ended");
-                recognition.stop();
-            };
-        }
-
         // Unlock audio context
         function unlockAudioContext() {
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -223,21 +190,6 @@
                     console.error("Error resuming audio context:", error);
                 });
             }
-        }
-
-        // Normalize input
-        function normalizeInput(input) {
-            input = input.trim().toLowerCase().replace(/[^a-z0-9\s]/g, '');
-            console.log("After trimming and cleaning:", input);
-            if (input.match(/^0+$/) || input.match(/zero|oh|zeroo|zer0|ohh|o|zeros|ohhh|zro/)) {
-                console.log(`Normalized "${input}" to "zero"`);
-                return "zero";
-            }
-            if (input.match(/^full$/) || input.match(/ful|fuul|fulls|fl/)) {
-                console.log(`Normalized "${input}" to "full"`);
-                return "full";
-            }
-            return input;
         }
 
         // Validate audio URL
@@ -300,6 +252,23 @@
         async function sendCommand(input) {
             unlockAudioContext();
             if (!input) return;
+
+            // Check context for "full" and "next"
+            if (input === "full" || input === "next") {
+                let hasContext = false;
+                if (lastContext && lastContext.length) {
+                    const params = lastContext[0].parameters || {};
+                    if (params.chapter && params.verse) {
+                        hasContext = true;
+                    }
+                }
+                if (!hasContext) {
+                    document.getElementById("response").innerText = "Request a Shloka first";
+                    document.getElementById("autoplay-message").style.display = "none";
+                    document.getElementById("play-audio-button").style.display = "none";
+                    return;
+                }
+            }
 
             const payload = {
                 session: "session-" + Date.now(),
@@ -451,22 +420,8 @@
             }
         }
 
-        // Initialize recognition and load shlokas
-        initRecognition();
+        // Initialize and load shlokas
         loadShlokaText();
-
-        // Start voice recognition
-        function startVoice() {
-            unlockAudioContext();
-            try {
-                recognition.start();
-                console.log("Speech recognition started");
-            } catch (error) {
-                console.error("Error starting recognition:", error);
-                initRecognition();
-                setTimeout(() => recognition.start(), 1000);
-            }
-        }
     </script>
 </body>
 </html>
