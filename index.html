@@ -59,54 +59,14 @@
     <div id="autoplay-message">Your browser may have blocked autoplay. Click the audio player to start.</div>
 
     <script>
-        // Add at the top of the <script> section
-let lastContext = [];
-
-// Update sendCommand
-async function sendCommand() {
-    unlockAudioContext();
-    const input = document.getElementById("commandInput").value.trim().toLowerCase();
-    if (!input) return;
-
-    const payload = {
-        queryResult: {
-            queryText: input,
-            intent: { displayName: getIntentName(input) },
-            parameters: getParameters(input),
-            outputContexts: lastContext.length ? lastContext : []
-        },
-        session: "session-" + Date.now()
-    };
-
-    try {
-        const response = await fetch(WEBHOOK_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-        const data = await response.json();
-        // Update context with response context
-        if (data.outputContexts && data.outputContexts.length) {
-            lastContext = data.outputContexts.map(ctx => ({
-                name: ctx.name,
-                lifespanCount: ctx.lifespanCount,
-                parameters: ctx.parameters
-            }));
-        }
-        console.log("Payload sent:", payload);
-        console.log("Context received:", lastContext);
-        displayResponse(data);
-    } catch (error) {
-        console.error("Error:", error);
-        document.getElementById("response").innerText = "Error processing command.";
-        document.getElementById("autoplay-message").style.display = "none";
-    }
-}
         // Webhook URL
         const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
         const WEBHOOK_URL = isLocal
             ? "http://localhost:8080/webhook"
             : "https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
+
+        // Persist context
+        let lastContext = [];
 
         // Unlock audio context for autoplay
         function unlockAudioContext() {
@@ -116,10 +76,18 @@ async function sendCommand() {
             }
         }
 
+        // Normalize input (voice or text)
+        function normalizeInput(input) {
+            input = input.trim().toLowerCase();
+            // Convert "0", "zero", or similar to "zero"
+            if (input.match(/^0+$/) || input === "zero") return "zero";
+            return input;
+        }
+
         // Send text command
         async function sendCommand() {
             unlockAudioContext();
-            const input = document.getElementById("commandInput").value.trim().toLowerCase();
+            const input = normalizeInput(document.getElementById("commandInput").value);
             if (!input) return;
 
             const payload = {
@@ -127,10 +95,12 @@ async function sendCommand() {
                     queryText: input,
                     intent: { displayName: getIntentName(input) },
                     parameters: getParameters(input),
-                    outputContexts: []
+                    outputContexts: lastContext.length ? lastContext : []
                 },
                 session: "session-" + Date.now()
             };
+
+            console.log("Sending payload:", JSON.stringify(payload, null, 2));
 
             try {
                 const response = await fetch(WEBHOOK_URL, {
@@ -139,6 +109,15 @@ async function sendCommand() {
                     body: JSON.stringify(payload)
                 });
                 const data = await response.json();
+                // Update context
+                if (data.outputContexts && data.outputContexts.length) {
+                    lastContext = data.outputContexts.map(ctx => ({
+                        name: ctx.name,
+                        lifespanCount: ctx.lifespanCount,
+                        parameters: ctx.parameters
+                    }));
+                }
+                console.log("Received context:", JSON.stringify(lastContext, null, 2));
                 displayResponse(data);
             } catch (error) {
                 console.error("Error:", error);
@@ -147,9 +126,9 @@ async function sendCommand() {
             }
         }
 
-        // Map text input to intent
+        // Map input to intent
         function getIntentName(input) {
-            if (input === "zero" || input === "0") return "ZeroIntent";
+            if (input === "zero" || input.match(/^0+$/)) return "ZeroIntent";
             if (input === "full") return "FullIntent";
             if (input === "next") return "NextIntent";
             if (input.startsWith("chapter")) return "ChapterIntent";
@@ -183,7 +162,6 @@ async function sendCommand() {
                 audio.type = "audio/mpeg";
                 responseDiv.appendChild(audio);
 
-                // Detect if autoplay is blocked
                 audio.play().then(() => {
                     audio.muted = false;
                 }).catch(error => {
@@ -200,8 +178,9 @@ async function sendCommand() {
 
         recognition.onresult = async function(event) {
             let transcript = event.results[0][0].transcript.trim().toLowerCase();
-            // Normalize "0" to "zero" for voice input
-            if (transcript === "0") transcript = "zero";
+            console.log("Voice transcript:", transcript);
+            transcript = normalizeInput(transcript);
+            console.log("Normalized transcript:", transcript);
             document.getElementById("commandInput").value = transcript;
             await sendCommand();
         };
