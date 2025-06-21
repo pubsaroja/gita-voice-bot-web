@@ -16,11 +16,21 @@
         }
         .input-container {
             margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
         }
         input[type="text"] {
             padding: 10px;
             width: 200px;
             font-size: 16px;
+        }
+        select {
+            padding: 10px;
+            font-size: 16px;
+            width: 100px;
+            border-radius: 5px;
         }
         button {
             padding: 10px 20px;
@@ -70,7 +80,31 @@
     <p>Speak or type: "zero", "chapter 5", "full", "next"</p>
     <div class="input-container">
         <input type="text" id="commandInput" placeholder="Type command here">
+        <select id="chapterSelect" onchange="sendChapterCommand()">
+            <option value="" selected disabled>Select Chapter</option>
+            <option value="1">Chapter 1</option>
+            <option value="2">Chapter 2</option>
+            <option value="3">Chapter 3</option>
+            <option value="4">Chapter 4</option>
+            <option value="5">Chapter 5</option>
+            <option value="6">Chapter 6</option>
+            <option value="7">Chapter 7</option>
+            <option value="8">Chapter 8</option>
+            <option value="9">Chapter 9</option>
+            <option value="10">Chapter 10</option>
+            <option value="11">Chapter 11</option>
+            <option value="12">Chapter 12</option>
+            <option value="13">Chapter 13</option>
+            <option value="14">Chapter 14</option>
+            <option value="15">Chapter 15</option>
+            <option value="16">Chapter 16</option>
+            <option value="17">Chapter 17</option>
+            <option value="18">Chapter 18</option>
+        </select>
         <button onclick="sendCommand()">Send</button>
+        <button onclick="sendCommandWithValue('zero')">Zero</button>
+        <button onclick="sendCommandWithValue('full')">Full</button>
+        <button onclick="sendCommandWithValue('next')">Next</button>
     </div>
     <button onclick="startVoice()">🎤 Speak Now</button>
     <div id="response"></div>
@@ -85,7 +119,7 @@
             : "https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
 
         // Fallback audio URL
-        const FALLBACK_AUDIO_URL = "https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_700KB.mp3";
+        const FALLBACK_AUDIO_URL = "https://storage.googleapis.com/xai-public-assets/audio/sample.mp3";
 
         // Persist context
         let lastContext = [];
@@ -207,7 +241,7 @@
             }
         }
 
-        // Send command
+        // Send command from input box
         async function sendCommand() {
             unlockAudioContext();
             const input = normalizeInput(document.getElementById("commandInput").value);
@@ -247,6 +281,22 @@
                 document.getElementById("response").innerText = "Error processing command.";
                 document.getElementById("autoplay-message").style.display = "none";
                 document.getElementById("play-audio-button").style.display = "none";
+            }
+        }
+
+        // Send command with specific value (for buttons)
+        function sendCommandWithValue(value) {
+            document.getElementById("commandInput").value = value;
+            sendCommand();
+        }
+
+        // Send chapter command from dropdown
+        function sendChapterCommand() {
+            const chapter = document.getElementById("chapterSelect").value;
+            if (chapter) {
+                document.getElementById("commandInput").value = `chapter ${chapter}`;
+                sendCommand();
+                document.getElementById("chapterSelect").value = ""; // Reset dropdown
             }
         }
 
