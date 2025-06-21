@@ -97,7 +97,7 @@
 
             recognition.onresult = async function(event) {
                 let transcript = event.results[0][0].transcript;
-                console.log("Raw voice transcript:", transcript);
+                console.log("Raw voice transcript:", JSON.stringify(transcript));
                 transcript = normalizeInput(transcript);
                 console.log("Normalized transcript:", transcript);
                 document.getElementById("commandInput").value = transcript;
@@ -132,11 +132,11 @@
         function normalizeInput(input) {
             input = input.trim().toLowerCase().replace(/[^a-z0-9\s]/g, '');
             console.log("After trimming and cleaning:", input);
-            if (input.match(/^0+$/) || input.match(/zero|oh|zeroo|zer0|ohh|o|zeros|ohhh/)) {
+            if (input.match(/^0+$/) || input.match(/zero|oh|zeroo|zer0|ohh|o|zeros|ohhh|zro/)) {
                 console.log(`Normalized "${input}" to "zero"`);
                 return "zero";
             }
-            if (input === "full" || input.match(/ful|fuul|fulls/)) {
+            if (input.match(/^full$/) || input.match(/ful|fuul|fulls|fl/)) {
                 console.log(`Normalized "${input}" to "full"`);
                 return "full";
             }
@@ -164,13 +164,13 @@
             if (!input) return;
 
             const payload = {
+                session: "session-" + Date.now(),
                 queryResult: {
                     queryText: input,
                     intent: { displayName: getIntentName(input) },
                     parameters: getParameters(input),
-                    outputContexts: lastContext.length ? lastContext : []
-                },
-                session: "session-" + Date.now()
+                    outputContexts: lastContext
+                }
             };
 
             console.log("Sending payload:", JSON.stringify(payload, null, 2));
@@ -202,11 +202,12 @@
 
         // Map input to intent
         function getIntentName(input) {
-            if (input === "zero" || input.match(/^0+$/) || input.match(/oh|zeroo|zer0|ohh|o|zeros|ohhh/)) {
+            input = input.trim();
+            if (input === "zero" || input.match(/^0+$/) || input.match(/oh|zeroo|zer0|ohh|o|zeros|ohhh|zro/)) {
                 console.log("Mapped to ZeroIntent");
                 return "ZeroIntent";
             }
-            if (input === "full" || input.match(/ful|fuul|fulls/)) {
+            if (input === "full" || input.match(/ful|fuul|fulls|fl/)) {
                 console.log("Mapped to FullIntent");
                 return "FullIntent";
             }
