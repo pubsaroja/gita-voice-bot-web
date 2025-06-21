@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bhagavad Gita Voice Bot</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,22 +15,17 @@
         h1 {
             color: #333;
         }
-        .input-container {
-            margin: 20px 0;
+        .container {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-        }
-        input[type="text"] {
-            padding: 10px;
-            width: 200px;
-            font-size: 16px;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
         }
         select {
             padding: 10px;
             font-size: 16px;
-            width: 100px;
+            width: 200px;
             border-radius: 5px;
         }
         button {
@@ -40,9 +36,23 @@
             color: white;
             border: none;
             border-radius: 5px;
+            width: 200px;
         }
         button:hover {
             background-color: #45a049;
+        }
+        #shloka-text {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 600px;
+            min-height: 100px;
+            text-align: left;
+            white-space: pre-wrap;
         }
         #response {
             margin-top: 20px;
@@ -77,9 +87,11 @@
 <body>
     <h1>Bhagavad Gita <br>Voice Bot 🎙️</h1>
     <p><br>Developed by Dr.P.Udayabhaskar</p>
-    <p>Speak or type: "zero", "chapter 5", "full", "next"</p>
-    <div class="input-container">
-        <input type="text" id="commandInput" placeholder="Type command here">
+    <p>Speak: "zero", "chapter 5", "full", "next"</p>
+    <div class="container">
+        <button onclick="sendCommandWithValue('zero')">Browse Random Verse</button>
+        <button onclick="sendCommandWithValue('full')">Play Entire Verse</button>
+        <button onclick="sendCommandWithValue('next')">Play Next Verse</button>
         <select id="chapterSelect" onchange="sendChapterCommand()">
             <option value="" selected disabled>Select Chapter</option>
             <option value="1">Chapter 1</option>
@@ -88,322 +100,4 @@
             <option value="4">Chapter 4</option>
             <option value="5">Chapter 5</option>
             <option value="6">Chapter 6</option>
-            <option value="7">Chapter 7</option>
-            <option value="8">Chapter 8</option>
-            <option value="9">Chapter 9</option>
-            <option value="10">Chapter 10</option>
-            <option value="11">Chapter 11</option>
-            <option value="12">Chapter 12</option>
-            <option value="13">Chapter 13</option>
-            <option value="14">Chapter 14</option>
-            <option value="15">Chapter 15</option>
-            <option value="16">Chapter 16</option>
-            <option value="17">Chapter 17</option>
-            <option value="18">Chapter 18</option>
-        </select>
-        <button onclick="sendCommand()">Send</button>
-        <button onclick="sendCommandWithValue('zero')">Zero</button>
-        <button onclick="sendCommandWithValue('full')">Full</button>
-        <button onclick="sendCommandWithValue('next')">Next</button>
-    </div>
-    <button onclick="startVoice()">🎤 Speak Now</button>
-    <div id="response"></div>
-    <div id="autoplay-message">Your browser may have blocked autoplay or the audio file is invalid. Click the audio player or the button below to start.</div>
-    <button id="play-audio-button" onclick="playCurrentAudio()">Play Audio</button>
-
-    <script>
-        // Webhook URL
-        const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
-        const WEBHOOK_URL = isLocal
-            ? "http://localhost:8080/webhook"
-            : "https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
-
-        // Fallback audio URL
-        const FALLBACK_AUDIO_URL = "https://storage.googleapis.com/xai-public-assets/audio/sample.mp3";
-
-        // Persist context
-        let lastContext = [];
-        let currentAudio = null;
-        let recognition = null;
-
-        // Initialize speech recognition
-        function initRecognition() {
-            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = "en-US";
-            recognition.interimResults = false;
-            recognition.continuous = false;
-
-            recognition.onresult = async function(event) {
-                let transcript = event.results[0][0].transcript;
-                console.log("Raw voice transcript:", JSON.stringify(transcript));
-                transcript = normalizeInput(transcript);
-                console.log("Normalized transcript:", transcript);
-                document.getElementById("commandInput").value = transcript;
-                recognition.stop();
-                await sendCommand();
-            };
-
-            recognition.onerror = function(event) {
-                console.error("Speech recognition error:", event.error);
-                document.getElementById("response").innerText = `Voice recognition error: ${event.error}. Please try again or click 'Speak Now'.`;
-                document.getElementById("autoplay-message").style.display = "none";
-                document.getElementById("play-audio-button").style.display = "none";
-                recognition.stop();
-                setTimeout(initRecognition, 1000);
-            };
-
-            recognition.onend = function() {
-                console.log("Speech recognition ended");
-                recognition.stop();
-            };
-        }
-
-        // Unlock audio context
-        function unlockAudioContext() {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioContext.state === 'suspended') {
-                audioContext.resume().then(() => {
-                    console.log("Audio context resumed");
-                }).catch(error => {
-                    console.error("Error resuming audio context:", error);
-                });
-            }
-        }
-
-        // Normalize input
-        function normalizeInput(input) {
-            input = input.trim().toLowerCase().replace(/[^a-z0-9\s]/g, '');
-            console.log("After trimming and cleaning:", input);
-            if (input.match(/^0+$/) || input.match(/zero|oh|zeroo|zer0|ohh|o|zeros|ohhh|zro/)) {
-                console.log(`Normalized "${input}" to "zero"`);
-                return "zero";
-            }
-            if (input.match(/^full$/) || input.match(/ful|fuul|fulls|fl/)) {
-                console.log(`Normalized "${input}" to "full"`);
-                return "full";
-            }
-            return input;
-        }
-
-        // Validate audio URL
-        async function validateAudioUrl(url) {
-            try {
-                const response = await fetch(url, { method: 'HEAD', mode: 'cors' });
-                if (!response.ok) {
-                    console.error(`Audio URL inaccessible: ${response.status} ${response.statusText}`);
-                    return false;
-                }
-                const contentType = response.headers.get('Content-Type');
-                if (!contentType.includes('audio/mpeg') && !contentType.includes('audio/mp3')) {
-                    console.error(`Invalid content type: ${contentType}`);
-                    return false;
-                }
-                return true;
-            } catch (error) {
-                console.error("Error validating audio URL:", error);
-                return false;
-            }
-        }
-
-        // Play current audio manually
-        async function playCurrentAudio() {
-            if (currentAudio && currentAudio.src) {
-                console.log("Attempting manual playback for:", currentAudio.src);
-                let audioUrl = currentAudio.src;
-                let isValid = await validateAudioUrl(audioUrl);
-                if (!isValid) {
-                    console.log("Trying fallback audio URL:", FALLBACK_AUDIO_URL);
-                    audioUrl = FALLBACK_AUDIO_URL;
-                    isValid = await validateAudioUrl(audioUrl);
-                    if (!isValid) {
-                        document.getElementById("response").innerText = "Audio file is invalid or inaccessible.";
-                        document.getElementById("play-audio-button").style.display = "none";
-                        return;
-                    }
-                    currentAudio.src = audioUrl;
-                }
-                currentAudio.currentTime = 0;
-                currentAudio.load();
-                currentAudio.play().then(() => {
-                    currentAudio.muted = false;
-                    document.getElementById("autoplay-message").style.display = "none";
-                    document.getElementById("play-audio-button").style.display = "none";
-                    console.log("Manual audio playback started");
-                }).catch(error => {
-                    console.error("Manual play error:", error);
-                    document.getElementById("response").innerText = `Error playing audio: ${error.message}`;
-                    document.getElementById("play-audio-button").style.display = "none";
-                });
-            } else {
-                console.error("No valid audio element to play");
-                document.getElementById("response").innerText = "No audio available to play.";
-                document.getElementById("play-audio-button").style.display = "none";
-            }
-        }
-
-        // Send command from input box
-        async function sendCommand() {
-            unlockAudioContext();
-            const input = normalizeInput(document.getElementById("commandInput").value);
-            if (!input) return;
-
-            const payload = {
-                session: "session-" + Date.now(),
-                queryResult: {
-                    queryText: input,
-                    intent: { displayName: getIntentName(input) },
-                    parameters: getParameters(input),
-                    outputContexts: lastContext
-                }
-            };
-
-            console.log("Sending payload:", JSON.stringify(payload, null, 2));
-
-            try {
-                const response = await fetch(WEBHOOK_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                });
-                const data = await response.json();
-                console.log("Webhook response:", JSON.stringify(data, null, 2));
-                if (data.outputContexts && data.outputContexts.length) {
-                    lastContext = data.outputContexts.map(ctx => ({
-                        name: ctx.name,
-                        lifespanCount: ctx.lifespanCount,
-                        parameters: ctx.parameters
-                    }));
-                }
-                console.log("Received context:", JSON.stringify(lastContext, null, 2));
-                displayResponse(data);
-            } catch (error) {
-                console.error("Fetch error:", error);
-                document.getElementById("response").innerText = "Error processing command.";
-                document.getElementById("autoplay-message").style.display = "none";
-                document.getElementById("play-audio-button").style.display = "none";
-            }
-        }
-
-        // Send command with specific value (for buttons)
-        function sendCommandWithValue(value) {
-            document.getElementById("commandInput").value = value;
-            sendCommand();
-        }
-
-        // Send chapter command from dropdown
-        function sendChapterCommand() {
-            const chapter = document.getElementById("chapterSelect").value;
-            if (chapter) {
-                document.getElementById("commandInput").value = `chapter ${chapter}`;
-                sendCommand();
-                document.getElementById("chapterSelect").value = ""; // Reset dropdown
-            }
-        }
-
-        // Map input to intent
-        function getIntentName(input) {
-            input = input.trim();
-            if (input === "zero" || input.match(/^0+$/) || input.match(/oh|zeroo|zer0|ohh|o|zeros|ohhh|zro/)) {
-                console.log("Mapped to ZeroIntent");
-                return "ZeroIntent";
-            }
-            if (input === "full" || input.match(/ful|fuul|fulls|fl/)) {
-                console.log("Mapped to FullIntent");
-                return "FullIntent";
-            }
-            if (input === "next") {
-                console.log("Mapped to NextIntent");
-                return "NextIntent";
-            }
-            if (input.startsWith("chapter")) {
-                console.log("Mapped to ChapterIntent");
-                return "ChapterIntent";
-            }
-            console.log("Mapped to UnknownIntent");
-            return "UnknownIntent";
-        }
-
-        // Extract parameters
-        function getParameters(input) {
-            if (input.startsWith("chapter")) {
-                const match = input.match(/chapter\s+(\d+)/);
-                return match ? { chapter: parseInt(match[1]) } : {};
-            }
-            return {};
-        }
-
-        // Display response
-        async function displayResponse(data) {
-            const responseDiv = document.getElementById("response");
-            const autoplayMessage = document.getElementById("autoplay-message");
-            const playButton = document.getElementById("play-audio-button");
-            const text = data.fulfillmentText || "No response received.";
-            
-            responseDiv.innerHTML = text;
-            autoplayMessage.style.display = "none";
-            playButton.style.display = "none";
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio.remove();
-                currentAudio = null;
-            }
-
-            if (data.payload?.google?.richResponse?.items?.find(item => item.mediaResponse)?.mediaResponse?.mediaObjects?.[0]?.contentUrl) {
-                let audioUrl = data.payload.google.richResponse.items.find(item => item.mediaResponse).mediaResponse.mediaObjects[0].contentUrl;
-                let isValid = await validateAudioUrl(audioUrl);
-                if (!isValid) {
-                    console.log("Trying fallback audio URL:", FALLBACK_AUDIO_URL);
-                    audioUrl = FALLBACK_AUDIO_URL;
-                    isValid = await validateAudioUrl(audioUrl);
-                    if (!isValid) {
-                        responseDiv.innerHTML = `${text}<br>Audio file is invalid or inaccessible.`;
-                        return;
-                    }
-                }
-
-                const audio = document.createElement("audio");
-                audio.controls = true;
-                audio.autoplay = true;
-                audio.src = audioUrl;
-                audio.type = "audio/mpeg";
-                audio.style.display = "block";
-                responseDiv.appendChild(audio);
-                currentAudio = audio;
-
-                audio.play().then(() => {
-                    audio.muted = false;
-                    console.log("Audio playing successfully");
-                }).catch(error => {
-                    console.error("Autoplay blocked:", error);
-                    autoplayMessage.style.display = "block";
-                    playButton.style.display = "inline-block";
-                    responseDiv.innerHTML = `${text}<br>Autoplay blocked: ${error.message}`;
-                });
-            }
-        }
-
-        // Initialize recognition
-        initRecognition();
-
-        // Start voice recognition
-        function startVoice() {
-            unlockAudioContext();
-            try {
-                recognition.start();
-                console.log("Speech recognition started");
-            } catch (error) {
-                console.error("Error starting recognition:", error);
-                initRecognition();
-                setTimeout(() => recognition.start(), 1000);
-            }
-        }
-
-        // Allow Enter key to submit
-        document.getElementById("commandInput").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                sendCommand();
-            }
-        });
-    </script>
-</body>
-</html>
+            <option value="7">Chapter
