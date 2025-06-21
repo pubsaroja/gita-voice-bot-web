@@ -83,6 +83,9 @@
             ? "http://localhost:8080/webhook"
             : "https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
 
+        // Fallback audio URL
+        const FALLBACK_AUDIO_URL = "https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_700KB.mp3";
+
         // Persist context
         let lastContext = [];
         let currentAudio = null;
@@ -107,7 +110,7 @@
 
             recognition.onerror = function(event) {
                 console.error("Speech recognition error:", event.error);
-                document.getElementById("response").innerText = `Voice recognition error: ${event.error}. Please try again.`;
+                document.getElementById("response").innerText = `Voice recognition error: ${event.error}. Please try again or click 'Speak Now'.`;
                 document.getElementById("autoplay-message").style.display = "none";
                 document.getElementById("play-audio-button").style.display = "none";
                 recognition.stop();
@@ -150,13 +153,13 @@
         // Validate audio URL
         async function validateAudioUrl(url) {
             try {
-                const response = await fetch(url, { method: 'HEAD' });
+                const response = await fetch(url, { method: 'HEAD', mode: 'cors' });
                 if (!response.ok) {
                     console.error(`Audio URL inaccessible: ${response.status} ${response.statusText}`);
                     return false;
                 }
                 const contentType = response.headers.get('Content-Type');
-                if (!contentType.includes('audio/mpeg')) {
+                if (!contentType.includes('audio/mpeg') && !contentType.includes('audio/mp3')) {
                     console.error(`Invalid content type: ${contentType}`);
                     return false;
                 }
@@ -171,11 +174,18 @@
         async function playCurrentAudio() {
             if (currentAudio && currentAudio.src) {
                 console.log("Attempting manual playback for:", currentAudio.src);
-                const isValid = await validateAudioUrl(currentAudio.src);
+                let audioUrl = currentAudio.src;
+                let isValid = await validateAudioUrl(audioUrl);
                 if (!isValid) {
-                    document.getElementById("response").innerText = "Audio file is invalid or inaccessible.";
-                    document.getElementById("play-audio-button").style.display = "none";
-                    return;
+                    console.log("Trying fallback audio URL:", FALLBACK_AUDIO_URL);
+                    audioUrl = FALLBACK_AUDIO_URL;
+                    isValid = await validateAudioUrl(audioUrl);
+                    if (!isValid) {
+                        document.getElementById("response").innerText = "Audio file is invalid or inaccessible.";
+                        document.getElementById("play-audio-button").style.display = "none";
+                        return;
+                    }
+                    currentAudio.src = audioUrl;
                 }
                 currentAudio.currentTime = 0;
                 currentAudio.load();
@@ -288,11 +298,16 @@
             }
 
             if (data.payload?.google?.richResponse?.items?.find(item => item.mediaResponse)?.mediaResponse?.mediaObjects?.[0]?.contentUrl) {
-                const audioUrl = data.payload.google.richResponse.items.find(item => item.mediaResponse).mediaResponse.mediaObjects[0].contentUrl;
-                const isValid = await validateAudioUrl(audioUrl);
+                let audioUrl = data.payload.google.richResponse.items.find(item => item.mediaResponse).mediaResponse.mediaObjects[0].contentUrl;
+                let isValid = await validateAudioUrl(audioUrl);
                 if (!isValid) {
-                    responseDiv.innerHTML = `${text}<br>Audio file is invalid or inaccessible.`;
-                    return;
+                    console.log("Trying fallback audio URL:", FALLBACK_AUDIO_URL);
+                    audioUrl = FALLBACK_AUDIO_URL;
+                    isValid = await validateAudioUrl(audioUrl);
+                    if (!isValid) {
+                        responseDiv.innerHTML = `${text}<br>Audio file is invalid or inaccessible.`;
+                        return;
+                    }
                 }
 
                 const audio = document.createElement("audio");
