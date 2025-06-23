@@ -7,432 +7,119 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-            background-color: #f0f0f0;
-        }
-        h1 {
-            color: #333;
-        }
-        .container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
-            margin: 20px 0;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
         }
-        select {
-            padding: 10px;
-            font-size: 16px;
-            width: 200px;
-            border-radius: 5px;
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
         }
         button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #357EC7;
+            background-color: #4CAF50;
             color: white;
+            padding: 10px 20px;
+            margin: 10px;
             border: none;
             border-radius: 5px;
-            width: 200px;
+            cursor: pointer;
+            font-size: 16px;
         }
         button:hover {
             background-color: #45a049;
         }
-        #shloka-text {
+        .toggle-container {
+            margin: 20px 0;
+        }
+        .toggle-label {
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        #audioPlayer {
             margin-top: 20px;
-            font-size: 18px;
-            color: #333;
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 5px;
-            width: 80%;
-            max-width: 600px;
-            min-height: 100px;
-            text-align: left;
-            white-space: pre-wrap;
-            font-family: 'Noto Sans Devanagari', Arial, sans-serif;
+            width: 100%;
         }
         #response {
             margin-top: 20px;
-            font-size: 18px;
+            font-size: 14px;
             color: #333;
         }
-        #autoplay-message {
-            color: #ff4444;
-            font-size: 14px;
-            margin-top: 10px;
-            display: none;
-        }
-        #play-audio-button {
-            display: none;
-            margin-top: 10px;
-            padding: 8px 16px;
-            background-color: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #play-audio-button:hover {
-            background-color: #1976D2;
-        }
-        audio {
-            margin-top: 10px;
-            display: block;
-        }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Bhagavad Gita <br>Bot 🎵</h1>
-    <p><br>Developed by Dr.P.Udayabhaskar</p>
-    <p>Request a random Shloka from Srimad Bhagavdgita</p>
     <div class="container">
-        <button onclick="sendCommandWithValue('zero')">Browse Random Shloka</button>
-        <button onclick="sendCommandWithValue('full')">Play Entire Shloka</button>
-        <button onclick="sendCommandWithValue('next')">Play Next Shloka</button>
-        <select id="chapterSelect" onchange="sendChapterCommand()">
-            <option value="" selected disabled>Select Chapter</option>
-            <option value="1">Chapter 1</option>
-            <option value="2">Chapter 2</option>
-            <option value="3">Chapter 3</option>
-            <option value="4">Chapter 4</option>
-            <option value="5">Chapter 5</option>
-            <option value="6">Chapter 6</option>
-            <option value="7">Chapter 7</option>
-            <option value="8">Chapter 8</option>
-            <option value="9">Chapter 9</option>
-            <option value="10">Chapter 10</option>
-            <option value="11">Chapter 11</option>
-            <option value="12">Chapter 12</option>
-            <option value="13">Chapter 13</option>
-            <option value="14">Chapter 14</option>
-            <option value="15">Chapter 15</option>
-            <option value="16">Chapter 16</option>
-            <option value="17">Chapter 17</option>
-            <option value="18">Chapter 18</option>
-        </select>
-        <div id="shloka-text">Shloka text will appear here.</div>
+        <h1>Bhagavad Gita Voice Bot</h1>
+        <button id="randomQ1">Get Random Shloka Q1</button>
+        <button id="randomQ1orQ3">Get Random Shloka Q1 or Q3</button>
+        <div class="toggle-container">
+            <span class="toggle-label">Full Shloka Style:</span>
+            <label>
+                <input type="radio" name="style" value="gurudatta" checked> Gurudatta Style
+            </label>
+            <label>
+                <input type="radio" name="style" value="sringeri"> Sringeri Style
+            </label>
+        </div>
+        <audio id="audioPlayer" controls></audio>
+        <div id="response"></div>
     </div>
-    <div id="response"></div>
-    <div id="autoplay-message">Your browser may have blocked autoplay or the audio file is invalid. Click the audio player or the button below to start.</div>
-    <button id="play-audio-button" onclick="playCurrentAudio()">Play Audio</button>
 
     <script>
-        // Webhook URL
-        const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
-        const WEBHOOK_URL = isLocal
-            ? "http://localhost:8080/webhook"
-            : "https://gita-voice-bot-504694669439.us-central1.run.app/webhook";
+        const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
+        const audioPlayer = document.getElementById('audioPlayer');
+        const responseDiv = document.getElementById('response');
 
-        // Fallback audio URL
-        const FALLBACK_AUDIO_URL = "https://storage.googleapis.com/xai-public-assets/audio/sample.mp3";
-
-        // Shloka text file URL
-        const SHLOKA_FILE_URL = "https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt";
-
-        // Persist context
-        let lastContext = [];
-        let currentAudio = null;
-        let shlokas = [];
-
-        // Load shloka text
-        async function loadShlokaText() {
-            try {
-                const response = await fetch(SHLOKA_FILE_URL, { timeout: 10000 });
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch BG_Sringeri.txt: ${response.status} ${response.statusText}`);
-                }
-                const text = await response.text();
-                const lines = text.split('\n');
-                shlokas = [];
-                const regex = /^(\d+)\.(\d+)\s+(.+)$/;
-                console.log("First 10 lines of BG_Sringeri.txt:");
-                lines.slice(0, 10).forEach((line, i) => console.log(`Line ${i+1}: ${JSON.stringify(line.trim())}`));
-
-                let currentShloka = null;
-                for (const line of lines) {
-                    const trimmedLine = line.trim();
-                    if (!trimmedLine || trimmedLine.startsWith('#') || trimmedLine.startsWith('//')) continue;
-
-                    const match = trimmedLine.match(regex);
-                    if (match) {
-                        if (currentShloka) {
-                            shlokas.push(currentShloka);
-                        }
-                        currentShloka = {
-                            chapter: parseInt(match[1]),
-                            verse: parseInt(match[2]),
-                            text: match[3].trim()
-                        };
-                    } else if (currentShloka) {
-                        currentShloka.text += ' ' + trimmedLine;
-                    }
-                }
-                if (currentShloka) {
-                    shlokas.push(currentShloka);
-                }
-
-                console.log("Loaded shlokas:", shlokas.length, shlokas.slice(0, 5));
-                if (shlokas.length === 0) {
-                    document.getElementById("shloka-text").innerText = "No shlokas found in text file. Check format.";
-                }
-            } catch (error) {
-                console.error("Error loading shloka text:", error);
-                document.getElementById("shloka-text").innerText = `Error loading shloka text: ${error.message}`;
-            }
-        }
-
-        // Get shloka text by chapter and verse
-        function getShlokaText(chapter, verse) {
-            const shloka = shlokas.find(s => s.chapter === chapter && s.verse === verse);
-            return shloka ? shloka.text : "Shloka text not found.";
-        }
-
-        // Unlock audio context
-        function unlockAudioContext() {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioContext.state === 'suspended') {
-                audioContext.resume().then(() => {
-                    console.log("Audio context resumed");
-                }).catch(error => {
-                    console.error("Error resuming audio context:", error);
-                });
-            }
-        }
-
-        // Validate audio URL
-        async function validateAudioUrl(url) {
-            try {
-                const response = await fetch(url, { method: 'HEAD', mode: 'cors' });
-                if (!response.ok) {
-                    console.error(`Audio URL inaccessible: ${response.status} ${response.statusText}`);
-                    return false;
-                }
-                const contentType = response.headers.get('Content-Type');
-                if (!contentType.includes('audio/mpeg') && !contentType.includes('audio/mp3')) {
-                    console.error(`Invalid content type: ${contentType}`);
-                    return false;
-                }
-                return true;
-            } catch (error) {
-                console.error("Error validating audio URL:", error);
-                return false;
-            }
-        }
-
-        // Play current audio manually
-        async function playCurrentAudio() {
-            if (currentAudio && currentAudio.src) {
-                console.log("Attempting manual playback for:", currentAudio.src);
-                let audioUrl = currentAudio.src;
-                let isValid = await validateAudioUrl(audioUrl);
-                if (!isValid) {
-                    console.log("Trying fallback audio URL:", FALLBACK_AUDIO_URL);
-                    audioUrl = FALLBACK_AUDIO_URL;
-                    isValid = await validateAudioUrl(audioUrl);
-                    if (!isValid) {
-                        document.getElementById("response").innerText = "Audio file is invalid or inaccessible.";
-                        document.getElementById("play-audio-button").style.display = "none";
-                        return;
-                    }
-                    currentAudio.src = audioUrl;
-                }
-                currentAudio.currentTime = 0;
-                currentAudio.load();
-                currentAudio.play().then(() => {
-                    currentAudio.muted = false;
-                    document.getElementById("autoplay-message").style.display = "none";
-                    document.getElementById("play-audio-button").style.display = "none";
-                    console.log("Manual audio playback started");
-                }).catch(error => {
-                    console.error("Manual play error:", error);
-                    document.getElementById("response").innerText = `Error playing audio: ${error.message}`;
-                    document.getElementById("play-audio-button").style.display = "none";
-                });
-            } else {
-                console.error("No valid audio element to play");
-                document.getElementById("response").innerText = "No audio available to play.";
-                document.getElementById("play-audio-button").style.display = "none";
-            }
-        }
-
-        // Send command
-        async function sendCommand(input) {
-            unlockAudioContext();
-            if (!input) return;
-
-            // Check context for "full" and "next"
-            if (input === "full" || input === "next") {
-                let hasContext = false;
-                if (lastContext && lastContext.length) {
-                    const params = lastContext[0].parameters || {};
-                    if (params.chapter && params.verse) {
-                        hasContext = true;
-                    }
-                }
-                if (!hasContext) {
-                    document.getElementById("response").innerText = "Request a Shloka first";
-                    document.getElementById("autoplay-message").style.display = "none";
-                    document.getElementById("play-audio-button").style.display = "none";
-                    return;
-                }
-            }
-
+        async function sendCommand(intent, params = {}) {
             const payload = {
-                session: "session-" + Date.now(),
                 queryResult: {
-                    queryText: input,
-                    intent: { displayName: getIntentName(input) },
-                    parameters: getParameters(input),
-                    outputContexts: lastContext
+                    intent: { displayName: intent },
+                    parameters: params
                 }
             };
-
-            console.log("Sending payload:", JSON.stringify(payload, null, 2));
-
             try {
-                const response = await fetch(WEBHOOK_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 const data = await response.json();
-                console.log("Webhook response:", JSON.stringify(data, null, 2));
-                if (data.outputContexts && data.outputContexts.length) {
-                    lastContext = data.outputContexts.map(ctx => ({
-                        name: ctx.name,
-                        lifespanCount: ctx.lifespanCount,
-                        parameters: ctx.parameters
-                    }));
-                }
-                console.log("Received context:", JSON.stringify(lastContext, null, 2));
-                await displayResponse(data);
-            } catch (error) {
-                console.error("Fetch error:", error);
-                document.getElementById("response").innerText = "Error processing command.";
-                document.getElementById("autoplay-message").style.display = "none";
-                document.getElementById("play-audio-button").style.display = "none";
-            }
-        }
-
-        // Send command with specific value
-        function sendCommandWithValue(value) {
-            sendCommand(value);
-        }
-
-        // Send chapter command
-        function sendChapterCommand() {
-            const chapter = document.getElementById("chapterSelect").value;
-            if (chapter) {
-                sendCommand(`chapter ${chapter}`);
-                document.getElementById("chapterSelect").value = "";
-            }
-        }
-
-        // Map input to intent
-        function getIntentName(input) {
-            input = input.trim();
-            if (input === "zero" || input.match(/^0+$/) || input.match(/oh|zeroo|zer0|ohh|o|zeros|ohhh|zro/)) {
-                console.log("Mapped to ZeroIntent");
-                return "ZeroIntent";
-            }
-            if (input === "full" || input.match(/ful|fuul|fulls|fl/)) {
-                console.log("Mapped to FullIntent");
-                return "FullIntent";
-            }
-            if (input === "next") {
-                console.log("Mapped to NextIntent");
-                return "NextIntent";
-            }
-            if (input.startsWith("chapter")) {
-                console.log("Mapped to ChapterIntent");
-                return "ChapterIntent";
-            }
-            console.log("Mapped to UnknownIntent");
-            return "UnknownIntent";
-        }
-
-        // Extract parameters
-        function getParameters(input) {
-            if (input.startsWith("chapter")) {
-                const match = input.match(/chapter\s+(\d+)/);
-                return match ? { chapter: parseInt(match[1]) } : {};
-            }
-            return {};
-        }
-
-        // Display response
-        async function displayResponse(data) {
-            const responseDiv = document.getElementById("response");
-            const autoplayMessage = document.getElementById("autoplay-message");
-            const playButton = document.getElementById("play-audio-button");
-            const shlokaTextDiv = document.getElementById("shloka-text");
-            const text = data.fulfillmentText || "No response received.";
-            
-            responseDiv.innerHTML = text;
-            autoplayMessage.style.display = "none";
-            playButton.style.display = "none";
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio.remove();
-                currentAudio = null;
-            }
-
-            // Extract chapter and verse from context
-            let chapter = null;
-            let verse = null;
-            if (lastContext && lastContext.length) {
-                const params = lastContext[0].parameters || {};
-                chapter = params.chapter ? parseInt(params.chapter) : null;
-                verse = params.verse ? parseInt(params.verse) : null;
-            }
-
-            // Display shloka text
-            if (chapter && verse) {
-                shlokaTextDiv.innerText = getShlokaText(chapter, verse);
-            } else {
-                shlokaTextDiv.innerText = "Shloka text not available.";
-            }
-
-            if (data.payload?.google?.richResponse?.items?.find(item => item.mediaResponse)?.mediaResponse?.mediaObjects?.[0]?.contentUrl) {
-                let audioUrl = data.payload.google.richResponse.items.find(item => item.mediaResponse).mediaResponse.mediaObjects[0].contentUrl;
-                let isValid = await validateAudioUrl(audioUrl);
-                if (!isValid) {
-                    console.log("Trying fallback audio URL:", FALLBACK_AUDIO_URL);
-                    audioUrl = FALLBACK_AUDIO_URL;
-                    isValid = await validateAudioUrl(audioUrl);
-                    if (!isValid) {
-                        responseDiv.innerHTML = `${text}<br>Audio file is invalid or inaccessible.`;
-                        return;
+                responseDiv.textContent = data.fulfillmentText || 'No response';
+                if (data.payload && data.payload.google && data.payload.google.richResponse) {
+                    const media = data.payload.google.richResponse.items.find(item => item.mediaResponse);
+                    if (media && media.mediaResponse.mediaObjects[0]) {
+                        audioPlayer.src = media.mediaResponse.mediaObjects[0].contentUrl;
+                        audioPlayer.play();
                     }
                 }
-
-                const audio = document.createElement("audio");
-                audio.controls = true;
-                audio.autoplay = true;
-                audio.src = audioUrl;
-                audio.type = "audio/mpeg";
-                audio.style.display = "block";
-                responseDiv.appendChild(audio);
-                currentAudio = audio;
-
-                audio.play().then(() => {
-                    audio.muted = false;
-                    console.log("Audio playing successfully");
-                }).catch(error => {
-                    console.error("Autoplay blocked:", error);
-                    autoplayMessage.style.display = "block";
-                    playButton.style.display = "inline-block";
-                    responseDiv.innerHTML = `${text}<br>Autoplay blocked: ${error.message}`;
-                });
+            } catch (error) {
+                console.error('Error:', error);
+                responseDiv.textContent = 'Error fetching shloka';
             }
         }
 
-        // Initialize and load shlokas
-        loadShlokaText();
+        document.getElementById('randomQ1').addEventListener('click', () => {
+            sendCommand('ZeroIntent', { quarter: 'pada1' });
+        });
+
+        document.getElementById('randomQ1orQ3').addEventListener('click', () => {
+            sendCommand('ZeroIntent', { quarter: 'pada1_or_pada3' });
+        });
+
+        document.querySelectorAll('input[name="style"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                const style = document.querySelector('input[name="style"]:checked').value;
+                // Optionally send FullIntent with style to test
+                sendCommand('FullIntent', { style: style });
+            });
+        });
     </script>
 </body>
 </html>
