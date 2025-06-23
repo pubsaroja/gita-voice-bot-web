@@ -115,7 +115,7 @@
 
     <script>
         const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
-        const sringeriTextUrl = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/Sringeri.txt';
+        const sringeriTextUrl = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt';
         const audioPlayer = document.getElementById('audioPlayer');
         const responseDiv = document.getElementById('response');
         const shlokaTextDiv = document.getElementById('shlokaText');
@@ -125,10 +125,10 @@
                 console.log(`Fetching Sringeri.txt for chapter ${chapter}, verse ${verse} from ${sringeriTextUrl}`);
                 const response = await fetch(sringeriTextUrl, { mode: 'cors' });
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: Failed to fetch Sringeri.txt from ${sringeriTextUrl}`);
+                    throw new Error(`HTTP ${response.status}: Failed to fetch BG_Sringeri.txt from ${sringeriTextUrl}`);
                 }
                 const text = await response.text();
-                console.log(`Sringeri.txt fetched, length: ${text.length} characters`);
+                console.log(`BG_Sringeri.txt fetched, length: ${text.length} characters`);
                 const lines = text.split('\n').map(line => line.trim()).filter(line => line);
                 const key = `${chapter}.${verse}`;
                 console.log(`Searching for key: ${key}`);
@@ -141,7 +141,7 @@
                     return 'Shloka text not found';
                 }
             } catch (error) {
-                console.error('Error fetching Sringeri.txt:', error);
+                console.error('Error fetching BG_Sringeri.txt:', error);
                 return `Error loading shloka text: ${error.message}`;
             }
         }
