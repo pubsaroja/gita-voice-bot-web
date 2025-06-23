@@ -122,13 +122,24 @@
 
         async function fetchShlokaText(chapter, verse) {
             try {
+                console.log(`Fetching Sringeri.txt for chapter ${chapter}, verse ${verse} from ${sringeriTextUrl}`);
                 const response = await fetch(sringeriTextUrl, { mode: 'cors' });
-                if (!response.ok) throw new Error(`HTTP ${response.status}: Failed to fetch Sringeri.txt`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: Failed to fetch Sringeri.txt from ${sringeriTextUrl}`);
+                }
                 const text = await response.text();
+                console.log(`Sringeri.txt fetched, length: ${text.length} characters`);
                 const lines = text.split('\n').map(line => line.trim()).filter(line => line);
                 const key = `${chapter}.${verse}`;
+                console.log(`Searching for key: ${key}`);
                 const line = lines.find(line => line.toLowerCase().startsWith(key.toLowerCase() + ':'));
-                return line ? line.substring(key.length + 1).trim() : 'Shloka text not found';
+                if (line) {
+                    console.log(`Found line: ${line}`);
+                    return line.substring(key.length + 1).trim();
+                } else {
+                    console.log(`No line found for ${key}`);
+                    return 'Shloka text not found';
+                }
             } catch (error) {
                 console.error('Error fetching Sringeri.txt:', error);
                 return `Error loading shloka text: ${error.message}`;
@@ -141,15 +152,17 @@
                     intent: { displayName: intent },
                     parameters: params
                 },
-                session: `projects/${'gita-voice-bot'}/agent/sessions/default-session`
+                session: `projects/gita-voice-bot/agent/sessions/default-session`
             };
             try {
+                console.log(`Sending command: ${intent}`, params);
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 const data = await response.json();
+                console.log('Webhook response:', data);
                 responseDiv.textContent = data.fulfillmentText || 'No response';
                 if (data.payload && data.payload.google && data.payload.google.richResponse) {
                     const media = data.payload.google.richResponse.items.find(item => item.mediaResponse);
@@ -164,6 +177,7 @@
                     if (context && context.parameters) {
                         const chapter = context.parameters.chapter;
                         const verse = context.parameters.verse;
+                        console.log(`Context parameters: chapter=${chapter}, verse=${verse}`);
                         if (chapter && verse) {
                             const shlokaText = await fetchShlokaText(chapter, verse);
                             shlokaTextDiv.textContent = shlokaText;
@@ -175,7 +189,7 @@
                     shlokaTextDiv.textContent = ''; // Clear text for non-ZeroIntent
                 }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error sending command:', error);
                 responseDiv.textContent = `Error fetching shloka: ${error.message}`;
                 shlokaTextDiv.textContent = '';
             }
