@@ -76,7 +76,7 @@
         <h1>Bhagavad Gita Voice Bot</h1>
         <button id="randomQ1">Get Random Shloka Q1</button>
         <button id="randomQ1orQ3">Get Random Shloka Q1 or Q3</button>
-        <button id="showFull">Show Full Shloka</button>
+        <button id="getFull">Get Full Shloka</button>
         <button id="nextShloka">Next Shloka</button>
         <select id="chapterSelect" onchange="selectChapter()">
             <option value="">Select Chapter</option>
@@ -123,10 +123,11 @@
         async function fetchShlokaText(chapter, verse) {
             try {
                 const response = await fetch(sringeriTextUrl);
+                if (!response.ok) throw new Error('Failed to fetch Sringeri.txt');
                 const text = await response.text();
-                const lines = text.split('\n');
+                const lines = text.split('\n').map(line => line.trim());
                 const key = `${chapter}.${verse}`;
-                const line = lines.find(line => line.startsWith(key + ':'));
+                const line = lines.find(line => line.toLowerCase().startsWith(key.toLowerCase() + ':'));
                 return line ? line.substring(key.length + 1).trim() : 'Shloka text not found';
             } catch (error) {
                 console.error('Error fetching Sringeri.txt:', error);
@@ -187,7 +188,7 @@
             sendCommand('ZeroIntent', { quarter: 'pada1_or_pada3' });
         });
 
-        document.getElementById('showFull').addEventListener('click', () => {
+        document.getElementById('getFull').addEventListener('click', () => {
             const style = document.querySelector('input[name="style"]:checked').value;
             sendCommand('FullIntent', { style: style });
         });
