@@ -44,11 +44,6 @@
             font-size: 1.2em;
             color: #333;
             white-space: pre-wrap;
-            text-align: left;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            line-height: 1.5;
         }
         #audioPlayer {
             margin-top: 20px;
@@ -94,6 +89,9 @@
     
     <audio id="audioPlayer" controls></audio>
     
+    <p>Your browser may have blocked autoplay or the audio file is invalid. Click the audio player or the button below to start.</p>
+    <button onclick="document.getElementById('audioPlayer').play()">Play Audio</button>
+    
     <script>
         // Use persistent session ID
         let sessionId = localStorage.getItem('gitaSessionId');
@@ -115,20 +113,15 @@
                 const key2 = `${chapter}-${verse}`;
                 console.log(`Searching for key: ${key1} or ${key2}`);
                 
-                let shlokaText = '';
                 for (const line of lines) {
                     if (line.startsWith(key1 + ' ') || line.startsWith(key2 + ' ')) {
-                        shlokaText = line.substring(line.indexOf(' ') + 1).trim();
+                        const shlokaText = line.substring(line.indexOf(' ') + 1).trim();
                         console.log(`Found shloka: ${shlokaText}`);
-                        break;
+                        return shlokaText;
                     }
                 }
-                if (!shlokaText) {
-                    console.log(`No line found for ${key1} or ${key2}`);
-                    return 'Shloka text not found';
-                }
-                // Preserve line breaks in multi-line shlokas
-                return shlokaText.replace(/\\n/g, '\n');
+                console.log(`No line found for ${key1} or ${key2}`);
+                return 'Shloka text not found';
             } catch (error) {
                 console.error(`Error fetching shloka text: ${error}`);
                 return 'Error loading shloka text';
