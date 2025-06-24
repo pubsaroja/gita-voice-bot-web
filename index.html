@@ -94,8 +94,12 @@
     <button onclick="document.getElementById('audioPlayer').play()">Play Audio</button>
     
     <script>
-        // Generate a unique session ID
-        const sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
+        // Use persistent session ID
+        let sessionId = localStorage.getItem('gitaSessionId');
+        if (!sessionId) {
+            sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('gitaSessionId', sessionId);
+        }
 
         async function fetchShlokaText(chapter, verse) {
             const url = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt';
