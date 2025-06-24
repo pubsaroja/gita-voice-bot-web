@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bhagavad Gita Voice Bot</title>
+    <title>Bhagavad Gita Bot</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -44,85 +44,66 @@
             font-size: 1.2em;
             color: #333;
             white-space: pre-wrap;
+            text-align: left;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.5;
         }
         #audioPlayer {
             margin-top: 20px;
         }
-        .radio-group {
-            margin: 10px 0;
-        }
-        .radio-group label {
-            margin: 0 10px;
-        }
     </style>
 </head>
 <body>
-    <h1>Bhagavad Gita Voice Bot</h1>
+    <h1>Bhagavad Gita Bot 🎵</h1>
     <h2>Developed by Dr.P.Udayabhaskar</h2>
     <p>Request a random Shloka from Srimad Bhagavdgita</p>
     
     <div>
-        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1'})">Get Random Shloka Q1</button>
-        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3'})">Get Random Shloka Q1 or Q3</button>
-        <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Get Full Shloka</button>
-        <button onclick="sendCommand('NextIntent', {})">Next Shloka</button>
+        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1'})">Browse Random Shloka</button>
+        <button onclick="sendCommand('FullIntent', {style: 'gurudatta'})">Play Entire Shloka (Gurudatta)</button>
+        <button onclick="sendCommand('FullIntent', {style: 'sringeri'})">Play Entire Shloka (Sringeri)</button>
+        <button onclick="sendCommand('NextIntent', {})">Play Next Shloka</button>
     </div>
     
     <div>
         <select id="chapterSelect" onchange="sendCommand('ChapterIntent', {chapter: this.value, pada: 'pada1'})">
-            <option value="1">Chapter 1</option>
-            <option value="2">Chapter 2</option>
-            <option value="3">Chapter 3</option>
-            <option value="4">Chapter 4</option>
-            <option value="5">Chapter 5</option>
-            <option value="6">Chapter 6</option>
-            <option value="7">Chapter 7</option>
-            <option value="8">Chapter 8</option>
-            <option value="9">Chapter 9</option>
-            <option value="10">Chapter 10</option>
-            <option value="11">Chapter 11</option>
-            <option value="12">Chapter 12</option>
-            <option value="13">Chapter 13</option>
-            <option value="14">Chapter 14</option>
-            <option value="15">Chapter 15</option>
-            <option value="16">Chapter 16</option>
-            <option value="17">Chapter 17</option>
-            <option value="18">Chapter 18</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="13">13</option>
+            <option value="14">14</option>
+            <option value="15">15</option>
+            <option value="16">16</option>
+            <option value="17">17</option>
+            <option value="18">18</option>
         </select>
-    </div>
-    
-    <div class="radio-group">
-        <label>Full Shloka Style:</label>
-        <input type="radio" name="style" value="gurudatta" id="gurudatta" checked>
-        <label for="gurudatta">Gurudatta Style</label>
-        <input type="radio" name="style" value="sringeri" id="sringeri">
-        <label for="sringeri">Sringeri Style</label>
     </div>
     
     <div id="shlokaText">Shloka text will appear here.</div>
     
     <audio id="audioPlayer" controls></audio>
     
-    <p>Your browser may have blocked autoplay or the audio file is invalid. Click the audio player or the button below to start.</p>
-    <button onclick="document.getElementById('audioPlayer').play()">Play Audio</button>
-    
     <script>
-        // Persistent session ID and context
+        // Use persistent session ID
         let sessionId = localStorage.getItem('gitaSessionId');
         if (!sessionId) {
             sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
             localStorage.setItem('gitaSessionId', sessionId);
         }
-        let currentContext = JSON.parse(localStorage.getItem('gitaContext')) || [];
-
-        function getSelectedStyle() {
-            const style = document.querySelector('input[name="style"]:checked').value;
-            console.log(`Selected style: ${style}`);
-            return style;
-        }
 
         async function fetchShlokaText(chapter, verse) {
-            const url = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/BG_Sringeri.txt';
+            const url = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt';
             console.log(`Fetching Sringeri.txt for chapter ${chapter}, verse ${verse} from ${url}`);
             try {
                 const response = await fetch(url);
@@ -134,15 +115,20 @@
                 const key2 = `${chapter}-${verse}`;
                 console.log(`Searching for key: ${key1} or ${key2}`);
                 
+                let shlokaText = '';
                 for (const line of lines) {
                     if (line.startsWith(key1 + ' ') || line.startsWith(key2 + ' ')) {
-                        const shlokaText = line.substring(line.indexOf(' ') + 1).trim();
+                        shlokaText = line.substring(line.indexOf(' ') + 1).trim();
                         console.log(`Found shloka: ${shlokaText}`);
-                        return shlokaText;
+                        break;
                     }
                 }
-                console.log(`No line found for ${key1} or ${key2}`);
-                return 'Shloka text not found';
+                if (!shlokaText) {
+                    console.log(`No line found for ${key1} or ${key2}`);
+                    return 'Shloka text not found';
+                }
+                // Preserve line breaks in multi-line shlokas
+                return shlokaText.replace(/\\n/g, '\n');
             } catch (error) {
                 console.error(`Error fetching shloka text: ${error}`);
                 return 'Error loading shloka text';
@@ -156,7 +142,7 @@
                 queryResult: {
                     intent: { displayName: intent },
                     parameters: params,
-                    outputContexts: currentContext
+                    outputContexts: []
                 }
             };
 
@@ -178,7 +164,6 @@
                     const media = data.payload.google.richResponse.items.find(item => item.mediaResponse);
                     if (media && media.mediaResponse.mediaObjects[0]) {
                         const audioUrl = media.mediaResponse.mediaObjects[0].contentUrl;
-                        console.log(`Playing audio: ${audioUrl}`);
                         const audioPlayer = document.getElementById('audioPlayer');
                         audioPlayer.src = audioUrl;
                         audioPlayer.play();
@@ -186,9 +171,7 @@
                 }
 
                 if (data.outputContexts && data.outputContexts.length > 0) {
-                    currentContext = data.outputContexts;
-                    localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-                    const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+                    const context = data.outputContexts.find(ctx => ctx.name.includes('shloka-context'));
                     if (context && context.parameters) {
                         const chapter = Math.floor(context.parameters.chapter);
                         const verse = Math.floor(context.parameters.verse);
