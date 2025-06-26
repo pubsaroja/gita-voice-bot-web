@@ -98,10 +98,12 @@
         </select>
     </div>
     
-    <div>
-        <p>Full Shloka Style:</p>
-        <input type="radio" name="style" value="gurudatta" onclick="sendCommand('FullIntent', {style: 'gurudatta'})"> Gurudatta Style
-        <input type="radio" name="style" value="sringeri" onclick="sendCommand('FullIntent', {style: 'sringeri'})"> Sringeri Style
+    <div class="radio-group">
+        <label>Full Shloka Style:</label>
+        <input type="radio" name="style" value="gurudatta" id="gurudatta" checked>
+        <label for="gurudatta">Gurudatta Style</label>
+        <input type="radio" name="style" value="sringeri" id="sringeri">
+        <label for="sringeri">Sringeri Style</label>
     </div>
     
     <div id="shlokaText">Shloka text will appear here.</div>
