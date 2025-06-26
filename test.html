@@ -197,7 +197,9 @@
                 }
 
                 if (data.outputContexts && data.outputContexts.length > 0) {
-                    const context = data.outputContexts.find(ctx => ctx.name.includes('shloka-context'));
+          	currentContext = data.outputContexts;
+          	localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+          	const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
                     if (context && context.parameters) {
                         const chapter = Math.floor(context.parameters.chapter);
                         const verse = Math.floor(context.parameters.verse);
@@ -213,3 +215,4 @@
     </script>
 </body>
 </html>
+```
