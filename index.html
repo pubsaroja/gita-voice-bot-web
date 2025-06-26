@@ -1,9 +1,10 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bhagavad Gita Voice Bot</title>
+    <title>Bhagavad Gita Bot</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -39,32 +40,39 @@
             font-size: 1em;
             border-radius: 5px;
         }
+        input[type="radio"] {
+            margin: 5px;
+        }
         #shlokaText {
             margin-top: 20px;
             font-size: 1.2em;
             color: #333;
-            white-space: pre-wrap;
+            white-space: pre; /* Preserve exact newlines and whitespace */
+            text-align: left;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.5;
+            height: 7.2em; /* 4 lines: 1.2em * 1.5 * 4 */
+            overflow-y: auto; /* Scroll if text exceeds 4 lines */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
         #audioPlayer {
             margin-top: 20px;
         }
-        .radio-group {
-            margin: 10px 0;
-        }
-        .radio-group label {
-            margin: 0 10px;
-        }
     </style>
 </head>
 <body>
-    <h1>Bhagavad Gita Voice Bot</h1>
+    <h1>Bhagavad Gita Bot 🎵</h1>
     <h2>Developed by Dr.P.Udayabhaskar</h2>
     <p>Request a random Shloka from Srimad Bhagavdgita</p>
     
     <div>
         <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1'})">Get Random Shloka Q1</button>
         <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3'})">Get Random Shloka Q1 or Q3</button>
-        <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Get Full Shloka</button>
+        <button onclick="sendCommand('FullIntent', {})">Get Full Shloka</button>
         <button onclick="sendCommand('NextIntent', {})">Next Shloka</button>
     </div>
     
@@ -91,12 +99,10 @@
         </select>
     </div>
     
-    <div class="radio-group">
-        <label>Full Shloka Style:</label>
-        <input type="radio" name="style" value="gurudatta" id="gurudatta" checked>
-        <label for="gurudatta">Gurudatta Style</label>
-        <input type="radio" name="style" value="sringeri" id="sringeri">
-        <label for="sringeri">Sringeri Style</label>
+    <div>
+        <p>Full Shloka Style:</p>
+        <input type="radio" name="style" value="gurudatta" onclick="sendCommand('FullIntent', {style: 'gurudatta'})"> Gurudatta Style
+        <input type="radio" name="style" value="sringeri" onclick="sendCommand('FullIntent', {style: 'sringeri'})"> Sringeri Style
     </div>
     
     <div id="shlokaText">Shloka text will appear here.</div>
@@ -107,22 +113,15 @@
     <button onclick="document.getElementById('audioPlayer').play()">Play Audio</button>
     
     <script>
-        // Persistent session ID and context
+        // Use persistent session ID
         let sessionId = localStorage.getItem('gitaSessionId');
         if (!sessionId) {
             sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
             localStorage.setItem('gitaSessionId', sessionId);
         }
-        let currentContext = JSON.parse(localStorage.getItem('gitaContext')) || [];
-
-        function getSelectedStyle() {
-            const style = document.querySelector('input[name="style"]:checked').value;
-            console.log(`Selected style: ${style}`);
-            return style;
-        }
 
         async function fetchShlokaText(chapter, verse) {
-            const url = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/BG_Sringeri.txt';
+            const url = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt';
             console.log(`Fetching Sringeri.txt for chapter ${chapter}, verse ${verse} from ${url}`);
             try {
                 const response = await fetch(url);
@@ -136,9 +135,9 @@
                 
                 for (const line of lines) {
                     if (line.startsWith(key1 + ' ') || line.startsWith(key2 + ' ')) {
-                        const shlokaText = line.substring(line.indexOf(' ') + 1).trim();
+                        const shlokaText = line.substring(line.indexOf(' ') + 1);
                         console.log(`Found shloka: ${shlokaText}`);
-                        return shlokaText;
+                        return `Chapter ${chapter}\nVerse ${verse}\n${shlokaText}`; // Add Chapter and Verse
                     }
                 }
                 console.log(`No line found for ${key1} or ${key2}`);
@@ -156,7 +155,7 @@
                 queryResult: {
                     intent: { displayName: intent },
                     parameters: params,
-                    outputContexts: currentContext
+                    outputContexts: []
                 }
             };
 
@@ -178,7 +177,6 @@
                     const media = data.payload.google.richResponse.items.find(item => item.mediaResponse);
                     if (media && media.mediaResponse.mediaObjects[0]) {
                         const audioUrl = media.mediaResponse.mediaObjects[0].contentUrl;
-                        console.log(`Playing audio: ${audioUrl}`);
                         const audioPlayer = document.getElementById('audioPlayer');
                         audioPlayer.src = audioUrl;
                         audioPlayer.play();
@@ -186,9 +184,7 @@
                 }
 
                 if (data.outputContexts && data.outputContexts.length > 0) {
-                    currentContext = data.outputContexts;
-                    localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-                    const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+                    const context = data.outputContexts.find(ctx => ctx.name.includes('shloka-context'));
                     if (context && context.parameters) {
                         const chapter = Math.floor(context.parameters.chapter);
                         const verse = Math.floor(context.parameters.verse);
@@ -204,3 +200,4 @@
     </script>
 </body>
 </html>
+```
