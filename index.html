@@ -1,216 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bhagavad Gita Voice Bot</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 20px;
-      background-color: #f0f0f0;
-    }
-    h1 {
-      color: #2c3e50;
-      font-size: 2.5em;
-    }
-    h2 {
-      color: #34495e;
-      font-size: 1.5em;
-      margin-top: 10px;
-    }
-    button {
-      background-color: #4CAF50;
-      color: white;
-      padding: 10px 20px;
-      margin: 5px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1em;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-    select {
-      padding: 10px;
-      margin: 5px;
-      font-size: 1em;
-      border-radius: 5px;
-    }
-    #shlokaText {
-      margin: 20px auto 0 auto;
-      font-size: 1.2em;
-      color: #333;
-      white-space: pre-wrap;
-      overflow: hidden;
-      border: none;
-      resize: none;
-      background: transparent;
-      text-align: center;
-      width: 90%;
-      min-height: 2em;
-      line-height: 1.4;
-      transition: height 0.3s ease;
-    }
-    #audioPlayer {
-      margin-top: 20px;
-    }
-    .radio-group {
-      margin: 10px 0;
-    }
-    .radio-group label {
-      margin: 0 10px;
-    }
-    @media screen and (max-width: 600px) {
-      h1 {
-        font-size: 2em;
-      }
-      h2 {
-        font-size: 1.2em;
-      }
-      button {
-        font-size: 0.9em;
-        padding: 8px 16px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bhagavad Gita Voice Bot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #34495e;
+            font-size: 1.5em;
+            margin-top: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        select {
+            padding: 10px;
+            margin: 5px;
+            font-size: 1em;
+            border-radius: 5px;
+        }
+        #shlokaText {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #333;
+            white-space: pre-wrap;
+        }
+        #audioPlayer {
+            margin-top: 20px;
+        }
+        .radio-group {
+            margin: 10px 0;
+        }
+        .radio-group label {
+            margin: 0 10px;
+        }
+    </style>
 </head>
 <body>
-  <h1>Bhagavad Gita Voice Bot</h1>
-  <h2>Developed by Dr.P.Udayabhaskar</h2>
-  <p>Request a random Shloka from Srimad Bhagavdgita</p>
-
-  <div>
-    <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1'})">Get Random Shloka Q1</button>
-    <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3'})">Get Random Shloka Q1 or Q3</button>
-    <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Get Full Shloka</button>
-    <button onclick="sendCommand('NextIntent', {})">Next Shloka</button>
-  </div>
-
-  <div>
-    <select id="chapterSelect" onchange="sendCommand('ChapterIntent', {chapter: this.value, pada: 'pada1'})">
-      ${[...Array(18).keys()].map(i => `<option value="${i + 1}">Chapter ${i + 1}</option>`).join('')}
-    </select>
-  </div>
-
-  <div class="radio-group">
-    <label>Full Shloka Style:</label>
-    <input type="radio" name="style" value="gurudatta" id="gurudatta" checked>
-    <label for="gurudatta">Gurudatta Style</label>
-    <input type="radio" name="style" value="sringeri" id="sringeri">
-    <label for="sringeri">Sringeri Style</label>
-  </div>
-
-  <textarea id="shlokaText" readonly>Shloka text will appear here.</textarea>
-
-  <audio id="audioPlayer" controls></audio>
-
-  <p>Your browser may have blocked autoplay or the audio file is invalid. Click the audio player or the button below to start.</p>
-  <button onclick="document.getElementById('audioPlayer').play()">Play Audio</button>
-
-  <script>
-    let sessionId = localStorage.getItem('gitaSessionId');
-    if (!sessionId) {
-      sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('gitaSessionId', sessionId);
-    }
-    let currentContext = JSON.parse(localStorage.getItem('gitaContext')) || [];
-
-    function getSelectedStyle() {
-      return document.querySelector('input[name="style"]:checked').value;
-    }
-
-    function isRTL(text) {
-      const rtlChars = /[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]/;
-      return rtlChars.test(text);
-    }
-
-    function autoResizeTextArea() {
-      const textarea = document.getElementById('shlokaText');
-      textarea.style.height = 'auto';
-      textarea.style.height = textarea.scrollHeight + 'px';
-    }
-
-    async function fetchShlokaText(chapter, verse) {
-      const url = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/BG_Sringeri.txt';
-      try {
-        const response = await fetch(url);
-        const text = await response.text();
-        const lines = text.split('\n');
-        const key1 = `${chapter}.${verse}`;
-        const key2 = `${chapter}-${verse}`;
-        for (const line of lines) {
-          if (line.startsWith(key1 + ' ') || line.startsWith(key2 + ' ')) {
-            const shlokaText = line.substring(line.indexOf(' ') + 1).trim();
-            const shlokaBox = document.getElementById('shlokaText');
-            shlokaBox.value = shlokaText;
-            shlokaBox.dir = isRTL(shlokaText) ? 'rtl' : 'ltr';
-            autoResizeTextArea();
-            return shlokaText;
-          }
+    <h1>Bhagavad Gita Voice Bot</h1>
+    <h2>Developed by Dr.P.Udayabhaskar</h2>
+    <p>Request a random Shloka from Srimad Bhagavdgita</p>
+    
+    <div>
+        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1'})">Get Random Shloka Q1</button>
+        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3'})">Get Random Shloka Q1 or Q3</button>
+        <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Get Full Shloka</button>
+        <button onclick="sendCommand('NextIntent', {})">Next Shloka</button>
+    </div>
+    
+    <div>
+        <select id="chapterSelect" onchange="sendCommand('ChapterIntent', {chapter: this.value, pada: 'pada1'})">
+            <option value="1">Chapter 1</option>
+            <option value="2">Chapter 2</option>
+            <option value="3">Chapter 3</option>
+            <option value="4">Chapter 4</option>
+            <option value="5">Chapter 5</option>
+            <option value="6">Chapter 6</option>
+            <option value="7">Chapter 7</option>
+            <option value="8">Chapter 8</option>
+            <option value="9">Chapter 9</option>
+            <option value="10">Chapter 10</option>
+            <option value="11">Chapter 11</option>
+            <option value="12">Chapter 12</option>
+            <option value="13">Chapter 13</option>
+            <option value="14">Chapter 14</option>
+            <option value="15">Chapter 15</option>
+            <option value="16">Chapter 16</option>
+            <option value="17">Chapter 17</option>
+            <option value="18">Chapter 18</option>
+        </select>
+    </div>
+    
+    <div class="radio-group">
+        <label>Full Shloka Style:</label>
+        <input type="radio" name="style" value="gurudatta" id="gurudatta" checked>
+        <label for="gurudatta">Gurudatta Style</label>
+        <input type="radio" name="style" value="sringeri" id="sringeri">
+        <label for="sringeri">Sringeri Style</label>
+    </div>
+    
+    <div id="shlokaText">Shloka text will appear here.</div>
+    
+    <audio id="audioPlayer" controls></audio>
+    
+    <p>Your browser may have blocked autoplay or the audio file is invalid. Click the audio player or the button below to start.</p>
+    <button onclick="document.getElementById('audioPlayer').play()">Play Audio</button>
+    
+    <script>
+        // Persistent session ID and context
+        let sessionId = localStorage.getItem('gitaSessionId');
+        if (!sessionId) {
+            sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('gitaSessionId', sessionId);
         }
-        return 'Shloka text not found';
-      } catch (error) {
-        return 'Error loading shloka text';
-      }
-    }
+        let currentContext = JSON.parse(localStorage.getItem('gitaContext')) || [];
 
-    async function sendCommand(intent, params) {
-      const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
-      const payload = {
-        session: sessionId,
-        queryResult: {
-          intent: { displayName: intent },
-          parameters: params,
-          outputContexts: currentContext
-        }
-      };
-
-      try {
-        const response = await fetch(webhookUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-        const data = await response.json();
-
-        const fulfillmentText = data.fulfillmentText || 'No text received';
-        const shlokaBox = document.getElementById('shlokaText');
-        shlokaBox.value = fulfillmentText;
-        shlokaBox.dir = isRTL(fulfillmentText) ? 'rtl' : 'ltr';
-        autoResizeTextArea();
-
-        const media = data?.payload?.google?.richResponse?.items?.find(item => item.mediaResponse);
-        if (media?.mediaResponse?.mediaObjects?.[0]) {
-          const audioUrl = media.mediaResponse.mediaObjects[0].contentUrl;
-          const audioPlayer = document.getElementById('audioPlayer');
-          audioPlayer.src = audioUrl;
-          audioPlayer.play();
+        function getSelectedStyle() {
+            const style = document.querySelector('input[name="style"]:checked').value;
+            console.log(`Selected style: ${style}`);
+            return style;
         }
 
-        if (data.outputContexts?.length > 0) {
-          currentContext = data.outputContexts;
-          localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-          const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-          if (context?.parameters) {
-            const chapter = Math.floor(context.parameters.chapter);
-            const verse = Math.floor(context.parameters.verse);
-            const shlokaText = await fetchShlokaText(chapter, verse);
-            shlokaBox.value = shlokaText;
-            shlokaBox.dir = isRTL(shlokaText) ? 'rtl' : 'ltr';
-            autoResizeTextArea();
-          }
+        async function fetchShlokaText(chapter, verse) {
+            const url = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/BG_Sringeri.txt';
+            console.log(`Fetching Sringeri.txt for chapter ${chapter}, verse ${verse} from ${url}`);
+            try {
+                const response = await fetch(url);
+                const text = await response.text();
+                console.log(`BG_Sringeri.txt fetched, length: ${text.length} characters`);
+                
+                const lines = text.split('\n');
+                const key1 = `${chapter}.${verse}`;
+                const key2 = `${chapter}-${verse}`;
+                console.log(`Searching for key: ${key1} or ${key2}`);
+                
+                for (const line of lines) {
+                    if (line.startsWith(key1 + ' ') || line.startsWith(key2 + ' ')) {
+                        const shlokaText = line.substring(line.indexOf(' ') + 1).trim();
+                        console.log(`Found shloka: ${shlokaText}`);
+                        return shlokaText;
+                    }
+                }
+                console.log(`No line found for ${key1} or ${key2}`);
+                return 'Shloka text not found';
+            } catch (error) {
+                console.error(`Error fetching shloka text: ${error}`);
+                return 'Error loading shloka text';
+            }
         }
-      } catch (error) {
-        const shlokaBox = document.getElementById('shlokaText');
-        shlokaBox.value = 'Error communicating with server';
-        shlokaBox.dir = 'ltr';
-        autoResizeTextArea();
-      }
-    }
-  </script>
+
+        async function sendCommand(intent, params) {
+            const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
+            const payload = {
+                session: sessionId,
+                queryResult: {
+                    intent: { displayName: intent },
+                    parameters: params,
+                    outputContexts: currentContext
+                }
+            };
+
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                const fulfillmentText = data.fulfillmentText;
+                document.getElementById('shlokaText').innerText = fulfillmentText;
+                
+                if (data.payload && data.payload.google && data.payload.google.richResponse) {
+                    const media = data.payload.google.richResponse.items.find(item => item.mediaResponse);
+                    if (media && media.mediaResponse.mediaObjects[0]) {
+                        const audioUrl = media.mediaResponse.mediaObjects[0].contentUrl;
+                        console.log(`Playing audio: ${audioUrl}`);
+                        const audioPlayer = document.getElementById('audioPlayer');
+                        audioPlayer.src = audioUrl;
+                        audioPlayer.play();
+                    }
+                }
+
+                if (data.outputContexts && data.outputContexts.length > 0) {
+                    currentContext = data.outputContexts;
+                    localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+                    const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+                    if (context && context.parameters) {
+                        const chapter = Math.floor(context.parameters.chapter);
+                        const verse = Math.floor(context.parameters.verse);
+                        const shlokaText = await fetchShlokaText(chapter, verse);
+                        document.getElementById('shlokaText').innerText = shlokaText;
+                    }
+                }
+            } catch (error) {
+                console.error(`Error sending command: ${error}`);
+                document.getElementById('shlokaText').innerText = 'Error communicating with server';
+            }
+        }
+    </script>
 </body>
 </html>
