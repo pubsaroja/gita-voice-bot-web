@@ -44,7 +44,7 @@
             margin-top: 20px;
             font-size: 1.2em;
             color: #333;
-            white-space: pre-wrap;
+            white-space: pre-line; /* Changed from pre-wrap to ensure newlines render */
             text-align: left;
             max-width: 600px;
             margin-left: auto;
@@ -123,9 +123,9 @@
                 
                 for (const line of lines) {
                     if (line.startsWith(key1 + ' ') || line.startsWith(key2 + ' ')) {
-                        const shlokaText = line.substring(line.indexOf(' ') + 1).trim();
+                        const shlokaText = line.substring(line.indexOf(' ') + 1);
                         console.log(`Found shloka: ${shlokaText}`);
-                        return shlokaText.replace(/\\n/g, '\n');
+                        return shlokaText; // Removed trim() to preserve newlines
                     }
                 }
                 console.log(`No line found for ${key1} or ${key2}`);
