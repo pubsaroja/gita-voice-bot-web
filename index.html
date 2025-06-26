@@ -44,6 +44,12 @@
             font-size: 1.2em;
             color: #333;
             white-space: pre-wrap;
+            overflow: hidden;
+            border: none;
+            resize: none;
+            background: transparent;
+            text-align: center;
+            width: 80%;
         }
         #audioPlayer {
             margin-top: 20px;
@@ -99,7 +105,7 @@
         <label for="sringeri">Sringeri Style</label>
     </div>
     
-    <div id="shlokaText">Shloka text will appear here.</div>
+    <textarea id="shlokaText" readonly>Shloka text will appear here.</textarea>
     
     <audio id="audioPlayer" controls></audio>
     
@@ -107,7 +113,6 @@
     <button onclick="document.getElementById('audioPlayer').play()">Play Audio</button>
     
     <script>
-        // Persistent session ID and context
         let sessionId = localStorage.getItem('gitaSessionId');
         if (!sessionId) {
             sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
@@ -117,34 +122,34 @@
 
         function getSelectedStyle() {
             const style = document.querySelector('input[name="style"]:checked').value;
-            console.log(`Selected style: ${style}`);
             return style;
+        }
+
+        function autoResizeTextArea() {
+            const textarea = document.getElementById('shlokaText');
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
         }
 
         async function fetchShlokaText(chapter, verse) {
             const url = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/BG_Sringeri.txt';
-            console.log(`Fetching Sringeri.txt for chapter ${chapter}, verse ${verse} from ${url}`);
             try {
                 const response = await fetch(url);
                 const text = await response.text();
-                console.log(`BG_Sringeri.txt fetched, length: ${text.length} characters`);
-                
                 const lines = text.split('\n');
                 const key1 = `${chapter}.${verse}`;
                 const key2 = `${chapter}-${verse}`;
-                console.log(`Searching for key: ${key1} or ${key2}`);
-                
                 for (const line of lines) {
                     if (line.startsWith(key1 + ' ') || line.startsWith(key2 + ' ')) {
                         const shlokaText = line.substring(line.indexOf(' ') + 1).trim();
-                        console.log(`Found shloka: ${shlokaText}`);
+                        const shlokaBox = document.getElementById('shlokaText');
+                        shlokaBox.value = shlokaText;
+                        autoResizeTextArea();
                         return shlokaText;
                     }
                 }
-                console.log(`No line found for ${key1} or ${key2}`);
                 return 'Shloka text not found';
             } catch (error) {
-                console.error(`Error fetching shloka text: ${error}`);
                 return 'Error loading shloka text';
             }
         }
@@ -166,39 +171,41 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                if (!response.ok) {
-                    throw new Error(`HTTP error: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
                 const data = await response.json();
-                
+
                 const fulfillmentText = data.fulfillmentText;
-                document.getElementById('shlokaText').innerText = fulfillmentText;
-                
-                if (data.payload && data.payload.google && data.payload.google.richResponse) {
+                const shlokaBox = document.getElementById('shlokaText');
+                shlokaBox.value = fulfillmentText;
+                autoResizeTextArea();
+
+                if (data.payload?.google?.richResponse) {
                     const media = data.payload.google.richResponse.items.find(item => item.mediaResponse);
-                    if (media && media.mediaResponse.mediaObjects[0]) {
+                    if (media?.mediaResponse?.mediaObjects?.[0]) {
                         const audioUrl = media.mediaResponse.mediaObjects[0].contentUrl;
-                        console.log(`Playing audio: ${audioUrl}`);
                         const audioPlayer = document.getElementById('audioPlayer');
                         audioPlayer.src = audioUrl;
                         audioPlayer.play();
                     }
                 }
 
-                if (data.outputContexts && data.outputContexts.length > 0) {
+                if (data.outputContexts?.length > 0) {
                     currentContext = data.outputContexts;
                     localStorage.setItem('gitaContext', JSON.stringify(currentContext));
                     const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-                    if (context && context.parameters) {
+                    if (context?.parameters) {
                         const chapter = Math.floor(context.parameters.chapter);
                         const verse = Math.floor(context.parameters.verse);
                         const shlokaText = await fetchShlokaText(chapter, verse);
-                        document.getElementById('shlokaText').innerText = shlokaText;
+                        const shlokaBox = document.getElementById('shlokaText');
+                        shlokaBox.value = shlokaText;
+                        autoResizeTextArea();
                     }
                 }
             } catch (error) {
-                console.error(`Error sending command: ${error}`);
-                document.getElementById('shlokaText').innerText = 'Error communicating with server';
+                const shlokaBox = document.getElementById('shlokaText');
+                shlokaBox.value = 'Error communicating with server';
+                autoResizeTextArea();
             }
         }
     </script>
