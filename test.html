@@ -143,15 +143,18 @@
                 
                 for (let i = 0; i < lines.length; i++) {
                     if (lines[i].startsWith(key1 + ' ') || lines[i].startsWith(key2 + ' ')) {
-                        let shlokaText = lines[i].substring(lines[i].indexOf(' ') + 1);
-                        // Check if next line is part of the shloka (not another key)
-                        if (i + 1 < lines.length && !lines[i + 1].match(/^\d+\.\d+/)) {
-                            shlokaText += '\n' + lines[i + 1];
+                        let shlokaLines = [lines[i].substring(lines[i].indexOf(' ') + 1)];
+                        let j = i + 1;
+                        while (j < lines.length && !lines[j].match(/^\d+\.\d+/)) {
+                            shlokaLines.push(lines[j]);
+                            j++;
                         }
+                        let shlokaText = shlokaLines.join('\n');
                         console.log(`Found shloka: ${shlokaText}`);
-                        return `${chapter}.${verse} ${shlokaText}`; // Format as 5.8 [text]
+                        return `${chapter}.${verse} ${shlokaText}`;
                     }
                 }
+
                 console.log(`No line found for ${key1} or ${key2}`);
                 return 'Shloka text not found';
             } catch (error) {
