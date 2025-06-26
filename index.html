@@ -117,6 +117,15 @@
 
     
     <script>
+        <!-- Inside <script> -->
+    function handleChapterSelect(selectElement) {
+      const chapter = selectElement.value;
+      if (chapter) {
+        sendCommand('ChapterIntent', { chapter: chapter, pada: 'pada1' });
+        selectElement.selectedIndex = 0; // Reset to placeholder
+  }
+}
+
         // Use persistent session ID
         let sessionId = localStorage.getItem('gitaSessionId');
         if (!sessionId) {
