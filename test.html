@@ -105,7 +105,7 @@
         <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1', style: getSelectedStyle()})">Get Random Shloka Q1</button>
         <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Get Random Shloka Q1 or Q3</button>
         <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Get Full Shloka</button>
-        <button onclick="sendCommand('NextIntent', {style: getSelectedStyle()})">Next Shloka</button>
+        <button onclick="sendCommand('NextIntent', {quarter: 'pada1', style: getSelectedStyle()})">Next Shloka</button>
     </div>
     
     <div>
@@ -276,7 +276,6 @@
                 
                 if (data.payload && data.payload.google && data.payload.google.richResponse) {
                     const media = data.payload.google.richResponse.items.find(item => item.mediaResponse);
-                    if (media && data.payload.google.richResponse.items.find(item => item.mediaResponse);
                     if (media && media.mediaResponse.mediaObjects[0]) {
                         const audioUrl = media.mediaResponse.mediaObjects[0].contentUrl;
                         const audioPlayer = document.getElementById('audioPlayer');
