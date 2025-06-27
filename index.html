@@ -60,9 +60,17 @@
         }
         .radio-group {
             margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .radio-group label {
-            margin: 0 10px;
+            margin: 5px 10px;
+        }
+        .radio-group .radio-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
         }
         .textbox-container {
             display: flex;
@@ -77,13 +85,13 @@
         .textbox-label {
             font-weight: bold;
             margin-bottom: 5px;
-            display: none; /* Hidden by default, shown for active textbox */
+            display: none;
         }
         .textbox-label.active {
             display: block;
         }
         .shloka-text {
-            display: none; /* Hidden by default, shown for active textbox */
+            display: none;
         }
         .shloka-text.active {
             display: block;
@@ -97,7 +105,7 @@
         <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1', style: getSelectedStyle()})">Get Random Shloka Q1</button>
         <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Get Random Shloka Q1 or Q3</button>
         <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Get Full Shloka</button>
-        <button onclick="sendCommand('NextIntent', {style: getSelectedStyle()})">Next Shloka</button>
+        <button onclick="sendCommand('NextIntent', {quarter: 'pada1', style: getSelectedStyle()})">Next Shloka</button>
     </div>
     
     <div>
@@ -125,11 +133,13 @@
     </div>
     
     <div class="radio-group">
-        <label>Full Shloka Style:</label>
-        <input type="radio" name="style" value="gurudatta" id="gurudatta" checked onchange="updateTextboxVisibility()">
-        <label for="gurudatta">Gurudatta Style</label>
-        <input type="radio" name="style" value="sringeri" id="sringeri" onchange="updateTextboxVisibility()">
-        <label for="sringeri">Sringeri Style</label>
+        <label>Full Shloka Style</label>
+        <div class="radio-buttons">
+            <input type="radio" name="style" value="gurudatta" id="gurudatta" checked onchange="updateTextboxVisibility()">
+            <label for="gurudatta">Gurudatta Style</label>
+            <input type="radio" name="style" value="sringeri" id="sringeri" onchange="updateTextboxVisibility()">
+            <label for="sringeri">Sringeri Style</label>
+        </div>
     </div>
     
     <div class="textbox-container">
@@ -186,7 +196,6 @@
                 sringeriLabel.classList.add('active');
             }
 
-            // Update text in both boxes to ensure consistency
             const currentText = style === 'gurudatta' ? gurudattaText.innerText : sringeriText.innerText;
             if (currentText !== 'Your Shloka will appear here') {
                 const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
@@ -241,6 +250,30 @@
         async function sendCommand(intent, params) {
             const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
             const style = params.style || getSelectedStyle();
+            // Ensure NextIntent uses pada1 and preserves chapter/verse
+            if (intent === 'NextIntent') {
+                params.quarter = 'pada1'; // Force quarter to pada1
+                let context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+                if (context && context.parameters && context.parameters.chapter && context.parameters.verse) {
+                    // Update existing context with quarter: pada1
+                    context.parameters.quarter = 'pada1';
+                    context.parameters.style = style;
+                } else {
+                    // Create new context with placeholder chapter/verse (backend should set these)
+                    currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
+                    currentContext.push({
+                        name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                        lifespanCount: 5,
+                        parameters: { 
+                            quarter: 'pada1', 
+                            style: style,
+                            chapter: context?.parameters.chapter || 1,
+                            verse: context?.parameters.verse || 1
+                        }
+                    });
+                }
+                localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+            }
             const payload = {
                 session: sessionId,
                 queryResult: {
@@ -262,7 +295,6 @@
                 const data = await response.json();
                 
                 const fulfillmentText = data.fulfillmentText;
-                // Update both textboxes with the same text
                 document.getElementById('gurudattaText').innerText = fulfillmentText;
                 document.getElementById('sringeriText').innerText = fulfillmentText;
                 
@@ -284,7 +316,6 @@
                         const chapter = Math.floor(context.parameters.chapter);
                         const verse = Math.floor(context.parameters.verse);
                         const shlokaText = await fetchShlokaText(chapter, verse, style);
-                        // Update both textboxes with the same text
                         document.getElementById('gurudattaText').innerText = shlokaText;
                         document.getElementById('sringeriText').innerText = shlokaText;
                     }
@@ -293,7 +324,6 @@
                 updateTextboxVisibility();
             } catch (error) {
                 console.error(`Error sending command: ${error}`);
-                // Update both textboxes with error message
                 const errorText = 'Error communicating with server';
                 document.getElementById('gurudattaText').innerText = errorText;
                 document.getElementById('sringeriText').innerText = errorText;
@@ -301,7 +331,6 @@
             }
         }
 
-        // Initialize textbox visibility on page load
         updateTextboxVisibility();
     </script>
     <h2>Developed by Dr.P.Udayabhaskar</h2>
