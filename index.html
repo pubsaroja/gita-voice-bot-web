@@ -39,18 +39,18 @@
             font-size: 1em;
             border-radius: 5px;
         }
-        #shlokaText {
-            margin-top: 20px;
+        .shloka-text {
+            margin-top: 10px;
             font-size: 1.2em;
             color: #333;
-            white-space: pre; /* Preserve exact newlines and whitespace */
+            white-space: pre;
             text-align: left;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
             line-height: 1.5;
-            height: 7.2em; /* 4 lines: 1.2em * 1.5 * 4 */
-            overflow-y: auto; /* Scroll if text exceeds 4 lines */
+            height: 7.2em;
+            overflow-y: auto;
             padding: 10px;
             border: 2px solid #357EC7;
             border-radius: 5px;
@@ -58,24 +58,46 @@
         #audioPlayer {
             margin-top: 20px;
         }
-    	.radio-group {
-      	margin: 10px 0;
-    	}
-    	.radio-group label {
-      	margin: 0 10px;
-    	}
+        .radio-group {
+            margin: 10px 0;
+        }
+        .radio-group label {
+            margin: 0 10px;
+        }
+        .textbox-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .textbox-container > div {
+            width: 100%;
+            max-width: 600px;
+        }
+        .textbox-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: none; /* Hidden by default, shown for active textbox */
+        }
+        .textbox-label.active {
+            display: block;
+        }
+        .shloka-text {
+            display: none; /* Hidden by default, shown for active textbox */
+        }
+        .shloka-text.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
-    <h1>Bhagavad Gita Bot </h1>
-    <!--<p>Request a random Shloka from Srimad Bhagavdgita</p>-->
-    
+    <h1>Bhagavad Gita Bot</h1>
     
     <div>
-        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1'})">Get Random Shloka Q1</button>
-        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3'})">Get Random Shloka Q1 or Q3</button>
- 	<button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Get Full Shloka</button>
-        <button onclick="sendCommand('NextIntent', {})">Next Shloka</button>
+        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1', style: getSelectedStyle()})">Get Random Shloka Q1</button>
+        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Get Random Shloka Q1 or Q3</button>
+        <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Get Full Shloka</button>
+        <button onclick="sendCommand('NextIntent', {style: getSelectedStyle()})">Next Shloka</button>
     </div>
     
     <div>
@@ -102,49 +124,92 @@
         </select>
     </div>
     
-  <div class="radio-group">
-    <label>Full Shloka Style:</label>
-    <input type="radio" name="style" value="gurudatta" id="gurudatta" checked>
-    <label for="gurudatta">Gurudatta Style</label>
-    <input type="radio" name="style" value="sringeri" id="sringeri">
-    <label for="sringeri">Sringeri Style</label>
-  </div>
+    <div class="radio-group">
+        <label>Full Shloka Style:</label>
+        <input type="radio" name="style" value="gurudatta" id="gurudatta" checked onchange="updateTextboxVisibility()">
+        <label for="gurudatta">Gurudatta Style</label>
+        <input type="radio" name="style" value="sringeri" id="sringeri" onchange="updateTextboxVisibility()">
+        <label for="sringeri">Sringeri Style</label>
+    </div>
     
-    <div id="shlokaText">Shloka text will appear here.</div>
+    <div class="textbox-container">
+        <div>
+            <div id="gurudattaLabel" class="textbox-label active">Gurudatta Style Shloka</div>
+            <div id="gurudattaText" class="shloka-text active">Your Shloka will appear here</div>
+        </div>
+        <div>
+            <div id="sringeriLabel" class="textbox-label">Sringeri Style Shloka</div>
+            <div id="sringeriText" class="shloka-text">Your Shloka will appear here</div>
+        </div>
+    </div>
     
     <audio id="audioPlayer" controls></audio>
     
-
-    
     <script>
-        <!-- Inside <script> -->
-    function handleChapterSelect(selectElement) {
-      const chapter = selectElement.value;
-      if (chapter) {
-        sendCommand('ChapterIntent', { chapter: chapter, pada: 'pada1' });
-        selectElement.selectedIndex = 0; // Reset to placeholder
-  }
-}
+        function handleChapterSelect(selectElement) {
+            const chapter = selectElement.value;
+            if (chapter) {
+                sendCommand('ChapterIntent', { chapter: chapter, pada: 'pada1', style: getSelectedStyle() });
+                selectElement.selectedIndex = 0;
+            }
+        }
 
-        // Use persistent session ID
         let sessionId = localStorage.getItem('gitaSessionId');
         if (!sessionId) {
             sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
             localStorage.setItem('gitaSessionId', sessionId);
         }
-    	let currentContext = JSON.parse(localStorage.getItem('gitaContext')) || [];
-    	function getSelectedStyle() {
-      	const style = document.querySelector('input[name="style"]:checked').value;
-      	console.log(`Selected style: ${style}`);
-      	return style;
-    	}
-        async function fetchShlokaText(chapter, verse) {
-            const url = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt';
-            console.log(`Fetching Sringeri.txt for chapter ${chapter}, verse ${verse} from ${url}`);
+        let currentContext = JSON.parse(localStorage.getItem('gitaContext')) || [];
+
+        function getSelectedStyle() {
+            const style = document.querySelector('input[name="style"]:checked').value;
+            console.log(`Selected style: ${style}`);
+            return style;
+        }
+
+        function updateTextboxVisibility() {
+            const style = getSelectedStyle();
+            const gurudattaText = document.getElementById('gurudattaText');
+            const sringeriText = document.getElementById('sringeriText');
+            const gurudattaLabel = document.getElementById('gurudattaLabel');
+            const sringeriLabel = document.getElementById('sringeriLabel');
+
+            if (style === 'gurudatta') {
+                gurudattaText.classList.add('active');
+                gurudattaLabel.classList.add('active');
+                sringeriText.classList.remove('active');
+                sringeriLabel.classList.remove('active');
+            } else {
+                gurudattaText.classList.remove('active');
+                gurudattaLabel.classList.remove('active');
+                sringeriText.classList.add('active');
+                sringeriLabel.classList.add('active');
+            }
+
+            // Update text in both boxes to ensure consistency
+            const currentText = style === 'gurudatta' ? gurudattaText.innerText : sringeriText.innerText;
+            if (currentText !== 'Your Shloka will appear here') {
+                const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+                if (context && context.parameters) {
+                    const chapter = Math.floor(context.parameters.chapter);
+                    const verse = Math.floor(context.parameters.verse);
+                    fetchShlokaText(chapter, verse, style).then(shlokaText => {
+                        gurudattaText.innerText = shlokaText;
+                        sringeriText.innerText = shlokaText;
+                    });
+                }
+            }
+        }
+
+        async function fetchShlokaText(chapter, verse, style) {
+            const url = style === 'gurudatta' 
+                ? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG Telugu with Uvacha2.txt'
+                : 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt';
+            console.log(`Fetching ${style} text for chapter ${chapter}, verse ${verse} from ${url}`);
             try {
                 const response = await fetch(url);
                 const text = await response.text();
-                console.log(`BG_Sringeri.txt fetched, length: ${text.length} characters`);
+                console.log(`${style} text fetched, length: ${text.length} characters`);
                 
                 const lines = text.split('\n');
                 const key1 = `${chapter}.${verse}`;
@@ -168,19 +233,20 @@
                 console.log(`No line found for ${key1} or ${key2}`);
                 return 'Shloka text not found';
             } catch (error) {
-                console.error(`Error fetching shloka text: ${error}`);
+                console.error(`Error fetching ${style} text: ${error}`);
                 return 'Error loading shloka text';
             }
         }
 
         async function sendCommand(intent, params) {
             const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
+            const style = params.style || getSelectedStyle();
             const payload = {
                 session: sessionId,
                 queryResult: {
                     intent: { displayName: intent },
                     parameters: params,
-          	outputContexts: currentContext
+                    outputContexts: currentContext
                 }
             };
 
@@ -196,7 +262,9 @@
                 const data = await response.json();
                 
                 const fulfillmentText = data.fulfillmentText;
-                document.getElementById('shlokaText').innerText = fulfillmentText;
+                // Update both textboxes with the same text
+                document.getElementById('gurudattaText').innerText = fulfillmentText;
+                document.getElementById('sringeriText').innerText = fulfillmentText;
                 
                 if (data.payload && data.payload.google && data.payload.google.richResponse) {
                     const media = data.payload.google.richResponse.items.find(item => item.mediaResponse);
@@ -209,21 +277,32 @@
                 }
 
                 if (data.outputContexts && data.outputContexts.length > 0) {
-          	currentContext = data.outputContexts;
-          	localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-          	const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+                    currentContext = data.outputContexts;
+                    localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+                    const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
                     if (context && context.parameters) {
                         const chapter = Math.floor(context.parameters.chapter);
                         const verse = Math.floor(context.parameters.verse);
-                        const shlokaText = await fetchShlokaText(chapter, verse);
-                        document.getElementById('shlokaText').innerText = shlokaText;
+                        const shlokaText = await fetchShlokaText(chapter, verse, style);
+                        // Update both textboxes with the same text
+                        document.getElementById('gurudattaText').innerText = shlokaText;
+                        document.getElementById('sringeriText').innerText = shlokaText;
                     }
                 }
+
+                updateTextboxVisibility();
             } catch (error) {
                 console.error(`Error sending command: ${error}`);
-                document.getElementById('shlokaText').innerText = 'Error communicating with server';
+                // Update both textboxes with error message
+                const errorText = 'Error communicating with server';
+                document.getElementById('gurudattaText').innerText = errorText;
+                document.getElementById('sringeriText').innerText = errorText;
+                updateTextboxVisibility();
             }
         }
+
+        // Initialize textbox visibility on page load
+        updateTextboxVisibility();
     </script>
     <h2>Developed by Dr.P.Udayabhaskar</h2>
 </body>
