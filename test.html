@@ -60,9 +60,17 @@
         }
         .radio-group {
             margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .radio-group label {
-            margin: 0 10px;
+            margin: 5px 10px;
+        }
+        .radio-group .radio-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
         }
         .textbox-container {
             display: flex;
@@ -77,13 +85,13 @@
         .textbox-label {
             font-weight: bold;
             margin-bottom: 5px;
-            display: none; /* Hidden by default, shown for active textbox */
+            display: none;
         }
         .textbox-label.active {
             display: block;
         }
         .shloka-text {
-            display: none; /* Hidden by default, shown for active textbox */
+            display: none;
         }
         .shloka-text.active {
             display: block;
@@ -125,11 +133,13 @@
     </div>
     
     <div class="radio-group">
-        <label>Full Shloka Style:</label>
-        <input type="radio" name="style" value="gurudatta" id="gurudatta" checked onchange="updateTextboxVisibility()">
-        <label for="gurudatta">Gurudatta Style</label>
-        <input type="radio" name="style" value="sringeri" id="sringeri" onchange="updateTextboxVisibility()">
-        <label for="sringeri">Sringeri Style</label>
+        <label>Full Shloka Style</label>
+        <div class="radio-buttons">
+            <input type="radio" name="style" value="gurudatta" id="gurudatta" checked onchange="updateTextboxVisibility()">
+            <label for="gurudatta">Gurudatta Style</label>
+            <input type="radio" name="style" value="sringeri" id="sringeri" onchange="updateTextboxVisibility()">
+            <label for="sringeri">Sringeri Style</label>
+        </div>
     </div>
     
     <div class="textbox-container">
@@ -137,9 +147,7 @@
             <div id="gurudattaLabel" class="textbox-label active">Gurudatta Style Shloka</div>
             <div id="gurudattaText" class="shloka-text active">Your Shloka will appear here</div>
         </div>
-        <div>
-            <div id="sringeriLabel" class="textbox-label">Sringeri Style Shloka</div>
-            <div id="sringeriText" class="shloka-text">Your Shloka will appear here</div>
+        <div	clk="sringeriText" class="shloka-text">Your Shloka will appear here</div>
         </div>
     </div>
     
@@ -186,7 +194,6 @@
                 sringeriLabel.classList.add('active');
             }
 
-            // Update text in both boxes to ensure consistency
             const currentText = style === 'gurudatta' ? gurudattaText.innerText : sringeriText.innerText;
             if (currentText !== 'Your Shloka will appear here') {
                 const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
@@ -262,7 +269,6 @@
                 const data = await response.json();
                 
                 const fulfillmentText = data.fulfillmentText;
-                // Update both textboxes with the same text
                 document.getElementById('gurudattaText').innerText = fulfillmentText;
                 document.getElementById('sringeriText').innerText = fulfillmentText;
                 
@@ -284,7 +290,6 @@
                         const chapter = Math.floor(context.parameters.chapter);
                         const verse = Math.floor(context.parameters.verse);
                         const shlokaText = await fetchShlokaText(chapter, verse, style);
-                        // Update both textboxes with the same text
                         document.getElementById('gurudattaText').innerText = shlokaText;
                         document.getElementById('sringeriText').innerText = shlokaText;
                     }
@@ -293,7 +298,6 @@
                 updateTextboxVisibility();
             } catch (error) {
                 console.error(`Error sending command: ${error}`);
-                // Update both textboxes with error message
                 const errorText = 'Error communicating with server';
                 document.getElementById('gurudattaText').innerText = errorText;
                 document.getElementById('sringeriText').innerText = errorText;
@@ -301,7 +305,6 @@
             }
         }
 
-        // Initialize textbox visibility on page load
         updateTextboxVisibility();
     </script>
     <h2>Developed by Dr.P.Udayabhaskar</h2>
