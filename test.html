@@ -40,7 +40,7 @@
             border-radius: 5px;
         }
         .shloka-text {
-            margin-top: 20px;
+            margin-top: 10px;
             font-size: 1.2em;
             color: #333;
             white-space: pre;
@@ -66,17 +66,27 @@
         }
         .textbox-container {
             display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
         }
         .textbox-container > div {
-            flex: 1;
-            min-width: 300px;
+            width: 100%;
+            max-width: 600px;
         }
         .textbox-label {
             font-weight: bold;
             margin-bottom: 5px;
+            display: none; /* Hidden by default, shown for active textbox */
+        }
+        .textbox-label.active {
+            display: block;
+        }
+        .shloka-text {
+            display: none; /* Hidden by default, shown for active textbox */
+        }
+        .shloka-text.active {
+            display: block;
         }
     </style>
 </head>
@@ -124,11 +134,11 @@
     
     <div class="textbox-container">
         <div>
-            <div class="textbox-label">Gurudatta Style Shloka</div>
-            <div id="gurudattaText" class="shloka-text">Your Shloka will appear here</div>
+            <div id="gurudattaLabel" class="textbox-label active">Gurudatta Style Shloka</div>
+            <div id="gurudattaText" class="shloka-text active">Your Shloka will appear here</div>
         </div>
         <div>
-            <div class="textbox-label">Sringeri Style Shloka</div>
+            <div id="sringeriLabel" class="textbox-label">Sringeri Style Shloka</div>
             <div id="sringeriText" class="shloka-text">Your Shloka will appear here</div>
         </div>
     </div>
@@ -161,12 +171,33 @@
             const style = getSelectedStyle();
             const gurudattaText = document.getElementById('gurudattaText');
             const sringeriText = document.getElementById('sringeriText');
+            const gurudattaLabel = document.getElementById('gurudattaLabel');
+            const sringeriLabel = document.getElementById('sringeriLabel');
+
             if (style === 'gurudatta') {
-                gurudattaText.style.display = 'block';
-                sringeriText.style.display = 'none';
+                gurudattaText.classList.add('active');
+                gurudattaLabel.classList.add('active');
+                sringeriText.classList.remove('active');
+                sringeriLabel.classList.remove('active');
             } else {
-                gurudattaText.style.display = 'none';
-                sringeriText.style.display = 'block';
+                gurudattaText.classList.remove('active');
+                gurudattaLabel.classList.remove('active');
+                sringeriText.classList.add('active');
+                sringeriLabel.classList.add('active');
+            }
+
+            // Update text in both boxes to ensure consistency
+            const currentText = style === 'gurudatta' ? gurudattaText.innerText : sringeriText.innerText;
+            if (currentText !== 'Your Shloka will appear here') {
+                const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+                if (context && context.parameters) {
+                    const chapter = Math.floor(context.parameters.chapter);
+                    const verse = Math.floor(context.parameters.verse);
+                    fetchShlokaText(chapter, verse, style).then(shlokaText => {
+                        gurudattaText.innerText = shlokaText;
+                        sringeriText.innerText = shlokaText;
+                    });
+                }
             }
         }
 
@@ -231,8 +262,9 @@
                 const data = await response.json();
                 
                 const fulfillmentText = data.fulfillmentText;
-                const targetTextbox = style === 'gurudatta' ? 'gurudattaText' : 'sringeriText';
-                document.getElementById(targetTextbox).innerText = fulfillmentText;
+                // Update both textboxes with the same text
+                document.getElementById('gurudattaText').innerText = fulfillmentText;
+                document.getElementById('sringeriText').innerText = fulfillmentText;
                 
                 if (data.payload && data.payload.google && data.payload.google.richResponse) {
                     const media = data.payload.google.richResponse.items.find(item => item.mediaResponse);
@@ -252,15 +284,20 @@
                         const chapter = Math.floor(context.parameters.chapter);
                         const verse = Math.floor(context.parameters.verse);
                         const shlokaText = await fetchShlokaText(chapter, verse, style);
-                        document.getElementById(targetTextbox).innerText = shlokaText;
+                        // Update both textboxes with the same text
+                        document.getElementById('gurudattaText').innerText = shlokaText;
+                        document.getElementById('sringeriText').innerText = shlokaText;
                     }
                 }
 
                 updateTextboxVisibility();
             } catch (error) {
                 console.error(`Error sending command: ${error}`);
-                const targetTextbox = style === 'gurudatta' ? 'gurudattaText' : 'sringeriText';
-                document.getElementById(targetTextbox).innerText = 'Error communicating with server';
+                // Update both textboxes with error message
+                const errorText = 'Error communicating with server';
+                document.getElementById('gurudattaText').innerText = errorText;
+                document.getElementById('sringeriText').innerText = errorText;
+                updateTextboxVisibility();
             }
         }
 
