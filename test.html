@@ -188,6 +188,15 @@
         const text = await fetchShlokaText(chapter, verse);
         updateTextBoxes(getSelectedStyle(), `${chapter}.${verse} ${text}`);
       }
+	const style = getSelectedStyle();
+	const fileName = `${chapter}.${verse}.mp3`;
+	const baseFolder = (style === 'sringeri')
+  	? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioSringeri/'
+  	: 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioFull/';
+	const audioUrl = baseFolder + fileName;
+	document.getElementById('audioPlayer').src = audioUrl;
+	document.getElementById('audioPlayer').play();
+
     });
   });
 </script>
