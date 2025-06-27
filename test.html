@@ -1,229 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bhagavad Gita Bot</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-            background-color: #f0f0f0;
-        }
-        h1 {
-            color: #2c3e50;
-            font-size: 2.5em;
-        }
-        h2 {
-            color: #34495e;
-            font-size: 1.5em;
-            margin-top: 10px;
-        }
-        button {
-            background-color: #357EC7;
-            color: white;
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-        button:hover {
-            background-color: #008CBA;
-        }
-        select {
-            padding: 10px;
-            margin: 5px;
-            font-size: 1em;
-            border-radius: 5px;
-        }
-        #shlokaText {
-            margin-top: 20px;
-            font-size: 1.2em;
-            color: #333;
-            white-space: pre; /* Preserve exact newlines and whitespace */
-            text-align: left;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            line-height: 1.5;
-            height: 7.2em; /* 4 lines: 1.2em * 1.5 * 4 */
-            overflow-y: auto; /* Scroll if text exceeds 4 lines */
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        #audioPlayer {
-            margin-top: 20px;
-        }
-    	.radio-group {
-      	margin: 10px 0;
-    	}
-    	.radio-group label {
-      	margin: 0 10px;
-    	}
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bhagavad Gita Bot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f0f0f0;
+      margin: 20px;
+    }
+    button {
+      background-color: #357EC7;
+      color: white;
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #textSringeri, #textGurudatta {
+      font-size: 1.2em;
+      color: #333;
+      white-space: pre-wrap;
+      text-align: center;
+      margin: 20px auto;
+      max-width: 600px;
+      padding: 10px;
+      border: 2px solid #357EC7;
+      border-radius: 8px;
+      display: none;
+    }
+  </style>
 </head>
 <body>
-    <h1>Bhagavad Gita Bot 🎵</h1>
-    <h2>Developed by Dr.P.Udayabhaskar</h2>
-    <p>Request a random Shloka from Srimad Bhagavdgita</p>
-    
-    <div>
-        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1'})">Get Random Shloka Q1</button>
-        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3'})">Get Random Shloka Q1 or Q3</button>
- 	<button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Get Full Shloka</button>
-        <button onclick="sendCommand('NextIntent', {})">Next Shloka</button>
-    </div>
-    
-    <div>
-        <select id="chapterSelect" onchange="handleChapterSelect(this)">
-            <option value="" selected disabled>-- Select Chapter --</option>
-            <option value="1">Chapter 1</option>
-            <option value="2">Chapter 2</option>
-            <option value="3">Chapter 3</option>
-            <option value="4">Chapter 4</option>
-            <option value="5">Chapter 5</option>
-            <option value="6">Chapter 6</option>
-            <option value="7">Chapter 7</option>
-            <option value="8">Chapter 8</option>
-            <option value="9">Chapter 9</option>
-            <option value="10">Chapter 10</option>
-            <option value="11">Chapter 11</option>
-            <option value="12">Chapter 12</option>
-            <option value="13">Chapter 13</option>
-            <option value="14">Chapter 14</option>
-            <option value="15">Chapter 15</option>
-            <option value="16">Chapter 16</option>
-            <option value="17">Chapter 17</option>
-            <option value="18">Chapter 18</option>
-        </select>
-    </div>
-    
-  <div class="radio-group">
-    <label>Full Shloka Style:</label>
-    <input type="radio" name="style" value="gurudatta" id="gurudatta" checked>
-    <label for="gurudatta">Gurudatta Style</label>
-    <input type="radio" name="style" value="sringeri" id="sringeri">
-    <label for="sringeri">Sringeri Style</label>
-  </div>
-    
-    <div id="shlokaText">Shloka text will appear here.</div>
-    
-    <audio id="audioPlayer" controls></audio>
-    
 
-    
-    <script>
-        <!-- Inside <script> -->
-    function handleChapterSelect(selectElement) {
-      const chapter = selectElement.value;
+  <h1>Bhagavad Gita Bot</h1>
+
+  <div>
+    <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1'})">Get Random Shloka Q1</button>
+    <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3'})">Get Random Shloka Q1 or Q3</button>
+    <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Get Full Shloka</button>
+    <button onclick="sendCommand('NextIntent', {})">Next Shloka</button>
+  </div>
+
+  <div>
+    <select id="chapterSelect" onchange="handleChapterSelect(this)">
+      <option value="" selected disabled>-- Select Chapter --</option>
+      <option value="1">Chapter 1</option>
+      <option value="2">Chapter 2</option>
+      <option value="3">Chapter 3</option>
+      <option value="4">Chapter 4</option>
+      <option value="5">Chapter 5</option>
+      <option value="6">Chapter 6</option>
+      <option value="7">Chapter 7</option>
+      <option value="8">Chapter 8</option>
+      <option value="9">Chapter 9</option>
+      <option value="10">Chapter 10</option>
+      <option value="11">Chapter 11</option>
+      <option value="12">Chapter 12</option>
+      <option value="13">Chapter 13</option>
+      <option value="14">Chapter 14</option>
+      <option value="15">Chapter 15</option>
+      <option value="16">Chapter 16</option>
+      <option value="17">Chapter 17</option>
+      <option value="18">Chapter 18</option>
+    </select>
+  </div>
+
+  <div class="radio-group">
+    <label><input type="radio" name="style" value="gurudatta" checked> Gurudatta Style</label>
+    <label><input type="radio" name="style" value="sringeri"> Sringeri Style</label>
+  </div>
+
+  <div id="textGurudatta">Gurudatta shloka will appear here.</div>
+  <div id="textSringeri">Sringeri shloka will appear here.</div>
+
+  <audio id="audioPlayer" controls></audio>
+
+  <script>
+    let sessionId = localStorage.getItem('gitaSessionId');
+    if (!sessionId) {
+      sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('gitaSessionId', sessionId);
+    }
+    let currentContext = [];
+
+    function getSelectedStyle() {
+      return document.querySelector('input[name="style"]:checked').value;
+    }
+
+    function handleChapterSelect(el) {
+      const chapter = el.value;
       if (chapter) {
         sendCommand('ChapterIntent', { chapter: chapter, pada: 'pada1' });
-        selectElement.selectedIndex = 0; // Reset to placeholder
-  }
-}
+        el.selectedIndex = 0;
+      }
+    }
 
-        // Use persistent session ID
-        let sessionId = localStorage.getItem('gitaSessionId');
-        if (!sessionId) {
-            sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('gitaSessionId', sessionId);
+    async function fetchShlokaText(chapter, verse) {
+      const style = getSelectedStyle();
+      const url = style === 'sringeri'
+        ? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/BG_Sringeri.txt'
+        : 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/BG%20Telugu%20with%20Uvacha.txt';
+      const response = await fetch(url);
+      const text = await response.text();
+      const lines = text.split('\n');
+      const key = `${chapter}.${verse}`;
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].startsWith(key + ' ')) {
+          const shlokaLines = [lines[i].substring(lines[i].indexOf(' ') + 1)];
+          let j = i + 1;
+          while (j < lines.length && !lines[j].match(/^\d+\.\d+/)) {
+            shlokaLines.push(lines[j]);
+            j++;
+          }
+          return shlokaLines.join('\n');
         }
-    	let currentContext = JSON.parse(localStorage.getItem('gitaContext')) || [];
-    	function getSelectedStyle() {
-      	const style = document.querySelector('input[name="style"]:checked').value;
-      	console.log(`Selected style: ${style}`);
-      	return style;
-    	}
-        async function fetchShlokaText(chapter, verse) {
-            const url = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt';
-            console.log(`Fetching Sringeri.txt for chapter ${chapter}, verse ${verse} from ${url}`);
-            try {
-                const response = await fetch(url);
-                const text = await response.text();
-                console.log(`BG_Sringeri.txt fetched, length: ${text.length} characters`);
-                
-                const lines = text.split('\n');
-                const key1 = `${chapter}.${verse}`;
-                const key2 = `${chapter}-${verse}`;
-                console.log(`Searching for key: ${key1} or ${key2}`);
-                
-                for (let i = 0; i < lines.length; i++) {
-                    if (lines[i].startsWith(key1 + ' ') || lines[i].startsWith(key2 + ' ')) {
-                        let shlokaLines = [lines[i].substring(lines[i].indexOf(' ') + 1)];
-                        let j = i + 1;
-                        while (j < lines.length && !lines[j].match(/^\d+\.\d+/)) {
-                            shlokaLines.push(lines[j]);
-                            j++;
-                        }
-                        let shlokaText = shlokaLines.join('\n');
-                        console.log(`Found shloka: ${shlokaText}`);
-                        return `${chapter}.${verse} ${shlokaText}`;
-                    }
-                }
+      }
+      return 'Shloka not found';
+    }
 
-                console.log(`No line found for ${key1} or ${key2}`);
-                return 'Shloka text not found';
-            } catch (error) {
-                console.error(`Error fetching shloka text: ${error}`);
-                return 'Error loading shloka text';
+    async function sendCommand(intent, params) {
+      const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
+      const payload = {
+        session: sessionId,
+        queryResult: {
+          intent: { displayName: intent },
+          parameters: params,
+          outputContexts: currentContext
+        }
+      };
+
+      try {
+        const res = await fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (data.payload?.google?.richResponse?.items) {
+          const media = data.payload.google.richResponse.items.find(i => i.mediaResponse);
+          if (media) {
+            let audioUrl = media.mediaResponse.mediaObjects[0].contentUrl;
+            const style = getSelectedStyle();
+            if (style === 'sringeri') {
+              audioUrl = audioUrl.replace('AudioFull', 'AudioSringeri');
             }
+            const audioPlayer = document.getElementById('audioPlayer');
+            audioPlayer.src = audioUrl;
+            audioPlayer.play();
+          }
         }
 
-        async function sendCommand(intent, params) {
-            const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
-            const payload = {
-                session: sessionId,
-                queryResult: {
-                    intent: { displayName: intent },
-                    parameters: params,
-          	outputContexts: currentContext
-                }
-            };
-
-            try {
-                const response = await fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error: ${response.status}`);
-                }
-                const data = await response.json();
-                
-                const fulfillmentText = data.fulfillmentText;
-                document.getElementById('shlokaText').innerText = fulfillmentText;
-                
-                if (data.payload && data.payload.google && data.payload.google.richResponse) {
-                    const media = data.payload.google.richResponse.items.find(item => item.mediaResponse);
-                    if (media && media.mediaResponse.mediaObjects[0]) {
-                        const audioUrl = media.mediaResponse.mediaObjects[0].contentUrl;
-                        const audioPlayer = document.getElementById('audioPlayer');
-                        audioPlayer.src = audioUrl;
-                        audioPlayer.play();
-                    }
-                }
-
-                if (data.outputContexts && data.outputContexts.length > 0) {
-          	currentContext = data.outputContexts;
-          	localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-          	const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-                    if (context && context.parameters) {
-                        const chapter = Math.floor(context.parameters.chapter);
-                        const verse = Math.floor(context.parameters.verse);
-                        const shlokaText = await fetchShlokaText(chapter, verse);
-                        document.getElementById('shlokaText').innerText = shlokaText;
-                    }
-                }
-            } catch (error) {
-                console.error(`Error sending command: ${error}`);
-                document.getElementById('shlokaText').innerText = 'Error communicating with server';
-            }
+        if (data.outputContexts) {
+          currentContext = data.outputContexts;
+          localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+          const context = currentContext.find(c => c.name.includes('shloka-context'));
+          if (context?.parameters) {
+            const chapter = Math.floor(context.parameters.chapter);
+            const verse = Math.floor(context.parameters.verse);
+            const text = await fetchShlokaText(chapter, verse);
+            updateTextBoxes(getSelectedStyle(), `${chapter}.${verse} ${text}`);
+          }
         }
-    </script>
+      } catch (e) {
+        console.error('Error:', e);
+      }
+    }
+
+    function updateTextBoxes(style, text) {
+      document.getElementById('textSringeri').style.display = (style === 'sringeri') ? 'block' : 'none';
+      document.getElementById('textGurudatta').style.display = (style === 'gurudatta') ? 'block' : 'none';
+      if (style === 'sringeri') {
+        document.getElementById('textSringeri').innerText = text;
+      } else {
+        document.getElementById('textGurudatta').innerText = text;
+      }
+    }
+
+    document.querySelectorAll('input[name="style"]').forEach(el => {
+      el.addEventListener('change', async () => {
+        const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+        if (context?.parameters) {
+          const chapter = Math.floor(context.parameters.chapter);
+          const verse = Math.floor(context.parameters.verse);
+          const text = await fetchShlokaText(chapter, verse);
+          updateTextBoxes(getSelectedStyle(), `${chapter}.${verse} ${text}`);
+        }
+      });
+    });
+  </script>
+
+  <h2>Developed by Dr. P. Udayabhaskar</h2>
 </body>
 </html>
