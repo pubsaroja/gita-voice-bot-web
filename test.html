@@ -99,7 +99,7 @@
     async function fetchShlokaText(chapter, verse) {
       const style = getSelectedStyle();
       const url = style === 'sringeri'
-        ? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt'
+        ? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/BG_Sringeri.txt'
         : 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/BG%20Telugu%20with%20Uvacha.txt';
       const response = await fetch(url);
       const text = await response.text();
