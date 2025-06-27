@@ -250,18 +250,17 @@
         async function sendCommand(intent, params) {
             const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
             const style = params.style || getSelectedStyle();
-            // Ensure NextIntent sets quarter to pada1 in context
+            // Ensure NextIntent always uses pada1
             if (intent === 'NextIntent') {
-                let context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-                if (context && context.parameters) {
-                    context.parameters.quarter = 'pada1';
-                } else {
-                    currentContext.push({
-                        name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
-                        lifespanCount: 5,
-                        parameters: { quarter: 'pada1' }
-                    });
-                }
+                params.quarter = 'pada1'; // Force quarter to pada1 in parameters
+                // Clear existing shloka-context to avoid stale quarter
+                currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
+                // Create new shloka-context with quarter: pada1
+                currentContext.push({
+                    name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                    lifespanCount: 5,
+                    parameters: { quarter: 'pada1', style: style }
+                });
                 localStorage.setItem('gitaContext', JSON.stringify(currentContext));
             }
             const payload = {
