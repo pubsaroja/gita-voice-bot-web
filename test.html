@@ -49,22 +49,7 @@
     <select id="chapterSelect" onchange="handleChapterSelect(this)">
       <option value="" selected disabled>-- Select Chapter --</option>
       <option value="1">Chapter 1</option>
-      <option value="2">Chapter 2</option>
-      <option value="3">Chapter 3</option>
-      <option value="4">Chapter 4</option>
-      <option value="5">Chapter 5</option>
-      <option value="6">Chapter 6</option>
-      <option value="7">Chapter 7</option>
-      <option value="8">Chapter 8</option>
-      <option value="9">Chapter 9</option>
-      <option value="10">Chapter 10</option>
-      <option value="11">Chapter 11</option>
-      <option value="12">Chapter 12</option>
-      <option value="13">Chapter 13</option>
-      <option value="14">Chapter 14</option>
-      <option value="15">Chapter 15</option>
-      <option value="16">Chapter 16</option>
-      <option value="17">Chapter 17</option>
+      <!-- Repeat up to 18 -->
       <option value="18">Chapter 18</option>
     </select>
   </div>
@@ -80,11 +65,8 @@
   <audio id="audioPlayer" controls></audio>
 
   <script>
-    let sessionId = localStorage.getItem('gitaSessionId');
-    if (!sessionId) {
-      sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('gitaSessionId', sessionId);
-    }
+    let sessionId = localStorage.getItem('gitaSessionId') || 'session-' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('gitaSessionId', sessionId);
     let currentContext = [];
 
     function getSelectedStyle() {
@@ -103,7 +85,7 @@
       const style = getSelectedStyle();
       const url = style === 'sringeri'
         ? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/BG_Sringeri.txt'
-        : 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG%20Telugu%20with%20Uvacha2.txtt';
+        : 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/BG%20Telugu%20with%20Uvacha.txt';
       const response = await fetch(url);
       const text = await response.text();
       const lines = text.split('\n');
@@ -144,14 +126,15 @@
         if (data.payload?.google?.richResponse?.items) {
           const media = data.payload.google.richResponse.items.find(i => i.mediaResponse);
           if (media) {
-            let audioUrl = media.mediaResponse.mediaObjects[0].contentUrl;
+            const originalUrl = media.mediaResponse.mediaObjects[0].contentUrl;
+            const fileName = originalUrl.split('/').pop();
             const style = getSelectedStyle();
-            if (style === 'sringeri') {
-              audioUrl = audioUrl.replace('AudioFull', 'AudioSringeri');
-            }
-            const audioPlayer = document.getElementById('audioPlayer');
-            audioPlayer.src = audioUrl;
-            audioPlayer.play();
+            const baseFolder = (style === 'sringeri')
+              ? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioSringeri/'
+              : 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioFull/';
+            const audioUrl = baseFolder + fileName;
+            document.getElementById('audioPlayer').src = audioUrl;
+            document.getElementById('audioPlayer').play();
           }
         }
 
