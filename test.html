@@ -250,6 +250,20 @@
         async function sendCommand(intent, params) {
             const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
             const style = params.style || getSelectedStyle();
+            // Ensure NextIntent sets quarter to pada1 in context
+            if (intent === 'NextIntent') {
+                let context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+                if (context && context.parameters) {
+                    context.parameters.quarter = 'pada1';
+                } else {
+                    currentContext.push({
+                        name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                        lifespanCount: 5,
+                        parameters: { quarter: 'pada1' }
+                    });
+                }
+                localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+            }
             const payload = {
                 session: sessionId,
                 queryResult: {
