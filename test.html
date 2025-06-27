@@ -250,17 +250,28 @@
         async function sendCommand(intent, params) {
             const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
             const style = params.style || getSelectedStyle();
-            // Ensure NextIntent always uses pada1
+            // Ensure NextIntent uses pada1 and preserves chapter/verse
             if (intent === 'NextIntent') {
-                params.quarter = 'pada1'; // Force quarter to pada1 in parameters
-                // Clear existing shloka-context to avoid stale quarter
-                currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
-                // Create new shloka-context with quarter: pada1
-                currentContext.push({
-                    name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
-                    lifespanCount: 5,
-                    parameters: { quarter: 'pada1', style: style }
-                });
+                params.quarter = 'pada1'; // Force quarter to pada1
+                let context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+                if (context && context.parameters && context.parameters.chapter && context.parameters.verse) {
+                    // Update existing context with quarter: pada1
+                    context.parameters.quarter = 'pada1';
+                    context.parameters.style = style;
+                } else {
+                    // Create new context with placeholder chapter/verse (backend should set these)
+                    currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
+                    currentContext.push({
+                        name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                        lifespanCount: 5,
+                        parameters: { 
+                            quarter: 'pada1', 
+                            style: style,
+                            chapter: context?.parameters.chapter || 1,
+                            verse: context?.parameters.verse || 1
+                        }
+                    });
+                }
                 localStorage.setItem('gitaContext', JSON.stringify(currentContext));
             }
             const payload = {
