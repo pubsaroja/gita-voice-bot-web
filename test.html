@@ -45,29 +45,12 @@
   <button onclick="sendCommand('NextIntent', {})">Next Shloka</button>
 </div>
 
-    <div>
-        <select id="chapterSelect" onchange="handleChapterSelect(this)">
-            <option value="" selected disabled>-- Select Chapter --</option>
-            <option value="1">Chapter 1</option>
-            <option value="2">Chapter 2</option>
-            <option value="3">Chapter 3</option>
-            <option value="4">Chapter 4</option>
-            <option value="5">Chapter 5</option>
-            <option value="6">Chapter 6</option>
-            <option value="7">Chapter 7</option>
-            <option value="8">Chapter 8</option>
-            <option value="9">Chapter 9</option>
-            <option value="10">Chapter 10</option>
-            <option value="11">Chapter 11</option>
-            <option value="12">Chapter 12</option>
-            <option value="13">Chapter 13</option>
-            <option value="14">Chapter 14</option>
-            <option value="15">Chapter 15</option>
-            <option value="16">Chapter 16</option>
-            <option value="17">Chapter 17</option>
-            <option value="18">Chapter 18</option>
-        </select>
-    </div>
+<div>
+  <select id="chapterSelect" onchange="handleChapterSelect(this)">
+    <option value="" selected disabled>-- Select Chapter --</option>
+    ${[...Array(18)].map((_, i) => `<option value="${i+1}">Chapter ${i+1}</option>`).join('\n')}
+  </select>
+</div>
 
 <div class="radio-group">
   <label><input type="radio" name="style" value="gurudatta" checked> Gurudatta Style</label>
@@ -138,32 +121,41 @@
       });
       const data = await res.json();
 
-      if (data.payload?.google?.richResponse?.items) {
-        const media = data.payload.google.richResponse.items.find(i => i.mediaResponse);
-        if (media) {
-          const originalUrl = media.mediaResponse.mediaObjects[0].contentUrl;
-          const fileName = originalUrl.split('/').pop();
-          const style = getSelectedStyle();
-          const baseFolder = (style === 'sringeri')
-            ? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioSringeri/'
-            : 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioFull/';
-          const audioUrl = baseFolder + fileName;
-          document.getElementById('audioPlayer').src = audioUrl;
-          document.getElementById('audioPlayer').play();
-        }
-      }
+      let chapter, verse;
 
       if (data.outputContexts) {
         currentContext = data.outputContexts;
         localStorage.setItem('gitaContext', JSON.stringify(currentContext));
         const context = currentContext.find(c => c.name.includes('shloka-context'));
         if (context?.parameters) {
-          const chapter = Math.floor(context.parameters.chapter);
-          const verse = Math.floor(context.parameters.verse);
+          chapter = Math.floor(context.parameters.chapter);
+          verse = Math.floor(context.parameters.verse);
           const text = await fetchShlokaText(chapter, verse);
           updateTextBoxes(getSelectedStyle(), `${chapter}.${verse} ${text}`);
         }
       }
+
+      // Always attempt to construct audio path even if not provided
+      if (!chapter || !verse) {
+        const context = currentContext.find(c => c.name.includes('shloka-context'));
+        if (context?.parameters) {
+          chapter = Math.floor(context.parameters.chapter);
+          verse = Math.floor(context.parameters.verse);
+        }
+      }
+
+      if (chapter && verse) {
+        const style = getSelectedStyle();
+        const fileName = `${chapter}.${verse}.mp3`;
+        const baseFolder = (style === 'sringeri')
+          ? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioSringeri/'
+          : 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioFull/';
+        const audioUrl = baseFolder + fileName;
+        const player = document.getElementById('audioPlayer');
+        player.src = audioUrl;
+        player.play();
+      }
+
     } catch (e) {
       console.error('Error:', e);
     }
@@ -188,15 +180,6 @@
         const text = await fetchShlokaText(chapter, verse);
         updateTextBoxes(getSelectedStyle(), `${chapter}.${verse} ${text}`);
       }
-	const style = getSelectedStyle();
-	const fileName = `${chapter}.${verse}.mp3`;
-	const baseFolder = (style === 'sringeri')
-  	? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioSringeri/'
-  	: 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioFull/';
-	const audioUrl = baseFolder + fileName;
-	document.getElementById('audioPlayer').src = audioUrl;
-	document.getElementById('audioPlayer').play();
-
     });
   });
 </script>
