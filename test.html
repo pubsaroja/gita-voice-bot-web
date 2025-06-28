@@ -57,12 +57,13 @@
             margin-right: auto;
             line-height: 1.5;
             min-height: 1.8em; /* 1 line: 1.2em * 1.5 */
-            max-height: 7.2em; /* 4 lines: 1.2em * 1.5 * 4 */
+            max-height: 9em; /* 5 lines: 1.2em * 1.5 * 5 */
             overflow-y: auto;
             padding: 10px;
             border: 2px solid #357EC7;
             border-radius: 5px;
             box-sizing: border-box; /* Include padding in height */
+            scrollbar-width: auto; /* Ensure visible scrollbar */
         }
         #audioPlayer {
             margin-top: 20px;
@@ -160,7 +161,7 @@
         .close-button:hover {
             background-color: #cc0000;
         }
-        @media (max-width: 600px) {
+        @media (max-width>600px) {
             .button-container {
                 flex-direction: column;
             }
@@ -275,16 +276,22 @@
                 // For initial HTML with <br> tags
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = text;
-                const brCount = (text.match(/<br\s*\/?>/gi) || []).length;
-                const textLines = tempDiv.textContent.split('\n').filter(line => line.trim() !== '').length;
-                lines = Math.max(textLines, brCount + 1); // Count <br> tags plus first line
+                // Split by <br> tags and count non-empty lines
+                const htmlLines = text.split(/<br\s*\/?>/gi).map(line => {
+                    const div = document.createElement('div');
+                    div.innerHTML = line;
+                    return div.textContent.trim();
+                }).filter(line => line !== '');
+                lines = htmlLines.length || 1;
             } else {
                 // For plain text (shlokas, meanings, errors)
-                const cleanText = textbox.textContent || textbox.innerText || text;
-                lines = cleanText.split('\n').filter(line => line.trim() !== '').length || 1;
+                const cleanText = (textbox.textContent || textbox.innerText || text).trim();
+                // Normalize newlines and filter non-empty lines
+                lines = cleanText.replace(/\r\n|\r|\n+/g, '\n').split('\n').filter(line => line.trim() !== '').length || 1;
             }
             const lineHeightEm = 1.2 * 1.5; // font-size * line-height
-            const newHeight = Math.min(Math.max(lines * lineHeightEm, 1.8), 7.2);
+            const paddingEm = 20 / 16; // 20px padding (10px top + bottom) in em
+            const newHeight = Math.min(Math.max(lines * lineHeightEm + paddingEm, 1.8), 9);
             console.log(`Adjusting height for ${text.substring(0, 20)}...: ${lines} lines, ${newHeight}em, isInitialHTML: ${isInitialHTML}`);
             textbox.style.height = `${newHeight}em`;
         }
