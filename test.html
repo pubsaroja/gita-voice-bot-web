@@ -62,6 +62,7 @@
             padding: 10px;
             border: 2px solid #357EC7;
             border-radius: 5px;
+            box-sizing: border-box; /* Include padding in height */
         }
         #audioPlayer {
             margin-top: 20px;
@@ -222,7 +223,7 @@
     <div class="textbox-container">
         <div>
             <div id="gurudattaLabel" class="textbox-label active">Gurudatta Style Shloka</div>
-            <div id="gurudattaText" class="shloka-text active"><b style="color:red;">Your Shloka will appear here.</b>  <br>Shloka Q1: Get Random Shloka with 1st pada. <br>Shloka Q1 or Q3: Get 1st Pada or 3rd Pada.<br>Full - Get full Shloka<br>Previous: Get previous Shloka.<br>Select Shloka: Get individual Shloka.<br>Meanings: Get meanings of Shlokas.<br>Dropdown "Select Chapter" : Get random shloka from particular chapter.<br>To avoid confusion, Gurudatta style audio only being kept in the Sringeri Style also.  Please let me know if you want Sringeri style audio also. (dr(dot)p(dot)udayabhaskar(at)gmail.com).  </div>
+            <div id="gurudattaText" class="shloka-text active"><b style="color:red;">Your Shloka will appear here.</b>  <br>Shloka Q1: Get Random Shloka with 1st pada. <br>Shloka Q1 or Q3: Get 1st Pada or 3rd Pada.<br>Full - Get full Shloka<br>Previous: Get previous Shloka.<br>Select Shloka: Get individual Shloka.<br>Meanings: Get meanings of Shlokas.<br>Dropdown "Select Chapter" : Get random shloka from particular chapter.<br></div>
         </div>
         <div>
             <div id="sringeriLabel" class="textbox-label">Sringeri Style Shloka</div>
@@ -266,6 +267,27 @@
             9: 34, 10: 42, 11: 55, 12: 20, 13: 34, 14: 27, 15: 20,
             16: 24, 17: 28, 18: 78
         };
+
+        // Helper function to count lines and adjust textbox height
+        function adjustTextboxHeight(textbox, text, isInitialHTML = false) {
+            let lines;
+            if (isInitialHTML) {
+                // For initial HTML with <br> tags
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = text;
+                const brCount = (text.match(/<br\s*\/?>/gi) || []).length;
+                const textLines = tempDiv.textContent.split('\n').filter(line => line.trim() !== '').length;
+                lines = Math.max(textLines, brCount + 1); // Count <br> tags plus first line
+            } else {
+                // For plain text (shlokas, meanings, errors)
+                const cleanText = textbox.textContent || textbox.innerText || text;
+                lines = cleanText.split('\n').filter(line => line.trim() !== '').length || 1;
+            }
+            const lineHeightEm = 1.2 * 1.5; // font-size * line-height
+            const newHeight = Math.min(Math.max(lines * lineHeightEm, 1.8), 7.2);
+            console.log(`Adjusting height for ${text.substring(0, 20)}...: ${lines} lines, ${newHeight}em, isInitialHTML: ${isInitialHTML}`);
+            textbox.style.height = `${newHeight}em`;
+        }
 
         async function fetchAudioUrl(chapter, verse, quarter = null, backendAudioUrl = null) {
             const baseUrl = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main';
@@ -397,18 +419,19 @@
                 if (typeof audioResult === 'object' && audioResult.error) {
                     gurudattaText.innerText = `${shlokaText}\n${audioResult.error}`;
                     sringeriText.innerText = `${shlokaText}\n${audioResult.error}`;
+                    adjustTextboxHeight(gurudattaText, gurudattaText.innerText);
+                    adjustTextboxHeight(sringeriText, sringeriText.innerText);
                 }
             } catch (error) {
                 gurudattaText.innerText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
                 sringeriText.innerText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
+                adjustTextboxHeight(gurudattaText, gurudattaText.innerText);
+                adjustTextboxHeight(sringeriText, sringeriText.innerText);
             }
             
             // Adjust textbox height
             const activeTextbox = style === 'gurudatta' ? gurudattaText : sringeriText;
-            const lines = shlokaText.split('\n').filter(line => line.trim() !== '').length || 1;
-            const lineHeightEm = 1.2 * 1.5;
-            const newHeight = Math.min(Math.max(lines * lineHeightEm, 1.8), 7.2);
-            activeTextbox.style.height = `${newHeight}em`;
+            adjustTextboxHeight(activeTextbox, shlokaText);
             
             updateTextboxVisibility();
             closeVerseTable();
@@ -452,18 +475,19 @@
                     if (typeof audioResult === 'object' && audioResult.error) {
                         gurudattaText.innerText = `${shlokaText}\n${audioResult.error}`;
                         sringeriText.innerText = `${shlokaText}\n${audioResult.error}`;
+                        adjustTextboxHeight(gurudattaText, gurudattaText.innerText);
+                        adjustTextboxHeight(sringeriText, sringeriText.innerText);
                     }
                 } catch (error) {
                     gurudattaText.innerText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
                     sringeriText.innerText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
+                    adjustTextboxHeight(gurudattaText, gurudattaText.innerText);
+                    adjustTextboxHeight(sringeriText, sringeriText.innerText);
                 }
                 
                 // Adjust textbox height
                 const activeTextbox = style === 'gurudatta' ? gurudattaText : sringeriText;
-                const lines = shlokaText.split('\n').filter(line => line.trim() !== '').length || 1;
-                const lineHeightEm = 1.2 * 1.5;
-                const newHeight = Math.min(Math.max(lines * lineHeightEm, 1.8), 7.2);
-                activeTextbox.style.height = `${newHeight}em`;
+                adjustTextboxHeight(activeTextbox, shlokaText);
                 
                 updateTextboxVisibility();
             } else {
@@ -472,9 +496,10 @@
                 const sringeriText = document.getElementById('sringeriText');
                 gurudattaText.innerText = errorText;
                 sringeriText.innerText = errorText;
-                // Reset height for error message
+                // Adjust textbox height
+                const style = getSelectedStyle();
                 const activeTextbox = style === 'gurudatta' ? gurudattaText : sringeriText;
-                activeTextbox.style.height = '1.8em';
+                adjustTextboxHeight(activeTextbox, errorText);
                 updateTextboxVisibility();
             }
         }
@@ -494,10 +519,7 @@
                 // Adjust textbox height
                 const style = getSelectedStyle();
                 const activeTextbox = style === 'gurudatta' ? gurudattaText : sringeriText;
-                const lines = meaningText.split('\n').filter(line => line.trim() !== '').length || 1;
-                const lineHeightEm = 1.2 * 1.5;
-                const newHeight = Math.min(Math.max(lines * lineHeightEm, 1.8), 7.2);
-                activeTextbox.style.height = `${newHeight}em`;
+                adjustTextboxHeight(activeTextbox, meaningText);
                 
                 updateTextboxVisibility();
             } else {
@@ -506,10 +528,10 @@
                 const sringeriText = document.getElementById('sringeriText');
                 gurudattaText.innerText = errorText;
                 sringeriText.innerText = errorText;
-                // Reset height for error message
+                // Adjust textbox height
                 const style = getSelectedStyle();
                 const activeTextbox = style === 'gurudatta' ? gurudattaText : sringeriText;
-                activeTextbox.style.height = '1.8em';
+                adjustTextboxHeight(activeTextbox, errorText);
                 updateTextboxVisibility();
             }
         }
@@ -540,18 +562,19 @@
                     if (typeof audioResult === 'object' && audioResult.error) {
                         gurudattaText.innerText = `${shlokaText}\n${audioResult.error}`;
                         sringeriText.innerText = `${shlokaText}\n${audioResult.error}`;
+                        adjustTextboxHeight(gurudattaText, gurudattaText.innerText);
+                        adjustTextboxHeight(sringeriText, sringeriText.innerText);
                     }
                 } catch (error) {
                     gurudattaText.innerText = `${shlokaText}\nError playing audio for ${chapter}.1: ${error.message}`;
                     sringeriText.innerText = `${shlokaText}\nError playing audio for ${chapter}.1: ${error.message}`;
+                    adjustTextboxHeight(gurudattaText, gurudattaText.innerText);
+                    adjustTextboxHeight(sringeriText, sringeriText.innerText);
                 }
                 
                 // Adjust textbox height
                 const activeTextbox = style === 'gurudatta' ? gurudattaText : sringeriText;
-                const lines = shlokaText.split('\n').filter(line => line.trim() !== '').length || 1;
-                const lineHeightEm = 1.2 * 1.5;
-                const newHeight = Math.min(Math.max(lines * lineHeightEm, 1.8), 7.2);
-                activeTextbox.style.height = `${newHeight}em`;
+                adjustTextboxHeight(activeTextbox, shlokaText);
                 
                 updateTextboxVisibility();
                 selectElement.selectedIndex = 0;
@@ -590,11 +613,7 @@
 
             // Adjust textbox height
             const activeTextbox = style === 'gurudatta' ? gurudattaText : sringeriText;
-            const currentText = activeTextbox.innerText;
-            const lines = currentText.split('\n').filter(line => line.trim() !== '').length || 1;
-            const lineHeightEm = 1.2 * 1.5;
-            const newHeight = Math.min(Math.max(lines * lineHeightEm, 1.8), 7.2);
-            activeTextbox.style.height = `${newHeight}em`;
+            adjustTextboxHeight(activeTextbox, activeTextbox.innerHTML, true);
         }
 
         async function fetchShlokaText(chapter, verse, style) {
@@ -689,27 +708,28 @@
                         if (typeof audioResult === 'object' && audioResult.error) {
                             gurudattaText.innerText = `${shlokaText}\n${audioResult.error}`;
                             sringeriText.innerText = `${shlokaText}\n${audioResult.error}`;
+                            adjustTextboxHeight(gurudattaText, gurudattaText.innerText);
+                            adjustTextboxHeight(sringeriText, sringeriText.innerText);
                         }
                     } catch (error) {
                         gurudattaText.innerText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
                         sringeriText.innerText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
+                        adjustTextboxHeight(gurudattaText, gurudattaText.innerText);
+                        adjustTextboxHeight(sringeriText, sringeriText.innerText);
                     }
                     
                     // Adjust textbox height
                     const activeTextbox = style === 'gurudatta' ? gurudattaText : sringeriText;
-                    const lines = shlokaText.split('\n').filter(line => line.trim() !== '').length || 1;
-                    const lineHeightEm = 1.2 * 1.5;
-                    const newHeight = Math.min(Math.max(lines * lineHeightEm, 1.8), 7.2);
-                    activeTextbox.style.height = `${newHeight}em`;
+                    adjustTextboxHeight(activeTextbox, shlokaText);
                 } else {
                     const errorText = 'Please select a Shloka first';
                     const gurudattaText = document.getElementById('gurudattaText');
                     const sringeriText = document.getElementById('sringeriText');
                     gurudattaText.innerText = errorText;
                     sringeriText.innerText = errorText;
-                    // Reset height for error message
+                    // Adjust textbox height
                     const activeTextbox = style === 'gurudatta' ? gurudattaText : sringeriText;
-                    activeTextbox.style.height = '1.8em';
+                    adjustTextboxHeight(activeTextbox, errorText);
                 }
 
                 updateTextboxVisibility();
@@ -719,10 +739,9 @@
                 const sringeriText = document.getElementById('sringeriText');
                 gurudattaText.innerText = errorText;
                 sringeriText.innerText = errorText;
-                // Reset height for error message
-                const style = getSelectedStyle();
+                // Adjust textbox height
                 const activeTextbox = style === 'gurudatta' ? gurudattaText : sringeriText;
-                activeTextbox.style.height = '1.8em';
+                adjustTextboxHeight(activeTextbox, errorText);
                 updateTextboxVisibility();
             }
         }
