@@ -121,6 +121,14 @@
             overflow-y: auto;
             border: 2px solid #357EC7;
         }
+        .chapter-select {
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 1em;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 200px;
+        }
         .verse-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
@@ -181,7 +189,7 @@
         <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Get Random Shloka Q1 or Q3</button>
         <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Get Full Shloka</button>
         <button onclick="sendCommand('NextIntent', {style: getSelectedStyle()})">Next Shloka</button>
-        <button onclick="handlePreviousShloka()">Previous Shloka</button>
+        <button onclick="sendCommand('PreviousIntent', {style: getSelectedStyle()})">Previous Shloka</button>
         <button onclick="showVerseTable()">Regular Readers</button>
     </div>
     
@@ -234,7 +242,28 @@
     <div id="verseTableModal" class="modal">
         <div class="modal-content">
             <button class="close-button" onclick="closeVerseTable()">Close</button>
-            <div id="verseTableContent"></div>
+            <select id="chapterTableSelect" class="chapter-select" onchange="updateVerseGrid()">
+                <option value="" selected disabled>-- Select Chapter --</option>
+                <option value="1">Chapter 1 (47 verses)</option>
+                <option value="2">Chapter 2 (72 verses)</option>
+                <option value="3">Chapter 3 (43 verses)</option>
+                <option value="4">Chapter 4 (42 verses)</option>
+                <option value="5">Chapter 5 (29 verses)</option>
+                <option value="6">Chapter 6 (47 verses)</option>
+                <option value="7">Chapter 7 (30 verses)</option>
+                <option value="8">Chapter 8 (28 verses)</option>
+                <option value="9">Chapter 9 (34 verses)</option>
+                <option value="10">Chapter 10 (42 verses)</option>
+                <option value="11">Chapter 11 (55 verses)</option>
+                <option value="12">Chapter 12 (20 verses)</option>
+                <option value="13">Chapter 13 (34 verses)</option>
+                <option value="14">Chapter 14 (27 verses)</option>
+                <option value="15">Chapter 15 (20 verses)</option>
+                <option value="16">Chapter 16 (24 verses)</option>
+                <option value="17">Chapter 17 (28 verses)</option>
+                <option value="18">Chapter 18 (78 verses)</option>
+            </select>
+            <div id="verseTableContent" class="verse-grid"></div>
         </div>
     </div>
     
@@ -248,12 +277,18 @@
 
         function showVerseTable() {
             const modal = document.getElementById('verseTableModal');
+            const chapterSelect = document.getElementById('chapterTableSelect');
+            chapterSelect.value = ''; // Reset dropdown
+            updateVerseGrid(); // Clear verse grid
+            modal.style.display = 'flex';
+        }
+
+        function updateVerseGrid() {
+            const chapter = document.getElementById('chapterTableSelect').value;
             const content = document.getElementById('verseTableContent');
             content.innerHTML = ''; // Clear previous content
 
-            for (let chapter = 1; chapter <= 18; chapter++) {
-                const chapterDiv = document.createElement('div');
-                chapterDiv.innerHTML = `<div class="chapter-title">Chapter ${chapter}</div>`;
+            if (chapter) {
                 const verseGrid = document.createElement('div');
                 verseGrid.className = 'verse-grid';
                 for (let verse = 1; verse <= verseCounts[chapter]; verse++) {
@@ -263,11 +298,8 @@
                     verseButton.onclick = () => selectVerse(chapter, verse);
                     verseGrid.appendChild(verseButton);
                 }
-                chapterDiv.appendChild(verseGrid);
-                content.appendChild(chapterDiv);
+                content.appendChild(verseGrid);
             }
-
-            modal.style.display = 'flex';
         }
 
         function closeVerseTable() {
@@ -278,39 +310,6 @@
             const style = getSelectedStyle();
             sendCommand('ChapterIntent', { chapter: chapter, verse: verse, style: style });
             closeVerseTable();
-        }
-
-        function handlePreviousShloka() {
-            const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-            if (context && context.parameters && context.parameters.chapter && context.parameters.verse) {
-                let chapter = Math.floor(context.parameters.chapter);
-                let verse = Math.floor(context.parameters.verse);
-                verse -= 1;
-                if (verse < 1) {
-                    chapter -= 1;
-                    if (chapter < 1) {
-                        chapter = 1;
-                        verse = 1;
-                    } else {
-                        verse = verseCounts[chapter];
-                    }
-                }
-                const style = getSelectedStyle();
-                sendCommand('ChapterIntent', { chapter: chapter, verse: verse, style: style });
-                // Update context to reflect previous verse
-                currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
-                currentContext.push({
-                    name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
-                    lifespanCount: 5,
-                    parameters: { chapter: chapter, verse: verse, style: style }
-                });
-                localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-            } else {
-                const errorText = 'Please select a Shloka first';
-                document.getElementById('gurudattaText').innerText = errorText;
-                document.getElementById('sringeriText').innerText = errorText;
-                updateTextboxVisibility();
-            }
         }
 
         function handleChapterSelect(selectElement) {
@@ -407,6 +406,14 @@
         async function sendCommand(intent, params) {
             const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
             const style = params.style || getSelectedStyle();
+            // Ensure context includes chapter and verse for navigation intents
+            if (intent === 'NextIntent' || intent === 'PreviousIntent') {
+                const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+                if (context && context.parameters) {
+                    params.chapter = context.parameters.chapter;
+                    params.verse = context.parameters.verse;
+                }
+            }
             const payload = {
                 session: sessionId,
                 queryResult: {
