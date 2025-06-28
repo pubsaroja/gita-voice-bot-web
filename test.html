@@ -285,6 +285,7 @@
 
             const tryUrl = async (url, type) => {
                 try {
+                    console.log(`fetchAudioUrl: Attempting ${type}: ${url}`);
                     const check = await fetch(url, { method: 'HEAD', mode: 'cors' });
                     if (!check.ok) {
                         console.log(`fetchAudioUrl: Failed to fetch ${type}, HTTP status: ${check.status}`);
@@ -317,10 +318,11 @@
                         audioUrl = `${baseUrl}/AudioFull/${key}.mp3`;
                     }
                 }
-                if (backendAudioUrl) {
+                // Skip backendAudioUrl for quarter audio to prioritize pada1Url
+                if (backendAudioUrl && quarter !== 'pada1') {
                     const backendUrlResult = await tryUrl(backendAudioUrl, `Backend-provided ${quarter}`);
                     if (backendUrlResult) {
-                        console.log(`fetchAudioUrl: Prioritizing backend audio for ${quarter}: ${backendUrlResult}`);
+                        console.log(`fetchAudioUrl: Using backend audio for ${quarter}: ${backendUrlResult}`);
                         return backendUrlResult;
                     }
                 }
