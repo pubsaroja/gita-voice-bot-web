@@ -20,6 +20,13 @@
             font-size: 1em;
             margin-top: 10px;
         }
+        .button-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+        }
         button {
             background-color: #357EC7;
             color: white;
@@ -43,13 +50,13 @@
             margin-top: 10px;
             font-size: 1.2em;
             color: #333;
-            white-space: pre;
+            white-space: pre-wrap;
             text-align: left;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
             line-height: 1.5;
-            height: 7.2em;
+            min-height: 3em;
             overflow-y: auto;
             padding: 10px;
             border: 2px solid #357EC7;
@@ -61,16 +68,12 @@
         .radio-group {
             margin: 10px 0;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
+            gap: 10px;
         }
         .radio-group label {
-            margin: 5px 10px;
-        }
-        .radio-group .radio-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
+            margin: 0 10px;
         }
         .textbox-container {
             display: flex;
@@ -96,16 +99,91 @@
         .shloka-text.active {
             display: block;
         }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 80%;
+            max-height: 80%;
+            overflow-y: auto;
+            border: 2px solid #357EC7;
+        }
+        .chapter-select {
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 1em;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 200px;
+        }
+        .verse-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 10px;
+            padding: 10px;
+        }
+        .verse-button {
+            background-color: #f9f9f9;
+            border: 1px solid #357EC7;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .verse-button:hover {
+            background-color: #e0e0e0;
+        }
+        .close-button {
+            background-color: #ff4444;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            float: right;
+        }
+        .close-button:hover {
+            background-color: #cc0000;
+        }
+        @media (max-width: 600px) {
+            .button-container {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+                max-width: 300px;
+                margin: 5px auto;
+            }
+            .verse-grid {
+                grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            }
+        }
     </style>
 </head>
 <body>
     <h1>Bhagavad Gita Bot</h1>
     
-    <div>
-        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1', style: getSelectedStyle()})">Get Random Shloka Q1</button>
-        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Get Random Shloka Q1 or Q3</button>
-        <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Get Full Shloka</button>
-        <button onclick="sendCommand('NextIntent', {quarter: 'pada1', style: getSelectedStyle()})">Next Shloka</button>
+    <div class="button-container">
+        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1', style: getSelectedStyle()})">Shloka Q1</button>
+        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Shloka Q1 or Q3</button>
+        <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Full Shloka</button>
+        <button onclick="sendCommand('NextIntent', {style: getSelectedStyle(), pada: 'pada1'})">Next Shloka</button>
+        <button id="previousButton" onclick="handlePreviousShloka()">Previous Shloka</button>
+        <button onclick="handleMeanings()">Meanings</button>
+        <button onclick="showVerseTable()">Select Shloka</button>
     </div>
     
     <div>
@@ -133,19 +211,17 @@
     </div>
     
     <div class="radio-group">
-        <label>Full Shloka Style</label>
-        <div class="radio-buttons">
-            <input type="radio" name="style" value="gurudatta" id="gurudatta" checked onchange="updateTextboxVisibility()">
-            <label for="gurudatta">Gurudatta Style</label>
-            <input type="radio" name="style" value="sringeri" id="sringeri" onchange="updateTextboxVisibility()">
-            <label for="sringeri">Sringeri Style</label>
-        </div>
+        <label>Full Shloka Style:</label>
+        <input type="radio" name="style" value="gurudatta" id="gurudatta" checked onchange="updateTextboxVisibility()">
+        <label for="gurudatta">Gurudatta Style</label>
+        <input type="radio" name="style" value="sringeri" id="sringeri" onchange="updateTextboxVisibility()">
+        <label for="sringeri">Sringeri Style</label>
     </div>
     
     <div class="textbox-container">
         <div>
             <div id="gurudattaLabel" class="textbox-label active">Gurudatta Style Shloka</div>
-            <div id="gurudattaText" class="shloka-text active">Your Shloka will appear here</div>
+            <div id="gurudattaText" class="shloka-text active"><b style="color:red;">Your Shloka will appear here.</b>  <br>Shloka Q1: Get Random Shloka with 1st pada. <br>Shloka Q1 or Q3: Get 1st Pada or 3rd Pada.<br>Full - Get full Shloka<br>Previous: Get previous Shloka.<br>Select Shloka: Get individual Shloka.<br>Meanings: Get meanings of Shlokas.<br>Dropdown "Select Chapter" : Get random shloka from particular chapter.<br></div>
         </div>
         <div>
             <div id="sringeriLabel" class="textbox-label">Sringeri Style Shloka</div>
@@ -155,35 +231,357 @@
     
     <audio id="audioPlayer" controls></audio>
     
+    <div id="verseTableModal" class="modal">
+        <div class="modal-content">
+            <button class="close-button" onclick="closeVerseTable()">Close</button>
+            <select id="chapterTableSelect" class="chapter-select" onchange="updateVerseGrid()">
+                <option value="" selected disabled>-- Select Chapter --</option>
+                <option value="1">Chapter 1 (47 verses)</option>
+                <option value="2">Chapter 2 (72 verses)</option>
+                <option value="3">Chapter 3 (43 verses)</option>
+                <option value="4">Chapter 4 (42 verses)</option>
+                <option value="5">Chapter 5 (29 verses)</option>
+                <option value="6">Chapter 6 (47 verses)</option>
+                <option value="7">Chapter 7 (30 verses)</option>
+                <option value="8">Chapter 8 (28 verses)</option>
+                <option value="9">Chapter 9 (34 verses)</option>
+                <option value="10">Chapter 10 (42 verses)</option>
+                <option value="11">Chapter 11 (55 verses)</option>
+                <option value="12">Chapter 12 (20 verses)</option>
+                <option value="13">Chapter 13 (34 verses)</option>
+                <option value="14">Chapter 14 (27 verses)</option>
+                <option value="15">Chapter 15 (20 verses)</option>
+                <option value="16">Chapter 16 (24 verses)</option>
+                <option value="17">Chapter 17 (28 verses)</option>
+                <option value="18">Chapter 18 (78 verses)</option>
+            </select>
+            <div id="verseTableContent" class="verse-grid"></div>
+        </div>
+    </div>
+    
     <script>
-        function handleChapterSelect(selectElement) {
-            const chapter = selectElement.value;
+        const verseCounts = {
+            1: 47, 2: 72, 3: 43, 4: 42, 5: 29, 6: 47, 7: 30, 8: 28,
+            9: 34, 10: 42, 11: 55, 12: 20, 13: 34, 14: 27, 15: 20,
+            16: 24, 17: 28, 18: 78
+        };
+
+        function adjustTextboxHeight() {
+            const gurudattaText = document.getElementById('gurudattaText');
+            const sringeriText = document.getElementById('sringeriText');
+            [gurudattaText, sringeriText].forEach(textbox => {
+                textbox.style.height = 'auto';
+                const scrollHeight = textbox.scrollHeight;
+                textbox.style.height = `${scrollHeight}px`;
+                console.log(`adjustTextboxHeight: ${textbox.id}, scrollHeight: ${scrollHeight}px, final height: ${textbox.style.height}`);
+            });
+        }
+
+        async function fetchAudioUrl(chapter, verse, quarter = null, backendAudioUrl = null) {
+            const baseUrl = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main';
+            const key = `${chapter}.${verse}`;
+            let audioUrl;
+            let errorMessage = '';
+
+            const tryUrl = async (url, type) => {
+                try {
+                    console.log(`fetchAudioUrl: Attempting ${type}: ${url}`);
+                    const check = await fetch(url, { method: 'HEAD', mode: 'cors' });
+                    if (!check.ok) {
+                        console.log(`fetchAudioUrl: Failed to fetch ${type}, HTTP status: ${check.status}`);
+                        throw new Error(`${type} inaccessible: HTTP ${check.status}`);
+                    }
+                    console.log(`fetchAudioUrl: Successfully fetched ${type}: ${url}`);
+                    return url;
+                } catch (error) {
+                    console.log(`fetchAudioUrl: Error for ${type}: ${error.message}`);
+                    return null;
+                }
+            };
+
+            if (quarter === 'pada1' || quarter === 'pada1_or_pada3') {
+                const pada1Url = `${baseUrl}/AudioQuarterAll/Chapter ${chapter}/${verse}.1.mp3`;
+                const pada3Url = `${baseUrl}/AudioQuarterAll/Chapter ${chapter}/${verse}.3.mp3`;
+                if (quarter === 'pada1') {
+                    audioUrl = await tryUrl(pada1Url, `AudioQuarterAll/Chapter ${chapter}/${verse}.1.mp3`);
+                    if (!audioUrl) {
+                        errorMessage = `Quarter audio (Pada1) not found in AudioQuarterAll/Chapter ${chapter} for ${key}`;
+                        audioUrl = `${baseUrl}/AudioFull/${key}.mp3`;
+                    }
+                } else {
+                    audioUrl = await tryUrl(pada1Url, `AudioQuarterAll/Chapter ${chapter}/${verse}.1.mp3`);
+                    if (!audioUrl) {
+                        audioUrl = await tryUrl(pada3Url, `AudioQuarterAll/Chapter ${chapter}/${verse}.3.mp3`);
+                    }
+                    if (!audioUrl) {
+                        errorMessage = `Quarter audio (Pada1 or Pada3) not found in AudioQuarterAll/Chapter ${chapter} for ${key}`;
+                        audioUrl = `${baseUrl}/AudioFull/${key}.mp3`;
+                    }
+                }
+                // Skip backendAudioUrl for quarter audio to prioritize pada1Url
+                if (backendAudioUrl && quarter !== 'pada1') {
+                    const backendUrlResult = await tryUrl(backendAudioUrl, `Backend-provided ${quarter}`);
+                    if (backendUrlResult) {
+                        console.log(`fetchAudioUrl: Using backend audio for ${quarter}: ${backendUrlResult}`);
+                        return backendUrlResult;
+                    }
+                }
+            } else {
+                audioUrl = `${baseUrl}/AudioFull/${key}.mp3`;
+            }
+
+            try {
+                const fullCheck = await fetch(audioUrl, { method: 'HEAD', mode: 'cors' });
+                if (!fullCheck.ok) {
+                    throw new Error(`AudioFull inaccessible: HTTP ${fullCheck.status}`);
+                }
+                console.log(`fetchAudioUrl: Using audio for ${key}: ${audioUrl}`);
+                return errorMessage ? { url: audioUrl, error: errorMessage } : audioUrl;
+            } catch (error) {
+                console.log(`fetchAudioUrl: Error for ${key}: ${error.message}`);
+                return { url: audioUrl, error: `No audio available for ${key}: ${error.message}` };
+            }
+        }
+
+        async function fetchShlokaMeaning(chapter, verse) {
+            const url = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/meanings.txt';
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+                const data = await response.json();
+                const key = `${chapter}.${verse}`;
+                if (data[key] && data[key].అర్థము) {
+                    return `${chapter}.${verse} Meaning:\n${data[key].అర్థము}`;
+                } else {
+                    return `Meaning for ${chapter}.${verse} not found`;
+                }
+            } catch (error) {
+                return `Error loading meaning for ${chapter}.${verse}: ${error.message}`;
+            }
+        }
+
+        function showVerseTable() {
+            const modal = document.getElementById('verseTableModal');
+            const chapterSelect = document.getElementById('chapterTableSelect');
+            chapterSelect.value = '';
+            updateVerseGrid();
+            modal.style.display = 'flex';
+        }
+
+        function updateVerseGrid() {
+            const chapter = parseInt(document.getElementById('chapterTableSelect').value);
+            const content = document.getElementById('verseTableContent');
+            content.innerHTML = '';
+
             if (chapter) {
-                sendCommand('ChapterIntent', { chapter: chapter, pada: 'pada1', style: getSelectedStyle() });
+                const verseGrid = document.createElement('div');
+                verseGrid.className = 'verse-grid';
+                for (let verse = 1; verse <= verseCounts[chapter]; verse++) {
+                    const verseButton = document.createElement('div');
+                    verseButton.className = 'verse-button';
+                    verseButton.textContent = `${chapter}.${verse}`;
+                    verseButton.onclick = () => selectVerse(chapter, verse);
+                    verseGrid.appendChild(verseButton);
+                }
+                content.appendChild(verseGrid);
+            }
+        }
+
+        function closeVerseTable() {
+            document.getElementById('verseTableModal').style.display = 'none';
+        }
+
+        async function selectVerse(chapter, verse) {
+            const style = getSelectedStyle();
+            currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
+            currentContext.push({
+                name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                lifespanCount: 5,
+                parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style, showingMeaning: false }
+            });
+            localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+            console.log('selectVerse: Updated context:', JSON.stringify(currentContext));
+            
+            const shlokaText = await fetchShlokaText(chapter, verse, style);
+            document.getElementById('gurudattaText').innerText = shlokaText;
+            document.getElementById('sringeriText').innerText = shlokaText;
+            adjustTextboxHeight();
+            
+            const audioResult = await fetchAudioUrl(chapter, verse);
+            const audioPlayer = document.getElementById('audioPlayer');
+            audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
+            try {
+                await audioPlayer.play();
+                if (typeof audioResult === 'object' && audioResult.error) {
+                    const errorText = `${shlokaText}\n${audioResult.error}`;
+                    document.getElementById('gurudattaText').innerText = errorText;
+                    document.getElementById('sringeriText').innerText = errorText;
+                    adjustTextboxHeight();
+                }
+            } catch (error) {
+                const errorText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
+                document.getElementById('gurudattaText').innerText = errorText;
+                document.getElementById('sringeriText').innerText = errorText;
+                adjustTextboxHeight();
+            }
+            
+            updateTextboxVisibility();
+            closeVerseTable();
+        }
+
+        async function handlePreviousShloka() {
+            const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+            if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
+                let chapter = Math.floor(context.parameters.chapter);
+                let verse = Math.floor(context.parameters.verse);
+                verse -= 1;
+                if (verse < 1) {
+                    chapter -= 1;
+                    if (chapter < 1) {
+                        chapter = 1;
+                        verse = 1;
+                    } else {
+                        verse = verseCounts[chapter];
+                    }
+                }
+                const style = getSelectedStyle();
+                currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
+                currentContext.push({
+                    name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                    lifespanCount: 5,
+                    parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style, showingMeaning: false }
+                });
+                localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+                console.log('handlePreviousShloka: Updated context:', JSON.stringify(currentContext));
+                
+                const shlokaText = await fetchShlokaText(chapter, verse, style);
+                document.getElementById('gurudattaText').innerText = shlokaText;
+                document.getElementById('sringeriText').innerText = shlokaText;
+                adjustTextboxHeight();
+                
+                const audioResult = await fetchAudioUrl(chapter, verse);
+                const audioPlayer = document.getElementById('audioPlayer');
+                audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
+                try {
+                    await audioPlayer.play();
+                    if (typeof audioResult === 'object' && audioResult.error) {
+                        const errorText = `${shlokaText}\n${audioResult.error}`;
+                        document.getElementById('gurudattaText').innerText = errorText;
+                        document.getElementById('sringeriText').innerText = errorText;
+                        adjustTextboxHeight();
+                    }
+                } catch (error) {
+                    const errorText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
+                    document.getElementById('gurudattaText').innerText = errorText;
+                    document.getElementById('sringeriText').innerText = errorText;
+                    adjustTextboxHeight();
+                }
+                
+                updateTextboxVisibility();
+            } else {
+                const errorText = 'Please select a Shloka first';
+                document.getElementById('gurudattaText').innerText = errorText;
+                document.getElementById('sringeriText').innerText = errorText;
+                adjustTextboxHeight();
+                updateTextboxVisibility();
+            }
+        }
+
+        async function handleMeanings() {
+            const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+            if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
+                const chapter = Math.floor(context.parameters.chapter);
+                const verse = Math.floor(context.parameters.verse);
+                const style = getSelectedStyle();
+                
+                currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
+                currentContext.push({
+                    name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                    lifespanCount: 5,
+                    parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style, showingMeaning: true }
+                });
+                localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+                console.log('handleMeanings: Updated context:', JSON.stringify(currentContext));
+                
+                const meaningText = await fetchShlokaMeaning(chapter, verse);
+                document.getElementById('gurudattaText').innerText = meaningText;
+                document.getElementById('sringeriText').innerText = meaningText;
+                adjustTextboxHeight();
+                
+                updateTextboxVisibility();
+            } else {
+                const errorText = 'Please select a Shloka first';
+                document.getElementById('gurudattaText').innerText = errorText;
+                document.getElementById('sringeriText').innerText = errorText;
+                adjustTextboxHeight();
+                updateTextboxVisibility();
+            }
+        }
+
+        async function handleChapterSelect(selectElement) {
+            const chapter = parseInt(selectElement.value);
+            if (chapter) {
+                const style = getSelectedStyle();
+                currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
+                currentContext.push({
+                    name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                    lifespanCount: 5,
+                    parameters: { chapter: parseInt(chapter), verse: 1, style: style, showingMeaning: false }
+                });
+                localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+                console.log('handleChapterSelect: Updated context:', JSON.stringify(currentContext));
+                
+                const shlokaText = await fetchShlokaText(chapter, 1, style);
+                document.getElementById('gurudattaText').innerText = shlokaText;
+                document.getElementById('sringeriText').innerText = shlokaText;
+                adjustTextboxHeight();
+                
+                const audioResult = await fetchAudioUrl(chapter, 1, 'pada1');
+                const audioPlayer = document.getElementById('audioPlayer');
+                audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
+                try {
+                    await audioPlayer.play();
+                    if (typeof audioResult === 'object' && audioResult.error) {
+                        const errorText = `${shlokaText}\n${audioResult.error}`;
+                        document.getElementById('gurudattaText').innerText = errorText;
+                        document.getElementById('sringeriText').innerText = errorText;
+                        adjustTextboxHeight();
+                    }
+                } catch (error) {
+                    const errorText = `${shlokaText}\nError playing audio for ${chapter}.1: ${error.message}`;
+                    document.getElementById('gurudattaText').innerText = errorText;
+                    document.getElementById('sringeriText').innerText = errorText;
+                    adjustTextboxHeight();
+                }
+                
+                updateTextboxVisibility();
                 selectElement.selectedIndex = 0;
             }
         }
 
-        let sessionId = localStorage.getItem('gitaSessionId');
-        if (!sessionId) {
-            sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('gitaSessionId', sessionId);
-        }
-        let currentContext = JSON.parse(localStorage.getItem('gitaContext')) || [];
+        // Reset localStorage and initialize session
+        localStorage.removeItem('gitaSessionId');
+        localStorage.removeItem('gitaContext');
+        console.log('Page load: Cleared localStorage (gitaSessionId, gitaContext)');
+        let sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('gitaSessionId', sessionId);
+        let currentContext = [];
+        adjustTextboxHeight();
 
         function getSelectedStyle() {
-            const style = document.querySelector('input[name="style"]:checked').value;
-            console.log(`Selected style: ${style}`);
-            return style;
+            return document.querySelector('input[name="style"]:checked').value;
         }
 
-        function updateTextboxVisibility() {
+        async function updateTextboxVisibility() {
             const style = getSelectedStyle();
             const gurudattaText = document.getElementById('gurudattaText');
             const sringeriText = document.getElementById('sringeriText');
             const gurudattaLabel = document.getElementById('gurudattaLabel');
             const sringeriLabel = document.getElementById('sringeriLabel');
 
+            // Toggle visibility
             if (style === 'gurudatta') {
                 gurudattaText.classList.add('active');
                 gurudattaLabel.classList.add('active');
@@ -196,16 +594,29 @@
                 sringeriLabel.classList.add('active');
             }
 
-            const currentText = style === 'gurudatta' ? gurudattaText.innerText : sringeriText.innerText;
-            if (currentText !== 'Your Shloka will appear here') {
-                const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-                if (context && context.parameters) {
-                    const chapter = Math.floor(context.parameters.chapter);
-                    const verse = Math.floor(context.parameters.verse);
-                    fetchShlokaText(chapter, verse, style).then(shlokaText => {
-                        gurudattaText.innerText = shlokaText;
-                        sringeriText.innerText = shlokaText;
-                    });
+            // Only fetch text if a valid shloka-context exists
+            const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+            if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
+                const chapter = Math.floor(context.parameters.chapter);
+                const verse = Math.floor(context.parameters.verse);
+                const showingMeaning = context.parameters.showingMeaning || false;
+
+                // Update context with new style, preserve showingMeaning
+                currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
+                currentContext.push({
+                    name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                    lifespanCount: 5,
+                    parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style, showingMeaning: showingMeaning }
+                });
+                localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+                console.log('updateTextboxVisibility: Updated context:', JSON.stringify(currentContext));
+
+                // Fetch text based on showingMeaning
+                if (!showingMeaning) {
+                    const shlokaText = await fetchShlokaText(chapter, verse, style);
+                    const activeTextbox = style === 'gurudatta' ? gurudattaText : sringeriText;
+                    activeTextbox.innerText = shlokaText;
+                    adjustTextboxHeight();
                 }
             }
         }
@@ -214,66 +625,41 @@
             const url = style === 'gurudatta' 
                 ? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG Telugu with Uvacha2.txt'
                 : 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt';
-            console.log(`Fetching ${style} text for chapter ${chapter}, verse ${verse} from ${url}`);
             try {
                 const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
                 const text = await response.text();
-                console.log(`${style} text fetched, length: ${text.length} characters`);
                 
                 const lines = text.split('\n');
                 const key1 = `${chapter}.${verse}`;
                 const key2 = `${chapter}-${verse}`;
-                console.log(`Searching for key: ${key1} or ${key2}`);
                 
                 for (let i = 0; i < lines.length; i++) {
-                    if (lines[i].startsWith(key1 + ' ') || lines[i].startsWith(key2 + ' ')) {
-                        let shlokaLines = [lines[i].substring(lines[i].indexOf(' ') + 1)];
+                    const line = lines[i].trim();
+                    if (line.match(new RegExp(`^${key1}\\s+|^${key2}\\s+|^${key1}\\t|^${key2}\\t|^${key1}$|^${key2}$`))) {
+                        let shlokaLines = [line.substring(line.indexOf(' ') + 1 || line.indexOf('\t') + 1 || line.length)];
                         let j = i + 1;
-                        while (j < lines.length && !lines[j].match(/^\d+\.\d+/)) {
-                            shlokaLines.push(lines[j]);
+                        while (j < lines.length && !lines[j].match(/^\d+[.-]\d+/)) {
+                            shlokaLines.push(lines[j].trim());
                             j++;
                         }
-                        let shlokaText = shlokaLines.join('\n');
-                        console.log(`Found shloka: ${shlokaText}`);
+                        let shlokaText = shlokaLines.join('\n').trim();
                         return `${chapter}.${verse} ${shlokaText}`;
                     }
                 }
 
-                console.log(`No line found for ${key1} or ${key2}`);
-                return 'Shloka text not found';
+                return `Shloka ${chapter}.${verse} not found`;
             } catch (error) {
-                console.error(`Error fetching ${style} text: ${error}`);
-                return 'Error loading shloka text';
+                return `Error loading shloka ${chapter}.${verse}: ${error.message}`;
             }
         }
 
         async function sendCommand(intent, params) {
             const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
             const style = params.style || getSelectedStyle();
-            // Ensure NextIntent uses pada1 and preserves chapter/verse
-            if (intent === 'NextIntent') {
-                params.quarter = 'pada1'; // Force quarter to pada1
-                let context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-                if (context && context.parameters && context.parameters.chapter && context.parameters.verse) {
-                    // Update existing context with quarter: pada1
-                    context.parameters.quarter = 'pada1';
-                    context.parameters.style = style;
-                } else {
-                    // Create new context with placeholder chapter/verse (backend should set these)
-                    currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
-                    currentContext.push({
-                        name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
-                        lifespanCount: 5,
-                        parameters: { 
-                            quarter: 'pada1', 
-                            style: style,
-                            chapter: context?.parameters.chapter || 1,
-                            verse: context?.parameters.verse || 1
-                        }
-                    });
-                }
-                localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-            }
+            const quarter = params.quarter || null;
             const payload = {
                 session: sessionId,
                 queryResult: {
@@ -294,42 +680,73 @@
                 }
                 const data = await response.json();
                 
-                const fulfillmentText = data.fulfillmentText;
-                document.getElementById('gurudattaText').innerText = fulfillmentText;
-                document.getElementById('sringeriText').innerText = fulfillmentText;
-                
-                if (data.payload && data.payload.google && data.payload.google.richResponse) {
-                    const media = data.payload.google.richResponse.items.find(item => item.mediaResponse);
-                    if (media && media.mediaResponse.mediaObjects[0]) {
-                        const audioUrl = media.mediaResponse.mediaObjects[0].contentUrl;
-                        const audioPlayer = document.getElementById('audioPlayer');
-                        audioPlayer.src = audioUrl;
-                        audioPlayer.play();
+                if (data.outputContexts && data.outputContexts.length > 0) {
+                    currentContext = data.outputContexts;
+                    const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+                    if (context && context.parameters) {
+                        context.parameters.showingMeaning = false;
+                    }
+                    localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+                    console.log('sendCommand: Updated context:', JSON.stringify(currentContext));
+                }
+
+                const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+                let backendAudioUrl = null;
+                if (data.payload && data.payload.google && data.payload.google.richResponse && data.payload.google.richResponse.items) {
+                    const mediaItem = data.payload.google.richResponse.items.find(item => item.mediaResponse && item.mediaResponse.mediaObjects);
+                    if (mediaItem && mediaItem.mediaResponse.mediaObjects[0]) {
+                        backendAudioUrl = mediaItem.mediaResponse.mediaObjects[0].contentUrl;
                     }
                 }
 
-                if (data.outputContexts && data.outputContexts.length > 0) {
-                    currentContext = data.outputContexts;
-                    localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-                    const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-                    if (context && context.parameters) {
-                        const chapter = Math.floor(context.parameters.chapter);
-                        const verse = Math.floor(context.parameters.verse);
-                        const shlokaText = await fetchShlokaText(chapter, verse, style);
-                        document.getElementById('gurudattaText').innerText = shlokaText;
-                        document.getElementById('sringeriText').innerText = shlokaText;
+                if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
+                    const chapter = Math.floor(context.parameters.chapter);
+                    const verse = Math.floor(context.parameters.verse);
+                    
+                    const shlokaText = await fetchShlokaText(chapter, verse, style);
+                    document.getElementById('gurudattaText').innerText = shlokaText;
+                    document.getElementById('sringeriText').innerText = shlokaText;
+                    adjustTextboxHeight();
+                    
+                    const audioResult = await fetchAudioUrl(chapter, verse, quarter, backendAudioUrl);
+                    const audioPlayer = document.getElementById('audioPlayer');
+                    audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
+                    try {
+                        audioPlayer.load();
+                        await audioPlayer.play();
+                        if (typeof audioResult === 'object' && audioResult.error) {
+                            const errorText = `${shlokaText}\n${audioResult.error}`;
+                            document.getElementById('gurudattaText').innerText = errorText;
+                            document.getElementById('sringeriText').innerText = errorText;
+                            adjustTextboxHeight();
+                        }
+                    } catch (error) {
+                        const errorText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
+                        document.getElementById('gurudattaText').innerText = errorText;
+                        document.getElementById('sringeriText').innerText = errorText;
+                        adjustTextboxHeight();
                     }
+                } else {
+                    const errorText = 'Please select a Shloka first';
+                    document.getElementById('gurudattaText').innerText = errorText;
+                    document.getElementById('sringeriText').innerText = errorText;
+                    adjustTextboxHeight();
                 }
 
                 updateTextboxVisibility();
             } catch (error) {
-                console.error(`Error sending command: ${error}`);
-                const errorText = 'Error communicating with server';
+                const errorText = `Error communicating with server for ${intent}: ${error.message}`;
                 document.getElementById('gurudattaText').innerText = errorText;
                 document.getElementById('sringeriText').innerText = errorText;
+                adjustTextboxHeight();
                 updateTextboxVisibility();
             }
         }
+
+        document.addEventListener('click', () => {
+            const audioPlayer = document.getElementById('audioPlayer');
+            audioPlayer.muted = false;
+        }, { once: true });
 
         updateTextboxVisibility();
     </script>
