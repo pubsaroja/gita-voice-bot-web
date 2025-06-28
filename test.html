@@ -266,17 +266,24 @@
             16: 24, 17: 28, 18: 78
         };
 
-        async function fetchAudioUrl(chapter, verse) {
+        async function fetchAudioUrl(chapter, verse, quarter = null) {
             const url = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/gita_audio_index.json';
             const key = `${chapter}.${verse}`;
-            console.log(`Fetching audio URL for ${key}`);
+            console.log(`Fetching audio URL for ${key}, quarter: ${quarter}`);
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error(`HTTP error: ${response.status}`);
                 }
                 const data = await response.json();
-                const audioUrl = data[key]?.AudioFull || `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioFull/${chapter}.${verse}.mp3`;
+                let audioUrl;
+                if (quarter === 'pada1') {
+                    audioUrl = data[key]?.AudioPada1 || `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioPada1/${chapter}.${verse}.mp3`;
+                } else if (quarter === 'pada1_or_pada3') {
+                    audioUrl = data[key]?.AudioPada1 || data[key]?.AudioPada3 || `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioPada1/${chapter}.${verse}.mp3`;
+                } else {
+                    audioUrl = data[key]?.AudioFull || `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioFull/${chapter}.${verse}.mp3`;
+                }
                 const audioCheck = await fetch(audioUrl, { method: 'HEAD' });
                 if (!audioCheck.ok) {
                     throw new Error(`Audio URL inaccessible: ${audioUrl}`);
@@ -285,7 +292,11 @@
                 return audioUrl;
             } catch (error) {
                 console.error(`Error fetching audio URL for ${key}: ${error}`);
-                const fallbackUrl = `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioFull/${chapter}.${verse}.mp3`;
+                const fallbackUrl = quarter === 'pada1' 
+                    ? `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioPada1/${chapter}.${verse}.mp3`
+                    : quarter === 'pada1_or_pada3'
+                    ? `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioPada1/${chapter}.${verse}.mp3`
+                    : `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioFull/${chapter}.${verse}.mp3`;
                 console.log(`Using fallback audio URL: ${fallbackUrl}`);
                 return fallbackUrl;
             }
@@ -309,8 +320,8 @@
                 
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i].trim();
-                    if (line.startsWith(key1 + ' ') || line.startsWith(key2 + ' ') || line.startsWith(key1 + '\t') || line.startsWith(key2 + '\t')) {
-                        let meaningLines = [line.substring(line.indexOf(' ') + 1)];
+                    if (line.match(new RegExp(`^${key1}\\s+|^${key2}\\s+|^${key1}\\t|^${key2}\\t|^${key1}$|^${key2}$`))) {
+                        let meaningLines = [line.substring(line.indexOf(' ') + 1 || line.indexOf('\t') + 1 || line.length)];
                         let j = i + 1;
                         while (j < lines.length && !lines[j].match(/^\d+[.-]\d+/)) {
                             meaningLines.push(lines[j].trim());
@@ -546,8 +557,8 @@
                 
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i].trim();
-                    if (line.startsWith(key1 + ' ') || line.startsWith(key2 + ' ') || line.startsWith(key1 + '\t') || line.startsWith(key2 + '\t')) {
-                        let shlokaLines = [line.substring(line.indexOf(' ') + 1)];
+                    if (line.match(new RegExp(`^${key1}\\s+|^${key2}\\s+|^${key1}\\t|^${key2}\\t|^${key1}$|^${key2}$`))) {
+                        let shlokaLines = [line.substring(line.indexOf(' ') + 1 || line.indexOf('\t') + 1 || line.length)];
                         let j = i + 1;
                         while (j < lines.length && !lines[j].match(/^\d+[.-]\d+/)) {
                             shlokaLines.push(lines[j].trim());
@@ -570,6 +581,7 @@
         async function sendCommand(intent, params) {
             const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
             const style = params.style || getSelectedStyle();
+            const quarter = params.quarter || null;
             console.log(`Sending ${intent} with params:`, JSON.stringify(params));
             const payload = {
                 session: sessionId,
@@ -601,13 +613,13 @@
                 if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
                     const chapter = Math.floor(context.parameters.chapter);
                     const verse = Math.floor(context.parameters.verse);
-                    console.log(`Updating for chapter ${chapter}, verse ${verse}, style ${style}`);
+                    console.log(`Updating for chapter ${chapter}, verse ${verse}, style ${style}, quarter ${quarter}`);
                     
                     const shlokaText = await fetchShlokaText(chapter, verse, style);
                     document.getElementById('gurudattaText').innerText = shlokaText;
                     document.getElementById('sringeriText').innerText = shlokaText;
                     
-                    const audioUrl = await fetchAudioUrl(chapter, verse);
+                    const audioUrl = await fetchAudioUrl(chapter, verse, quarter);
                     const audioPlayer = document.getElementById('audioPlayer');
                     audioPlayer.src = audioUrl;
                     try {
