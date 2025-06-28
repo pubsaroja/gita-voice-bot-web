@@ -56,7 +56,7 @@
             margin-left: auto;
             margin-right: auto;
             line-height: 1.5;
-            min-height: 7.2em;
+            min-height: 3em;
             overflow-y: auto;
             padding: 10px;
             border: 2px solid #357EC7;
@@ -271,8 +271,9 @@
             const sringeriText = document.getElementById('sringeriText');
             [gurudattaText, sringeriText].forEach(textbox => {
                 textbox.style.height = 'auto';
-                textbox.style.height = `${textbox.scrollHeight}px`;
-                console.log(`adjustTextboxHeight: Set ${textbox.id} height to ${textbox.style.height}`);
+                const scrollHeight = textbox.scrollHeight;
+                textbox.style.height = `${scrollHeight}px`;
+                console.log(`adjustTextboxHeight: ${textbox.id}, scrollHeight: ${scrollHeight}px, final height: ${textbox.style.height}`);
             });
         }
 
@@ -286,22 +287,18 @@
                 try {
                     const check = await fetch(url, { method: 'HEAD', mode: 'cors' });
                     if (!check.ok) {
+                        console.log(`fetchAudioUrl: Failed to fetch ${type}, HTTP status: ${check.status}`);
                         throw new Error(`${type} inaccessible: HTTP ${check.status}`);
                     }
+                    console.log(`fetchAudioUrl: Successfully fetched ${type}: ${url}`);
                     return url;
                 } catch (error) {
+                    console.log(`fetchAudioUrl: Error for ${type}: ${error.message}`);
                     return null;
                 }
             };
 
             if (quarter === 'pada1' || quarter === 'pada1_or_pada3') {
-                if (backendAudioUrl) {
-                    audioUrl = await tryUrl(backendAudioUrl, `Backend-provided ${quarter}`);
-                    if (audioUrl) {
-                        console.log(`fetchAudioUrl: Using backend audio for ${quarter}: ${audioUrl}`);
-                        return audioUrl;
-                    }
-                }
                 const pada1Url = `${baseUrl}/AudioQuarterAll/Chapter ${chapter}/${verse}.1.mp3`;
                 const pada3Url = `${baseUrl}/AudioQuarterAll/Chapter ${chapter}/${verse}.3.mp3`;
                 if (quarter === 'pada1') {
@@ -318,6 +315,13 @@
                     if (!audioUrl) {
                         errorMessage = `Quarter audio (Pada1 or Pada3) not found in AudioQuarterAll/Chapter ${chapter} for ${key}`;
                         audioUrl = `${baseUrl}/AudioFull/${key}.mp3`;
+                    }
+                }
+                if (backendAudioUrl) {
+                    const backendUrlResult = await tryUrl(backendAudioUrl, `Backend-provided ${quarter}`);
+                    if (backendUrlResult) {
+                        console.log(`fetchAudioUrl: Prioritizing backend audio for ${quarter}: ${backendUrlResult}`);
+                        return backendUrlResult;
                     }
                 }
             } else {
