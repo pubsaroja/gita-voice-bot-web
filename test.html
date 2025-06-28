@@ -120,7 +120,6 @@
             overflow-y: auto;
             border: 2px solid #357EC7;
         }
-        . Ascendancy 1.0 (Build 1281)
         .chapter-select {
             margin-bottom: 10px;
             padding: 10px;
@@ -159,22 +158,6 @@
         .close-button:hover {
             background-color: #cc0000;
         }
-        .debug-info {
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: #555;
-            text-align: left;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            display: none;
-        }
-        .debug-info.active {
-            display: block;
-        }
         @media (max-width: 600px) {
             .button-container {
                 flex-direction: column;
@@ -201,7 +184,6 @@
         <button id="previousButton" onclick="handlePreviousShloka()">Previous Shloka</button>
         <button onclick="handleMeanings()">Meanings</button>
         <button onclick="showVerseTable()">Regular Readers</button>
-        <button onclick="toggleDebug()">Toggle Debug Info</button>
     </div>
     
     <div>
@@ -249,8 +231,6 @@
     
     <audio id="audioPlayer" controls></audio>
     
-    <div id="debugInfo" class="debug-info">Debug information will appear here</div>
-    
     <div id="verseTableModal" class="modal">
         <div class="modal-content">
             <button class="close-button" onclick="closeVerseTable()">Close</button>
@@ -285,45 +265,21 @@
             9: 34, 10: 42, 11: 55, 12: 20, 13: 34, 14: 27, 15: 20,
             16: 24, 17: 28, 18: 78
         };
-        let debugMessages = [];
-        let isDebugActive = false;
-
-        function toggleDebug() {
-            isDebugActive = !isDebugActive;
-            const debugInfo = document.getElementById('debugInfo');
-            debugInfo.classList.toggle('active', isDebugActive);
-            debugInfo.innerText = isDebugActive ? debugMessages.join('\n') : 'Debug information will appear here';
-        }
-
-        function addDebugMessage(message) {
-            debugMessages.push(message);
-            if (isDebugActive) {
-                document.getElementById('debugInfo').innerText = debugMessages.join('\n');
-            }
-        }
 
         async function fetchAudioUrl(chapter, verse, quarter = null, backendAudioUrl = null) {
             const baseUrl = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main';
             const key = `${chapter}.${verse}`;
-            console.log(`Fetching audio URL for ${key}, quarter: ${quarter}, backendAudioUrl: ${backendAudioUrl}`);
-            addDebugMessage(`Fetching audio URL for ${key}, quarter: ${quarter}, backendAudioUrl: ${backendAudioUrl}`);
             let audioUrl;
             let errorMessage = '';
 
             const tryUrl = async (url, type) => {
-                console.log(`Trying ${type}: ${url}`);
-                addDebugMessage(`Trying ${type}: ${url}`);
                 try {
                     const check = await fetch(url, { method: 'HEAD', mode: 'cors' });
                     if (!check.ok) {
                         throw new Error(`${type} inaccessible: HTTP ${check.status}`);
                     }
-                    console.log(`${type} URL valid: ${url}`);
-                    addDebugMessage(`${type} URL valid: ${url}`);
                     return url;
                 } catch (error) {
-                    console.warn(`${type} failed: ${error.message}`);
-                    addDebugMessage(`${type} failed: ${error.message}`);
                     return null;
                 }
             };
@@ -355,51 +311,32 @@
                 audioUrl = `${baseUrl}/AudioFull/${key}.mp3`;
             }
 
-            // Validate AudioFull as final fallback
-            console.log(`Trying AudioFull: ${audioUrl}`);
-            addDebugMessage(`Trying AudioFull: ${audioUrl}`);
             try {
                 const fullCheck = await fetch(audioUrl, { method: 'HEAD', mode: 'cors' });
                 if (!fullCheck.ok) {
                     throw new Error(`AudioFull inaccessible: HTTP ${fullCheck.status}`);
                 }
-                console.log(`AudioFull URL valid: ${audioUrl}`);
-                addDebugMessage(`AudioFull URL valid: ${audioUrl}`);
                 return errorMessage ? { url: audioUrl, error: errorMessage } : audioUrl;
             } catch (error) {
-                console.error(`All audio URLs failed for ${key}: ${error}`);
-                addDebugMessage(`All audio URLs failed for ${key}: ${error.message}`);
                 return { url: audioUrl, error: `No audio available for ${key}: ${error.message}` };
             }
         }
 
         async function fetchShlokaMeaning(chapter, verse) {
             const url = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/meanings.txt';
-            console.log(`Fetching meaning for chapter ${chapter}, verse ${verse} from ${url}`);
-            addDebugMessage(`Fetching meaning for chapter ${chapter}, verse ${verse} from ${url}`);
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error(`HTTP error: ${response.status}`);
                 }
                 const data = await response.json();
-                const keys = Object.keys(data);
-                console.log(`Meaning JSON fetched, available keys: ${keys.join(', ')}`);
-                addDebugMessage(`Meaning JSON fetched, available keys: ${keys.join(', ')}`);
-                
                 const key = `${chapter}.${verse}`;
                 if (data[key] && data[key].అర్థము) {
-                    console.log(`Found meaning for ${key}: ${data[key].అర్థము}`);
-                    addDebugMessage(`Found meaning for ${key}: ${data[key].అర్థము}`);
                     return `${chapter}.${verse} Meaning:\n${data[key].అర్థము}`;
                 } else {
-                    console.log(`No meaning found for ${key}`);
-                    addDebugMessage(`No meaning found for ${key}`);
                     return `Meaning for ${chapter}.${verse} not found`;
                 }
             } catch (error) {
-                console.error(`Error fetching meaning: ${error}`);
-                addDebugMessage(`Error fetching meaning: ${error.message}`);
                 return `Error loading meaning for ${chapter}.${verse}: ${error.message}`;
             }
         }
@@ -437,8 +374,6 @@
 
         async function selectVerse(chapter, verse) {
             const style = getSelectedStyle();
-            console.log(`Selecting verse: ${chapter}.${verse}, style: ${style}`);
-            addDebugMessage(`Selecting verse: ${chapter}.${verse}, style: ${style}`);
             currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
             currentContext.push({
                 name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
@@ -456,15 +391,11 @@
             audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
             try {
                 await audioPlayer.play();
-                console.log(`Playing audio: ${audioPlayer.src}`);
-                addDebugMessage(`Playing audio: ${audioPlayer.src}`);
                 if (typeof audioResult !== 'string' && audioResult.error) {
                     document.getElementById('gurudattaText').innerText = `${shlokaText}\n${audioResult.error}`;
                     document.getElementById('sringeriText').innerText = `${shlokaText}\n${audioResult.error}`;
                 }
             } catch (error) {
-                console.error(`Error playing audio for ${chapter}.${verse}: ${error}`);
-                addDebugMessage(`Error playing audio for ${chapter}.${verse}: ${error.message}`);
                 document.getElementById('gurudattaText').innerText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
                 document.getElementById('sringeriText').innerText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
             }
@@ -478,8 +409,6 @@
             if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
                 let chapter = Math.floor(context.parameters.chapter);
                 let verse = Math.floor(context.parameters.verse);
-                console.log(`Current context: chapter ${chapter}, verse ${verse}`);
-                addDebugMessage(`Current context: chapter ${chapter}, verse ${verse}`);
                 verse -= 1;
                 if (verse < 1) {
                     chapter -= 1;
@@ -490,8 +419,6 @@
                         verse = verseCounts[chapter];
                     }
                 }
-                console.log(`Previous shloka: chapter ${chapter}, verse ${verse}`);
-                addDebugMessage(`Previous shloka: chapter ${chapter}, verse ${verse}`);
                 const style = getSelectedStyle();
                 currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
                 currentContext.push({
@@ -510,23 +437,17 @@
                 audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
                 try {
                     await audioPlayer.play();
-                    console.log(`Playing audio: ${audioPlayer.src}`);
-                    addDebugMessage(`Playing audio: ${audioPlayer.src}`);
                     if (typeof audioResult !== 'string' && audioResult.error) {
                         document.getElementById('gurudattaText').innerText = `${shlokaText}\n${audioResult.error}`;
                         document.getElementById('sringeriText').innerText = `${shlokaText}\n${audioResult.error}`;
                     }
                 } catch (error) {
-                    console.error(`Error playing audio for ${chapter}.${verse}: ${error}`);
-                    addDebugMessage(`Error playing audio for ${chapter}.${verse}: ${error.message}`);
                     document.getElementById('gurudattaText').innerText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
                     document.getElementById('sringeriText').innerText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
                 }
                 
                 updateTextboxVisibility();
             } else {
-                console.log('No valid context for Previous Shloka');
-                addDebugMessage('No valid context for Previous Shloka');
                 const errorText = 'Please select a Shloka first';
                 document.getElementById('gurudattaText').innerText = errorText;
                 document.getElementById('sringeriText').innerText = errorText;
@@ -539,8 +460,6 @@
             if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
                 const chapter = Math.floor(context.parameters.chapter);
                 const verse = Math.floor(context.parameters.verse);
-                console.log(`Fetching meaning for chapter ${chapter}, verse ${verse}`);
-                addDebugMessage(`Fetching meaning for chapter ${chapter}, verse ${verse}`);
                 
                 const meaningText = await fetchShlokaMeaning(chapter, verse);
                 document.getElementById('gurudattaText').innerText = meaningText;
@@ -548,8 +467,6 @@
                 
                 updateTextboxVisibility();
             } else {
-                console.log('No valid context for Meanings');
-                addDebugMessage('No valid context for Meanings');
                 const errorText = 'Please select a Shloka first';
                 document.getElementById('gurudattaText').innerText = errorText;
                 document.getElementById('sringeriText').innerText = errorText;
@@ -561,8 +478,6 @@
             const chapter = parseInt(selectElement.value);
             if (chapter) {
                 const style = getSelectedStyle();
-                console.log(`Chapter selected: ${chapter}, style: ${style}`);
-                addDebugMessage(`Chapter selected: ${chapter}, style: ${style}`);
                 currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
                 currentContext.push({
                     name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
@@ -580,15 +495,11 @@
                 audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
                 try {
                     await audioPlayer.play();
-                    console.log(`Playing audio: ${audioPlayer.src}`);
-                    addDebugMessage(`Playing audio: ${audioPlayer.src}`);
                     if (typeof audioResult !== 'string' && audioResult.error) {
                         document.getElementById('gurudattaText').innerText = `${shlokaText}\n${audioResult.error}`;
                         document.getElementById('sringeriText').innerText = `${shlokaText}\n${audioResult.error}`;
                     }
                 } catch (error) {
-                    console.error(`Error playing audio for ${chapter}.1: ${error}`);
-                    addDebugMessage(`Error playing audio for ${chapter}.1: ${error.message}`);
                     document.getElementById('gurudattaText').innerText = `${shlokaText}\nError playing audio for ${chapter}.1: ${error.message}`;
                     document.getElementById('sringeriText').innerText = `${shlokaText}\nError playing audio for ${chapter}.1: ${error.message}`;
                 }
@@ -606,10 +517,7 @@
         let currentContext = JSON.parse(localStorage.getItem('gitaContext')) || [];
 
         function getSelectedStyle() {
-            const style = document.querySelector('input[name="style"]:checked').value;
-            console.log(`Selected style: ${style}`);
-            addDebugMessage(`Selected style: ${style}`);
-            return style;
+            return document.querySelector('input[name="style"]:checked').value;
         }
 
         function updateTextboxVisibility() {
@@ -636,22 +544,16 @@
             const url = style === 'gurudatta' 
                 ? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG Telugu with Uvacha2.txt'
                 : 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt';
-            console.log(`Fetching ${style} text for chapter ${chapter}, verse ${verse} from ${url}`);
-            addDebugMessage(`Fetching ${style} text for chapter ${chapter}, verse ${verse} from ${url}`);
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error(`HTTP error: ${response.status}`);
                 }
                 const text = await response.text();
-                console.log(`${style} text fetched, length: ${text.length} characters`);
-                addDebugMessage(`${style} text fetched, length: ${text.length} characters`);
                 
                 const lines = text.split('\n');
                 const key1 = `${chapter}.${verse}`;
                 const key2 = `${chapter}-${verse}`;
-                console.log(`Searching for key: ${key1} or ${key2}`);
-                addDebugMessage(`Searching for key: ${key1} or ${key2}`);
                 
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i].trim();
@@ -663,18 +565,12 @@
                             j++;
                         }
                         let shlokaText = shlokaLines.join('\n').trim();
-                        console.log(`Found shloka: ${shlokaText}`);
-                        addDebugMessage(`Found shloka: ${shlokaText}`);
                         return `${chapter}.${verse} ${shlokaText}`;
                     }
                 }
 
-                console.log(`No line found for ${key1} or ${key2}`);
-                addDebugMessage(`No line found for ${key1} or ${key2}`);
                 return `Shloka ${chapter}.${verse} not found`;
             } catch (error) {
-                console.error(`Error fetching ${style} text: ${error}`);
-                addDebugMessage(`Error fetching ${style} text: ${error.message}`);
                 return `Error loading shloka ${chapter}.${verse}: ${error.message}`;
             }
         }
@@ -683,8 +579,6 @@
             const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
             const style = params.style || getSelectedStyle();
             const quarter = params.quarter || null;
-            console.log(`Sending ${intent} with params:`, JSON.stringify(params));
-            addDebugMessage(`Sending ${intent} with params: ${JSON.stringify(params)}`);
             const payload = {
                 session: sessionId,
                 queryResult: {
@@ -704,8 +598,6 @@
                     throw new Error(`HTTP error: ${response.status}`);
                 }
                 const data = await response.json();
-                console.log(`Response for ${intent}:`, JSON.stringify(data));
-                addDebugMessage(`Response for ${intent}: ${JSON.stringify(data)}`);
                 
                 if (data.outputContexts && data.outputContexts.length > 0) {
                     currentContext = data.outputContexts;
@@ -718,16 +610,12 @@
                     const mediaItem = data.payload.google.richResponse.items.find(item => item.mediaResponse && item.mediaResponse.mediaObjects);
                     if (mediaItem && mediaItem.mediaResponse.mediaObjects[0]) {
                         backendAudioUrl = mediaItem.mediaResponse.mediaObjects[0].contentUrl;
-                        console.log(`Backend provided audio URL: ${backendAudioUrl}`);
-                        addDebugMessage(`Backend provided audio URL: ${backendAudioUrl}`);
                     }
                 }
 
                 if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
                     const chapter = Math.floor(context.parameters.chapter);
                     const verse = Math.floor(context.parameters.verse);
-                    console.log(`Updating for chapter ${chapter}, verse ${verse}, style ${style}, quarter ${quarter}`);
-                    addDebugMessage(`Updating for chapter ${chapter}, verse ${verse}, style ${style}, quarter ${quarter}`);
                     
                     const shlokaText = await fetchShlokaText(chapter, verse, style);
                     document.getElementById('gurudattaText').innerText = shlokaText;
@@ -739,21 +627,15 @@
                     try {
                         audioPlayer.load();
                         await audioPlayer.play();
-                        console.log(`Playing audio: ${audioPlayer.src}`);
-                        addDebugMessage(`Playing audio: ${audioPlayer.src}`);
-                        if (typeof audioResult !== 'string' && audioResult.error) {
-                            document.getElementById('gurudattaText').innerText = `${shlokaText}\n${audioResult.error}`;
-                            document.getElementById('sringeriText').innerText = `${shlokaText}\n${audioResult.error}`;
-                        }
+                        if (typeof audioResult !== 'string' && audioResult.error)精力
+
+                        document.getElementById('gurudattaText').innerText = `${shlokaText}\n${audioResult.error}`;
+                        document.getElementById('sringeriText').innerText = `${shlokaText}\n${audioResult.error}`;
                     } catch (error) {
-                        console.error(`Error playing audio for ${chapter}.${verse}: ${error}`);
-                        addDebugMessage(`Error playing audio for ${chapter}.${verse}: ${error.message}`);
                         document.getElementById('gurudattaText').innerText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
                         document.getElementById('sringeriText').innerText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
                     }
                 } else {
-                    console.log(`No valid context for ${intent}`);
-                    addDebugMessage(`No valid context for ${intent}`);
                     const errorText = 'Please select a Shloka first';
                     document.getElementById('gurudattaText').innerText = errorText;
                     document.getElementById('sringeriText').innerText = errorText;
@@ -761,8 +643,6 @@
 
                 updateTextboxVisibility();
             } catch (error) {
-                console.error(`Error sending ${intent}: ${error}`);
-                addDebugMessage(`Error sending ${intent}: ${error.message}`);
                 const errorText = `Error communicating with server for ${intent}: ${error.message}`;
                 document.getElementById('gurudattaText').innerText = errorText;
                 document.getElementById('sringeriText').innerText = errorText;
@@ -770,12 +650,9 @@
             }
         }
 
-        // Ensure audio plays after user interaction
         document.addEventListener('click', () => {
             const audioPlayer = document.getElementById('audioPlayer');
             audioPlayer.muted = false;
-            console.log('Audio player unmuted on user interaction');
-            addDebugMessage('Audio player unmuted on user interaction');
         }, { once: true });
 
         updateTextboxVisibility();
