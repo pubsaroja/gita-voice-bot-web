@@ -308,12 +308,13 @@
 
         function selectVerse(chapter, verse) {
             const style = getSelectedStyle();
+            console.log(`Selecting verse: ${chapter}.${verse}, style: ${style}`);
             // Update context explicitly
             currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
             currentContext.push({
                 name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
                 lifespanCount: 5,
-                parameters: { chapter: chapter, verse: verse, style: style }
+                parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style }
             });
             localStorage.setItem('gitaContext', JSON.stringify(currentContext));
             sendCommand('ChapterIntent', { chapter: parseInt(chapter), verse: parseInt(verse), style: style });
@@ -322,9 +323,10 @@
 
         function handlePreviousShloka() {
             const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-            if (context && context.parameters && context.parameters.chapter && context.parameters.verse) {
+            if (context && context.parameters && context.parameters.chapter && typeof context.parameters.verse === 'number') {
                 let chapter = Math.floor(context.parameters.chapter);
                 let verse = Math.floor(context.parameters.verse);
+                console.log(`Current context: chapter ${chapter}, verse ${verse}`);
                 verse -= 1;
                 if (verse < 1) {
                     chapter -= 1;
@@ -335,16 +337,18 @@
                         verse = verseCounts[chapter];
                     }
                 }
+                console.log(`Previous shloka: chapter ${chapter}, verse ${verse}`);
                 const style = getSelectedStyle();
                 currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
                 currentContext.push({
                     name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
                     lifespanCount: 5,
-                    parameters: { chapter: chapter, verse: verse, style: style }
+                    parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style }
                 });
                 localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-                sendCommand('ChapterIntent', { chapter: parseInt(chapter), verse: parseInt(verse), style: style });
+                sendCommand('ChapterIntent', { chapter: parseInt(chapter), verse: parseInt(verse), style: style }, true);
             } else {
+                console.log('No valid context for Previous Shloka');
                 const errorText = 'Please select a Shloka first';
                 document.getElementById('gurudattaText').innerText = errorText;
                 document.getElementById('sringeriText').innerText = errorText;
@@ -356,14 +360,15 @@
             const chapter = parseInt(selectElement.value);
             if (chapter) {
                 const style = getSelectedStyle();
+                console.log(`Chapter selected: ${chapter}, style: ${style}`);
                 currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
                 currentContext.push({
                     name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
                     lifespanCount: 5,
-                    parameters: { chapter: chapter, verse: 1, style: style }
+                    parameters: { chapter: parseInt(chapter), verse: 1, style: style }
                 });
                 localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-                sendCommand('ChapterIntent', { chapter: chapter, pada: 'pada1', style: style });
+                sendCommand('ChapterIntent', { chapter: parseInt(chapter), verse: 1, pada: 'pada1', style: style });
                 selectElement.selectedIndex = 0;
             }
         }
@@ -406,6 +411,7 @@
                 if (context && context.parameters) {
                     const chapter = Math.floor(context.parameters.chapter);
                     const verse = Math.floor(context.parameters.verse);
+                    console.log(`Updating textbox for chapter ${chapter}, verse ${verse}, style ${style}`);
                     fetchShlokaText(chapter, verse, style).then(shlokaText => {
                         gurudattaText.innerText = shlokaText;
                         sringeriText.innerText = shlokaText;
@@ -430,28 +436,29 @@
                 console.log(`Searching for key: ${key1} or ${key2}`);
                 
                 for (let i = 0; i < lines.length; i++) {
-                    if (lines[i].startsWith(key1 + ' ') || lines[i].startsWith(key2 + ' ')) {
-                        let shlokaLines = [lines[i].substring(lines[i].indexOf(' ') + 1)];
+                    const line = lines[i].trim();
+                    if (line.startsWith(key1 + ' ') || line.startsWith(key2 + ' ') || line.startsWith(key1 + '\t') || line.startsWith(key2 + '\t')) {
+                        let shlokaLines = [line.substring(line.indexOf(' ') + 1)];
                         let j = i + 1;
-                        while (j < lines.length && !lines[j].match(/^\d+\.\d+/)) {
-                            shlokaLines.push(lines[j]);
+                        while (j < lines.length && !lines[j].match(/^\d+[.-]\d+/)) {
+                            shlokaLines.push(lines[j].trim());
                             j++;
                         }
-                        let shlokaText = shlokaLines.join('\n');
+                        let shlokaText = shlokaLines.join('\n').trim();
                         console.log(`Found shloka: ${shlokaText}`);
                         return `${chapter}.${verse} ${shlokaText}`;
                     }
                 }
 
                 console.log(`No line found for ${key1} or ${key2}`);
-                return 'Shloka text not found';
+                return `Shloka ${chapter}.${verse} not found`;
             } catch (error) {
                 console.error(`Error fetching ${style} text: ${error}`);
-                return 'Error loading shloka text';
+                return `Error loading shloka ${chapter}.${verse}`;
             }
         }
 
-        async function sendCommand(intent, params) {
+        async function sendCommand(intent, params, fallbackToFetch = false) {
             const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
             const style = params.style || getSelectedStyle();
             console.log(`Sending ${intent} with params:`, JSON.stringify(params));
@@ -476,7 +483,7 @@
                 const data = await response.json();
                 console.log(`Response for ${intent}:`, JSON.stringify(data));
                 
-                const fulfillmentText = data.fulfillmentText;
+                const fulfillmentText = data.fulfillmentText || `Shloka ${params.chapter}.${params.verse}`;
                 document.getElementById('gurudattaText').innerText = fulfillmentText;
                 document.getElementById('sringeriText').innerText = fulfillmentText;
                 
@@ -494,23 +501,36 @@
                 if (data.outputContexts && data.outputContexts.length > 0) {
                     currentContext = data.outputContexts;
                     localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-                    const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-                    if (context && context.parameters) {
-                        const chapter = Math.floor(context.parameters.chapter);
-                        const verse = Math.floor(context.parameters.verse);
-                        console.log(`Updating text for chapter ${chapter}, verse ${verse}, style ${style}`);
-                        const shlokaText = await fetchShlokaText(chapter, verse, style);
-                        document.getElementById('gurudattaText').innerText = shlokaText;
-                        document.getElementById('sringeriText').innerText = shlokaText;
-                    }
+                }
+
+                const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+                if (context && context.parameters) {
+                    const chapter = Math.floor(context.parameters.chapter);
+                    const verse = Math.floor(context.parameters.verse);
+                    console.log(`Updating text for chapter ${chapter}, verse ${verse}, style ${style}`);
+                    const shlokaText = await fetchShlokaText(chapter, verse, style);
+                    document.getElementById('gurudattaText').innerText = shlokaText;
+                    document.getElementById('sringeriText').innerText = shlokaText;
+                } else if (fallbackToFetch && params.chapter && params.verse) {
+                    console.log(`Falling back to fetchShlokaText for chapter ${params.chapter}, verse ${params.verse}`);
+                    const shlokaText = await fetchShlokaText(params.chapter, params.verse, style);
+                    document.getElementById('gurudattaText').innerText = shlokaText;
+                    document.getElementById('sringeriText').innerText = shlokaText;
                 }
 
                 updateTextboxVisibility();
             } catch (error) {
                 console.error(`Error sending ${intent}: ${error}`);
-                const errorText = `Error communicating with server for ${intent}`;
-                document.getElementById('gurudattaText').innerText = errorText;
-                document.getElementById('sringeriText').innerText = errorText;
+                if (fallbackToFetch && params.chapter && params.verse) {
+                    console.log(`Falling back to fetchShlokaText for chapter ${params.chapter}, verse ${params.verse}`);
+                    const shlokaText = await fetchShlokaText(params.chapter, params.verse, style);
+                    document.getElementById('gurudattaText').innerText = shlokaText;
+                    document.getElementById('sringeriText').innerText = shlokaText;
+                } else {
+                    const errorText = `Error communicating with server for ${intent}`;
+                    document.getElementById('gurudattaText').innerText = errorText;
+                    document.getElementById('sringeriText').innerText = errorText;
+                }
                 updateTextboxVisibility();
             }
         }
