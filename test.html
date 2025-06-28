@@ -120,6 +120,7 @@
             overflow-y: auto;
             border: 2px solid #357EC7;
         }
+        . Ascendancy 1.0 (Build 1281)
         .chapter-select {
             margin-bottom: 10px;
             padding: 10px;
@@ -301,12 +302,11 @@
             }
         }
 
-        async function fetchAudioUrl(chapter, verse, quarter = null) {
+        async function fetchAudioUrl(chapter, verse, quarter = null, backendAudioUrl = null) {
             const baseUrl = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main';
             const key = `${chapter}.${verse}`;
-            const keyAlt = `${chapter}-${verse}`;
-            console.log(`Fetching audio URL for ${key}, quarter: ${quarter}`);
-            addDebugMessage(`Fetching audio URL for ${key}, quarter: ${quarter}`);
+            console.log(`Fetching audio URL for ${key}, quarter: ${quarter}, backendAudioUrl: ${backendAudioUrl}`);
+            addDebugMessage(`Fetching audio URL for ${key}, quarter: ${quarter}, backendAudioUrl: ${backendAudioUrl}`);
             let audioUrl;
             let errorMessage = '';
 
@@ -328,41 +328,29 @@
                 }
             };
 
-            const namingVariations = [
-                { folder: 'AudioPada1', key: key },
-                { folder: 'AudioPada1', key: keyAlt },
-                { folder: 'audio_pada1', key: key },
-                { folder: 'audio_pada1', key: keyAlt },
-                { folder: 'AUDIO_PADA1', key: key },
-                { folder: 'AUDIO_PADA1', key: keyAlt }
-            ];
-            const pada3Variations = [
-                { folder: 'AudioPada3', key: key },
-                { folder: 'AudioPada3', key: keyAlt },
-                { folder: 'audio_pada3', key: key },
-                { folder: 'audio_pada3', key: keyAlt },
-                { folder: 'AUDIO_PADA3', key: key },
-                { folder: 'AUDIO_PADA3', key: keyAlt }
-            ];
-
-            if (quarter === 'pada1') {
-                for (const { folder, key } of namingVariations) {
-                    audioUrl = await tryUrl(`${baseUrl}/${folder}/${key}.mp3`, `${folder}/${key}.mp3`);
+            if (quarter === 'pada1' || quarter === 'pada1_or_pada3') {
+                if (backendAudioUrl) {
+                    audioUrl = await tryUrl(backendAudioUrl, `Backend-provided ${quarter}`);
                     if (audioUrl) return audioUrl;
                 }
-                errorMessage = `Quarter audio (Pada1) not found for ${key}, check repository for AudioPada1/${key}.mp3 or variations`;
-                audioUrl = `${baseUrl}/AudioFull/${key}.mp3`;
-            } else if (quarter === 'pada1_or_pada3') {
-                for (const { folder, key } of namingVariations) {
-                    audioUrl = await tryUrl(`${baseUrl}/${folder}/${key}.mp3`, `${folder}/${key}.mp3`);
-                    if (audioUrl) return audioUrl;
+                const pada1Url = `${baseUrl}/AudioQuarterAll/Chapter ${chapter}/${verse}.1.mp3`;
+                const pada3Url = `${baseUrl}/AudioQuarterAll/Chapter ${chapter}/${verse}.3.mp3`;
+                if (quarter === 'pada1') {
+                    audioUrl = await tryUrl(pada1Url, `AudioQuarterAll/Chapter ${chapter}/${verse}.1.mp3`);
+                    if (!audioUrl) {
+                        errorMessage = `Quarter audio (Pada1) not found in AudioQuarterAll/Chapter ${chapter} for ${key}`;
+                        audioUrl = `${baseUrl}/AudioFull/${key}.mp3`;
+                    }
+                } else {
+                    audioUrl = await tryUrl(pada1Url, `AudioQuarterAll/Chapter ${chapter}/${verse}.1.mp3`);
+                    if (!audioUrl) {
+                        audioUrl = await tryUrl(pada3Url, `AudioQuarterAll/Chapter ${chapter}/${verse}.3.mp3`);
+                    }
+                    if (!audioUrl) {
+                        errorMessage = `Quarter audio (Pada1 or Pada3) not found in AudioQuarterAll/Chapter ${chapter} for ${key}`;
+                        audioUrl = `${baseUrl}/AudioFull/${key}.mp3`;
+                    }
                 }
-                for (const { folder, key } of pada3Variations) {
-                    audioUrl = await tryUrl(`${baseUrl}/${folder}/${key}.mp3`, `${folder}/${key}.mp3`);
-                    if (audioUrl) return audioUrl;
-                }
-                errorMessage = `Quarter audio (Pada1 or Pada3) not found for ${key}, check repository for AudioPada1 or AudioPada3`;
-                audioUrl = `${baseUrl}/AudioFull/${key}.mp3`;
             } else {
                 audioUrl = `${baseUrl}/AudioFull/${key}.mp3`;
             }
@@ -725,6 +713,16 @@
                 }
 
                 const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+                let backendAudioUrl = null;
+                if (data.payload && data.payload.google && data.payload.google.richResponse && data.payload.google.richResponse.items) {
+                    const mediaItem = data.payload.google.richResponse.items.find(item => item.mediaResponse && item.mediaResponse.mediaObjects);
+                    if (mediaItem && mediaItem.mediaResponse.mediaObjects[0]) {
+                        backendAudioUrl = mediaItem.mediaResponse.mediaObjects[0].contentUrl;
+                        console.log(`Backend provided audio URL: ${backendAudioUrl}`);
+                        addDebugMessage(`Backend provided audio URL: ${backendAudioUrl}`);
+                    }
+                }
+
                 if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
                     const chapter = Math.floor(context.parameters.chapter);
                     const verse = Math.floor(context.parameters.verse);
@@ -735,7 +733,7 @@
                     document.getElementById('gurudattaText').innerText = shlokaText;
                     document.getElementById('sringeriText').innerText = shlokaText;
                     
-                    const audioResult = await fetchAudioUrl(chapter, verse, quarter);
+                    const audioResult = await fetchAudioUrl(chapter, verse, quarter, backendAudioUrl);
                     const audioPlayer = document.getElementById('audioPlayer');
                     audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
                     try {
