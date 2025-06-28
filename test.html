@@ -20,6 +20,13 @@
             font-size: 1em;
             margin-top: 10px;
         }
+        .button-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+        }
         button {
             background-color: #357EC7;
             color: white;
@@ -61,16 +68,12 @@
         .radio-group {
             margin: 10px 0;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
+            gap: 10px;
         }
         .radio-group label {
-            margin: 5px 10px;
-        }
-        .radio-group .radio-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
+            margin: 0 10px;
         }
         .textbox-container {
             display: flex;
@@ -96,16 +99,80 @@
         .shloka-text.active {
             display: block;
         }
+        /* Verse Table Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 80%;
+            max-height: 80%;
+            overflow-y: auto;
+            border: 2px solid #357EC7;
+        }
+        .verse-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .verse-table th, .verse-table td {
+            border: 1px solid #357EC7;
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .verse-table th {
+            background-color: #357EC7;
+            color: white;
+        }
+        .verse-table td:hover {
+            background-color: #e0e0e0;
+        }
+        .close-button {
+            background-color: #ff4444;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            float: right;
+        }
+        .close-button:hover {
+            background-color: #cc0000;
+        }
+        /* Mobile View */
+        @media (max-width: 600px) {
+            .button-container {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+                max-width: 300px;
+                margin: 5px auto;
+            }
+        }
     </style>
 </head>
 <body>
     <h1>Bhagavad Gita Bot</h1>
     
-    <div>
+    <div class="button-container">
         <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1', style: getSelectedStyle()})">Get Random Shloka Q1</button>
         <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Get Random Shloka Q1 or Q3</button>
         <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Get Full Shloka</button>
-        <button onclick="sendCommand('NextIntent', {quarter: 'pada1', style: getSelectedStyle()})">Next Shloka</button>
+        <button onclick="sendCommand('NextIntent', {style: getSelectedStyle()})">Next Shloka</button>
+        <button onclick="sendCommand('PreviousIntent', {style: getSelectedStyle()})">Previous Shloka</button>
+        <button onclick="showVerseTable()">Regular Readers</button>
     </div>
     
     <div>
@@ -133,13 +200,11 @@
     </div>
     
     <div class="radio-group">
-        <label>Full Shloka Style</label>
-        <div class="radio-buttons">
-            <input type="radio" name="style" value="gurudatta" id="gurudatta" checked onchange="updateTextboxVisibility()">
-            <label for="gurudatta">Gurudatta Style</label>
-            <input type="radio" name="style" value="sringeri" id="sringeri" onchange="updateTextboxVisibility()">
-            <label for="sringeri">Sringeri Style</label>
-        </div>
+        <label>Full Shloka Style:</label>
+        <input type="radio" name="style" value="gurudatta" id="gurudatta" checked onchange="updateTextboxVisibility()">
+        <label for="gurudatta">Gurudatta Style</label>
+        <input type="radio" name="style" value="sringeri" id="sringeri" onchange="updateTextboxVisibility()">
+        <label for="sringeri">Sringeri Style</label>
     </div>
     
     <div class="textbox-container">
@@ -155,7 +220,62 @@
     
     <audio id="audioPlayer" controls></audio>
     
+    <!-- Verse Table Modal -->
+    <div id="verseTableModal" class="modal">
+        <div class="modal-content">
+            <button class="close-button" onclick="closeVerseTable()">Close</button>
+            <table class="verse-table">
+                <thead>
+                    <tr>
+                        <th>Chapter</th>
+                        <th>Verses</th>
+                    </tr>
+                </thead>
+                <tbody id="verseTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+    
     <script>
+        // Verse counts for each chapter
+        const verseCounts = {
+            1: 47, 2: 72, 3: 43, 4: 42, 5: 29, 6: 47, 7: 30, 8: 28,
+            9: 34, 10: 42, 11: 55, 12: 20, 13: 34, 14: 27, 15: 20,
+            16: 24, 17: 28, 18: 78
+        };
+
+        function showVerseTable() {
+            const modal = document.getElementById('verseTableModal');
+            const tbody = document.getElementById('verseTableBody');
+            tbody.innerHTML = ''; // Clear previous content
+
+            for (let chapter = 1; chapter <= 18; chapter++) {
+                const row = document.createElement('tr');
+                const chapterCell = document.createElement('td');
+                chapterCell.textContent = `Chapter ${chapter}`;
+                const versesCell = document.createElement('td');
+                const verseList = Array.from({length: verseCounts[chapter]}, (_, i) => i + 1);
+                versesCell.innerHTML = verseList.map(verse => 
+                    `<span onclick="selectVerse(${chapter}, ${verse})">${verse}</span>`
+                ).join(', ');
+                row.appendChild(chapterCell);
+                row.appendChild(versesCell);
+                tbody.appendChild(row);
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function closeVerseTable() {
+            document.getElementById('verseTableModal').style.display = 'none';
+        }
+
+        function selectVerse(chapter, verse) {
+            const style = getSelectedStyle();
+            sendCommand('ChapterIntent', { chapter: chapter, verse: verse, style: style });
+            closeVerseTable();
+        }
+
         function handleChapterSelect(selectElement) {
             const chapter = selectElement.value;
             if (chapter) {
@@ -250,30 +370,6 @@
         async function sendCommand(intent, params) {
             const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
             const style = params.style || getSelectedStyle();
-            // Ensure NextIntent uses pada1 and preserves chapter/verse
-            if (intent === 'NextIntent') {
-                params.quarter = 'pada1'; // Force quarter to pada1
-                let context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-                if (context && context.parameters && context.parameters.chapter && context.parameters.verse) {
-                    // Update existing context with quarter: pada1
-                    context.parameters.quarter = 'pada1';
-                    context.parameters.style = style;
-                } else {
-                    // Create new context with placeholder chapter/verse (backend should set these)
-                    currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
-                    currentContext.push({
-                        name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
-                        lifespanCount: 5,
-                        parameters: { 
-                            quarter: 'pada1', 
-                            style: style,
-                            chapter: context?.parameters.chapter || 1,
-                            verse: context?.parameters.verse || 1
-                        }
-                    });
-                }
-                localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-            }
             const payload = {
                 session: sessionId,
                 queryResult: {
