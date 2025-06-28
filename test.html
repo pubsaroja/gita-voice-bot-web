@@ -57,13 +57,13 @@
             margin-right: auto;
             line-height: 1.5;
             min-height: 1.8em; /* 1 line: 1.2em * 1.5 */
-            max-height: 9em; /* 5 lines: 1.2em * 1.5 * 5 */
-            overflow-y: auto;
+            max-height: 10.8em; /* 6 lines: 1.2em * 1.5 * 6 */
+            overflow-y: hidden; /* Default: no scrollbar */
             padding: 10px;
             border: 2px solid #357EC7;
             border-radius: 5px;
             box-sizing: border-box; /* Include padding in height */
-            scrollbar-width: auto; /* Ensure visible scrollbar */
+            scrollbar-width: thin; /* Thinner scrollbar */
         }
         #audioPlayer {
             margin-top: 20px;
@@ -161,7 +161,7 @@
         .close-button:hover {
             background-color: #cc0000;
         }
-        @media (max-width>600px) {
+        @media (max-width: 600px) {
             .button-container {
                 flex-direction: column;
             }
@@ -275,14 +275,18 @@
             if (isInitialHTML) {
                 // For initial HTML with <br> tags
                 const tempDiv = document.createElement('div');
+                tempDiv.style.position = 'absolute';
+                tempDiv.style.visibility = 'hidden';
+                tempDiv.style.width = textbox.offsetWidth + 'px';
+                tempDiv.style.fontSize = '1.2em';
+                tempDiv.style.lineHeight = '1.5';
+                tempDiv.style.padding = '10px';
+                tempDiv.style.whiteSpace = 'pre-wrap';
                 tempDiv.innerHTML = text;
-                // Split by <br> tags and count non-empty lines
-                const htmlLines = text.split(/<br\s*\/?>/gi).map(line => {
-                    const div = document.createElement('div');
-                    div.innerHTML = line;
-                    return div.textContent.trim();
-                }).filter(line => line !== '');
-                lines = htmlLines.length || 1;
+                document.body.appendChild(tempDiv);
+                const lineHeight = 1.2 * 1.5; // font-size * line-height
+                lines = Math.ceil(tempDiv.getClientRects().length) || 1;
+                document.body.removeChild(tempDiv);
             } else {
                 // For plain text (shlokas, meanings, errors)
                 const cleanText = (textbox.textContent || textbox.innerText || text).trim();
@@ -290,9 +294,10 @@
                 lines = cleanText.replace(/\r\n|\r|\n+/g, '\n').split('\n').filter(line => line.trim() !== '').length || 1;
             }
             const lineHeightEm = 1.2 * 1.5; // font-size * line-height
-            const paddingEm = 20 / 16; // 20px padding (10px top + bottom) in em
-            const newHeight = Math.min(Math.max(lines * lineHeightEm + paddingEm, 1.8), 9);
-            console.log(`Adjusting height for ${text.substring(0, 20)}...: ${lines} lines, ${newHeight}em, isInitialHTML: ${isInitialHTML}`);
+            const newHeight = Math.min(Math.max(lines * lineHeightEm, 1.8), 10.8);
+            const needsScroll = (lines * lineHeightEm) > 10.8;
+            textbox.style.overflowY = needsScroll ? 'auto' : 'hidden';
+            console.log(`Adjusting height for ${text.substring(0, 20)}...: ${lines} lines, ${newHeight}em, isInitialHTML: ${isInitialHTML}, overflow-y: ${textbox.style.overflowY}`);
             textbox.style.height = `${newHeight}em`;
         }
 
