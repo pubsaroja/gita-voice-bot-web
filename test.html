@@ -278,25 +278,35 @@
                 const data = await response.json();
                 let audioUrl;
                 if (quarter === 'pada1') {
-                    audioUrl = data[key]?.AudioPada1 || `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioPada1/${chapter}.${verse}.mp3`;
+                    audioUrl = data[key]?.AudioPada1;
+                    if (!audioUrl) {
+                        console.warn(`No AudioPada1 for ${key}, trying AudioFull`);
+                        audioUrl = data[key]?.AudioFull || `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioFull/${chapter}.${verse}.mp3`;
+                    }
                 } else if (quarter === 'pada1_or_pada3') {
-                    audioUrl = data[key]?.AudioPada1 || data[key]?.AudioPada3 || `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioPada1/${chapter}.${verse}.mp3`;
+                    audioUrl = data[key]?.AudioPada1 || data[key]?.AudioPada3;
+                    if (!audioUrl) {
+                        console.warn(`No AudioPada1 or AudioPada3 for ${key}, trying AudioFull`);
+                        audioUrl = data[key]?.AudioFull || `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioFull/${chapter}.${verse}.mp3`;
+                    }
                 } else {
                     audioUrl = data[key]?.AudioFull || `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioFull/${chapter}.${verse}.mp3`;
                 }
-                const audioCheck = await fetch(audioUrl, { method: 'HEAD' });
+                // Validate URL
+                const audioCheck = await fetch(audioUrl, { method: 'HEAD', mode: 'cors' });
                 if (!audioCheck.ok) {
-                    throw new Error(`Audio URL inaccessible: ${audioUrl}`);
+                    console.warn(`Audio URL inaccessible: ${audioUrl}, falling back to AudioFull`);
+                    audioUrl = `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioFull/${chapter}.${verse}.mp3`;
+                    const fallbackCheck = await fetch(audioUrl, { method: 'HEAD', mode: 'cors' });
+                    if (!fallbackCheck.ok) {
+                        throw new Error(`Fallback AudioFull URL inaccessible: ${audioUrl}`);
+                    }
                 }
                 console.log(`Audio URL for ${key}: ${audioUrl}`);
                 return audioUrl;
             } catch (error) {
                 console.error(`Error fetching audio URL for ${key}: ${error}`);
-                const fallbackUrl = quarter === 'pada1' 
-                    ? `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioPada1/${chapter}.${verse}.mp3`
-                    : quarter === 'pada1_or_pada3'
-                    ? `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioPada1/${chapter}.${verse}.mp3`
-                    : `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioFull/${chapter}.${verse}.mp3`;
+                const fallbackUrl = `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioFull/${chapter}.${verse}.mp3`;
                 console.log(`Using fallback audio URL: ${fallbackUrl}`);
                 return fallbackUrl;
             }
@@ -310,31 +320,17 @@
                 if (!response.ok) {
                     throw new Error(`HTTP error: ${response.status}`);
                 }
-                const text = await response.text();
-                console.log(`Meaning text fetched, length: ${text.length} characters`);
+                const data = await response.json();
+                console.log(`Meaning JSON fetched, keys: ${Object.keys(data).length}`);
                 
-                const lines = text.split('\n');
-                const key1 = `${chapter}.${verse}`;
-                const key2 = `${chapter}-${verse}`;
-                console.log(`Searching for key: ${key1} or ${key2}`);
-                
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (line.match(new RegExp(`^${key1}\\s+|^${key2}\\s+|^${key1}\\t|^${key2}\\t|^${key1}$|^${key2}$`))) {
-                        let meaningLines = [line.substring(line.indexOf(' ') + 1 || line.indexOf('\t') + 1 || line.length)];
-                        let j = i + 1;
-                        while (j < lines.length && !lines[j].match(/^\d+[.-]\d+/)) {
-                            meaningLines.push(lines[j].trim());
-                            j++;
-                        }
-                        let meaningText = meaningLines.join('\n').trim();
-                        console.log(`Found meaning: ${meaningText}`);
-                        return `${chapter}.${verse} Meaning:\n${meaningText}`;
-                    }
+                const key = `${chapter}.${verse}`;
+                if (data[key] && data[key].అర్థము) {
+                    console.log(`Found meaning for ${key}: ${data[key].అర్థము}`);
+                    return `${chapter}.${verse} Meaning:\n${data[key].అర్థము}`;
+                } else {
+                    console.log(`No meaning found for ${key}`);
+                    return `Meaning for ${chapter}.${verse} not found`;
                 }
-
-                console.log(`No meaning found for ${key1} or ${key2}`);
-                return `Meaning for ${chapter}.${verse} not found`;
             } catch (error) {
                 console.error(`Error fetching meaning: ${error}`);
                 return `Error loading meaning for ${chapter}.${verse}`;
@@ -623,10 +619,13 @@
                     const audioPlayer = document.getElementById('audioPlayer');
                     audioPlayer.src = audioUrl;
                     try {
+                        audioPlayer.load();
                         await audioPlayer.play();
                         console.log(`Playing audio: ${audioUrl}`);
                     } catch (error) {
                         console.error(`Error playing audio for ${chapter}.${verse}: ${error}`);
+                        document.getElementById('gurudattaText').innerText = `Error playing audio for ${chapter}.${verse}`;
+                        document.getElementById('sringeriText').innerText = `Error playing audio for ${chapter}.${verse}`;
                     }
                 } else {
                     console.log(`No valid context for ${intent}`);
@@ -644,6 +643,13 @@
                 updateTextboxVisibility();
             }
         }
+
+        // Ensure audio plays after user interaction
+        document.addEventListener('click', () => {
+            const audioPlayer = document.getElementById('audioPlayer');
+            audioPlayer.muted = false;
+            console.log('Audio player unmuted on user interaction');
+        }, { once: true });
 
         updateTextboxVisibility();
     </script>
