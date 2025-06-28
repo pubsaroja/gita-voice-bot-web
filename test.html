@@ -37,11 +37,7 @@
             cursor: pointer;
             font-size: 1em;
         }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        button:hover:not(:disabled) {
+        button:hover {
             background-color: #008CBA;
         }
         select {
@@ -54,7 +50,7 @@
             margin-top: 10px;
             font-size: 1.2em;
             color: #333;
-            white-space: pre;
+            white-space: pre-wrap;
             text-align: left;
             max-width: 600px;
             margin-left: auto;
@@ -185,7 +181,8 @@
         <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Get Random Shloka Q1 or Q3</button>
         <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Get Full Shloka</button>
         <button onclick="sendCommand('NextIntent', {style: getSelectedStyle(), pada: 'pada1'})">Next Shloka</button>
-        <button id="previousButton" onclick="handlePreviousShloka()" disabled>Previous Shloka</button>
+        <button id="previousButton" onclick="handlePreviousShloka()">Previous Shloka</button>
+        <button onclick="handleMeanings()">Meanings</button>
         <button onclick="showVerseTable()">Regular Readers</button>
     </div>
     
@@ -280,7 +277,6 @@
                 }
                 const data = await response.json();
                 const audioUrl = data[key]?.AudioFull || `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioFull/${chapter}.${verse}.mp3`;
-                // Validate URL
                 const audioCheck = await fetch(audioUrl, { method: 'HEAD' });
                 if (!audioCheck.ok) {
                     throw new Error(`Audio URL inaccessible: ${audioUrl}`);
@@ -292,6 +288,45 @@
                 const fallbackUrl = `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioFull/${chapter}.${verse}.mp3`;
                 console.log(`Using fallback audio URL: ${fallbackUrl}`);
                 return fallbackUrl;
+            }
+        }
+
+        async function fetchShlokaMeaning(chapter, verse) {
+            const url = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/meanings.txt';
+            console.log(`Fetching meaning for chapter ${chapter}, verse ${verse} from ${url}`);
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+                const text = await response.text();
+                console.log(`Meaning text fetched, length: ${text.length} characters`);
+                
+                const lines = text.split('\n');
+                const key1 = `${chapter}.${verse}`;
+                const key2 = `${chapter}-${verse}`;
+                console.log(`Searching for key: ${key1} or ${key2}`);
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line.startsWith(key1 + ' ') || line.startsWith(key2 + ' ') || line.startsWith(key1 + '\t') || line.startsWith(key2 + '\t')) {
+                        let meaningLines = [line.substring(line.indexOf(' ') + 1)];
+                        let j = i + 1;
+                        while (j < lines.length && !lines[j].match(/^\d+[.-]\d+/)) {
+                            meaningLines.push(lines[j].trim());
+                            j++;
+                        }
+                        let meaningText = meaningLines.join('\n').trim();
+                        console.log(`Found meaning: ${meaningText}`);
+                        return `${chapter}.${verse} Meaning:\n${meaningText}`;
+                    }
+                }
+
+                console.log(`No meaning found for ${key1} or ${key2}`);
+                return `Meaning for ${chapter}.${verse} not found`;
+            } catch (error) {
+                console.error(`Error fetching meaning: ${error}`);
+                return `Error loading meaning for ${chapter}.${verse}`;
             }
         }
 
@@ -337,8 +372,6 @@
             });
             localStorage.setItem('gitaContext', JSON.stringify(currentContext));
             
-            document.getElementById('previousButton').disabled = (chapter === 1 && verse === 1);
-            
             const shlokaText = await fetchShlokaText(chapter, verse, style);
             document.getElementById('gurudattaText').innerText = shlokaText;
             document.getElementById('sringeriText').innerText = shlokaText;
@@ -369,7 +402,6 @@
                     if (chapter < 1) {
                         chapter = 1;
                         verse = 1;
-                        document.getElementById('previousButton').disabled = true;
                     } else {
                         verse = verseCounts[chapter];
                     }
@@ -383,8 +415,6 @@
                     parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style }
                 });
                 localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-                
-                document.getElementById('previousButton').disabled = (chapter === 1 && verse === 1);
                 
                 const shlokaText = await fetchShlokaText(chapter, verse, style);
                 document.getElementById('gurudattaText').innerText = shlokaText;
@@ -410,6 +440,27 @@
             }
         }
 
+        async function handleMeanings() {
+            const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+            if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
+                const chapter = Math.floor(context.parameters.chapter);
+                const verse = Math.floor(context.parameters.verse);
+                console.log(`Fetching meaning for chapter ${chapter}, verse ${verse}`);
+                
+                const meaningText = await fetchShlokaMeaning(chapter, verse);
+                document.getElementById('gurudattaText').innerText = meaningText;
+                document.getElementById('sringeriText').innerText = meaningText;
+                
+                updateTextboxVisibility();
+            } else {
+                console.log('No valid context for Meanings');
+                const errorText = 'Please select a Shloka first';
+                document.getElementById('gurudattaText').innerText = errorText;
+                document.getElementById('sringeriText').innerText = errorText;
+                updateTextboxVisibility();
+            }
+        }
+
         async function handleChapterSelect(selectElement) {
             const chapter = parseInt(selectElement.value);
             if (chapter) {
@@ -422,8 +473,6 @@
                     parameters: { chapter: parseInt(chapter), verse: 1, style: style }
                 });
                 localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-                
-                document.getElementById('previousButton').disabled = (chapter === 1 && verse === 1);
                 
                 const shlokaText = await fetchShlokaText(chapter, 1, style);
                 document.getElementById('gurudattaText').innerText = shlokaText;
@@ -553,8 +602,6 @@
                     const chapter = Math.floor(context.parameters.chapter);
                     const verse = Math.floor(context.parameters.verse);
                     console.log(`Updating for chapter ${chapter}, verse ${verse}, style ${style}`);
-                    
-                    document.getElementById('previousButton').disabled = (chapter === 1 && verse === 1);
                     
                     const shlokaText = await fetchShlokaText(chapter, verse, style);
                     document.getElementById('gurudattaText').innerText = shlokaText;
