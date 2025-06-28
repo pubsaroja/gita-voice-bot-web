@@ -130,7 +130,7 @@
         }
         .verse-grid {
             display: grid;
-            grid-template-columns: rekon(auto-fill, minmax(60px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
             gap: 10px;
             padding: 10px;
         }
@@ -386,8 +386,6 @@
             const shlokaText = await fetchShlokaText(chapter, verse, style);
             document.getElementById('gurudattaText').innerText = shlokaText;
             document.getElementById('sringeriText').innerText = shlokaText;
-            localStorage.setItem('gitaLastText', shlokaText);
-            console.log('selectVerse: Stored gitaLastText:', shlokaText);
             
             const audioResult = await fetchAudioUrl(chapter, verse);
             const audioPlayer = document.getElementById('audioPlayer');
@@ -398,15 +396,11 @@
                     const errorText = `${shlokaText}\n${audioResult.error}`;
                     document.getElementById('gurudattaText').innerText = errorText;
                     document.getElementById('sringeriText').innerText = errorText;
-                    localStorage.setItem('gitaLastText', errorText);
-                    console.log('selectVerse: Stored gitaLastText with error:', errorText);
                 }
             } catch (error) {
                 const errorText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
                 document.getElementById('gurudattaText').innerText = errorText;
                 document.getElementById('sringeriText').innerText = errorText;
-                localStorage.setItem('gitaLastText', errorText);
-                console.log('selectVerse: Stored gitaLastText with error:', errorText);
             }
             
             updateTextboxVisibility();
@@ -441,8 +435,6 @@
                 const shlokaText = await fetchShlokaText(chapter, verse, style);
                 document.getElementById('gurudattaText').innerText = shlokaText;
                 document.getElementById('sringeriText').innerText = shlokaText;
-                localStorage.setItem('gitaLastText', shlokaText);
-                console.log('handlePreviousShloka: Stored gitaLastText:', shlokaText);
                 
                 const audioResult = await fetchAudioUrl(chapter, verse);
                 const audioPlayer = document.getElementById('audioPlayer');
@@ -453,15 +445,11 @@
                         const errorText = `${shlokaText}\n${audioResult.error}`;
                         document.getElementById('gurudattaText').innerText = errorText;
                         document.getElementById('sringeriText').innerText = errorText;
-                        localStorage.setItem('gitaLastText', errorText);
-                        console.log('handlePreviousShloka: Stored gitaLastText with error:', errorText);
                     }
                 } catch (error) {
                     const errorText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
                     document.getElementById('gurudattaText').innerText = errorText;
                     document.getElementById('sringeriText').innerText = errorText;
-                    localStorage.setItem('gitaLastText', errorText);
-                    console.log('handlePreviousShloka: Stored gitaLastText with error:', errorText);
                 }
                 
                 updateTextboxVisibility();
@@ -469,8 +457,6 @@
                 const errorText = 'Please select a Shloka first';
                 document.getElementById('gurudattaText').innerText = errorText;
                 document.getElementById('sringeriText').innerText = errorText;
-                localStorage.setItem('gitaLastText', errorText);
-                console.log('handlePreviousShloka: Stored gitaLastText:', errorText);
                 updateTextboxVisibility();
             }
         }
@@ -494,16 +480,12 @@
                 const meaningText = await fetchShlokaMeaning(chapter, verse);
                 document.getElementById('gurudattaText').innerText = meaningText;
                 document.getElementById('sringeriText').innerText = meaningText;
-                localStorage.setItem('gitaLastText', meaningText);
-                console.log('handleMeanings: Stored gitaLastText:', meaningText);
                 
                 updateTextboxVisibility();
             } else {
                 const errorText = 'Please select a Shloka first';
                 document.getElementById('gurudattaText').innerText = errorText;
                 document.getElementById('sringeriText').innerText = errorText;
-                localStorage.setItem('gitaLastText', errorText);
-                console.log('handleMeanings: Stored gitaLastText:', errorText);
                 updateTextboxVisibility();
             }
         }
@@ -524,8 +506,6 @@
                 const shlokaText = await fetchShlokaText(chapter, 1, style);
                 document.getElementById('gurudattaText').innerText = shlokaText;
                 document.getElementById('sringeriText').innerText = shlokaText;
-                localStorage.setItem('gitaLastText', shlokaText);
-                console.log('handleChapterSelect: Stored gitaLastText:', shlokaText);
                 
                 const audioResult = await fetchAudioUrl(chapter, 1);
                 const audioPlayer = document.getElementById('audioPlayer');
@@ -536,15 +516,11 @@
                         const errorText = `${shlokaText}\n${audioResult.error}`;
                         document.getElementById('gurudattaText').innerText = errorText;
                         document.getElementById('sringeriText').innerText = errorText;
-                        localStorage.setItem('gitaLastText', errorText);
-                        console.log('handleChapterSelect: Stored gitaLastText with error:', errorText);
                     }
                 } catch (error) {
                     const errorText = `${shlokaText}\nError playing audio for ${chapter}.1: ${error.message}`;
                     document.getElementById('gurudattaText').innerText = errorText;
                     document.getElementById('sringeriText').innerText = errorText;
-                    localStorage.setItem('gitaLastText', errorText);
-                    console.log('handleChapterSelect: Stored gitaLastText with error:', errorText);
                 }
                 
                 updateTextboxVisibility();
@@ -552,20 +528,13 @@
             }
         }
 
-        let sessionId = localStorage.getItem('gitaSessionId');
-        if (!sessionId) {
-            sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('gitaSessionId', sessionId);
-        }
-        let currentContext = JSON.parse(localStorage.getItem('gitaContext')) || [];
-        let lastText = localStorage.getItem('gitaLastText') || '';
-
-        // Set initial textbox content from gitaLastText
-        if (lastText) {
-            document.getElementById('gurudattaText').innerText = lastText;
-            document.getElementById('sringeriText').innerText = lastText;
-            console.log('Page load: Set initial text from gitaLastText:', lastText);
-        }
+        // Reset localStorage and initialize session
+        localStorage.removeItem('gitaSessionId');
+        localStorage.removeItem('gitaContext');
+        console.log('Page load: Cleared localStorage (gitaSessionId, gitaContext)');
+        let sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('gitaSessionId', sessionId);
+        let currentContext = [];
 
         function getSelectedStyle() {
             return document.querySelector('input[name="style"]:checked').value;
@@ -591,12 +560,11 @@
                 sringeriLabel.classList.add('active');
             }
 
-            // Check if a shloka is selected and update text if necessary
+            // Only fetch text if a valid shloka-context exists
             const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
             if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
                 const chapter = Math.floor(context.parameters.chapter);
                 const verse = Math.floor(context.parameters.verse);
-                const contextStyle = context.parameters.style || 'gurudatta';
                 const showingMeaning = context.parameters.showingMeaning || false;
 
                 // Update context with new style, preserve showingMeaning
@@ -609,13 +577,11 @@
                 localStorage.setItem('gitaContext', JSON.stringify(currentContext));
                 console.log('updateTextboxVisibility: Updated context:', JSON.stringify(currentContext));
 
-                // Fetch text only if not showing meaning and style has changed
-                if (!showingMeaning && contextStyle !== style) {
+                // Fetch text based on showingMeaning
+                if (!showingMeaning) {
                     const shlokaText = await fetchShlokaText(chapter, verse, style);
                     const activeTextbox = style === 'gurudatta' ? gurudattaText : sringeriText;
                     activeTextbox.innerText = shlokaText;
-                    localStorage.setItem('gitaLastText', shlokaText);
-                    console.log('updateTextboxVisibility: Stored gitaLastText:', shlokaText);
                 }
             }
         }
@@ -705,8 +671,6 @@
                     const shlokaText = await fetchShlokaText(chapter, verse, style);
                     document.getElementById('gurudattaText').innerText = shlokaText;
                     document.getElementById('sringeriText').innerText = shlokaText;
-                    localStorage.setItem('gitaLastText', shlokaText);
-                    console.log('sendCommand: Stored gitaLastText:', shlokaText);
                     
                     const audioResult = await fetchAudioUrl(chapter, verse, quarter, backendAudioUrl);
                     const audioPlayer = document.getElementById('audioPlayer');
@@ -718,22 +682,16 @@
                             const errorText = `${shlokaText}\n${audioResult.error}`;
                             document.getElementById('gurudattaText').innerText = errorText;
                             document.getElementById('sringeriText').innerText = errorText;
-                            localStorage.setItem('gitaLastText', errorText);
-                            console.log('sendCommand: Stored gitaLastText with error:', errorText);
                         }
                     } catch (error) {
                         const errorText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
                         document.getElementById('gurudattaText').innerText = errorText;
                         document.getElementById('sringeriText').innerText = errorText;
-                        localStorage.setItem('gitaLastText', errorText);
-                        console.log('sendCommand: Stored gitaLastText with error:', errorText);
                     }
                 } else {
                     const errorText = 'Please select a Shloka first';
                     document.getElementById('gurudattaText').innerText = errorText;
                     document.getElementById('sringeriText').innerText = errorText;
-                    localStorage.setItem('gitaLastText', errorText);
-                    console.log('sendCommand: Stored gitaLastText:', errorText);
                 }
 
                 updateTextboxVisibility();
@@ -741,8 +699,6 @@
                 const errorText = `Error communicating with server for ${intent}: ${error.message}`;
                 document.getElementById('gurudattaText').innerText = errorText;
                 document.getElementById('sringeriText').innerText = errorText;
-                localStorage.setItem('gitaLastText', errorText);
-                console.log('sendCommand: Stored gitaLastText:', errorText);
                 updateTextboxVisibility();
             }
         }
