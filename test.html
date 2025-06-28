@@ -314,7 +314,7 @@
             try {
                 const fullCheck = await fetch(audioUrl, { method: 'HEAD', mode: 'cors' });
                 if (!fullCheck.ok) {
-                    throw new Error(`AudioFull inaccessible: HTTP ${fullCheck.status}`);
+                    throw new Error(`AudioFull inaccessible: HTTP ${check.status}`);
                 }
                 return errorMessage ? { url: audioUrl, error: errorMessage } : audioUrl;
             } catch (error) {
@@ -378,9 +378,10 @@
             currentContext.push({
                 name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
                 lifespanCount: 5,
-                parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style }
+                parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style, showingMeaning: false }
             });
             localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+            console.log('selectVerse: Updated context:', JSON.stringify(currentContext));
             
             const shlokaText = await fetchShlokaText(chapter, verse, style);
             document.getElementById('gurudattaText').innerText = shlokaText;
@@ -424,9 +425,10 @@
                 currentContext.push({
                     name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
                     lifespanCount: 5,
-                    parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style }
+                    parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style, showingMeaning: false }
                 });
                 localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+                console.log('handlePreviousShloka: Updated context:', JSON.stringify(currentContext));
                 
                 const shlokaText = await fetchShlokaText(chapter, verse, style);
                 document.getElementById('gurudattaText').innerText = shlokaText;
@@ -460,6 +462,17 @@
             if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
                 const chapter = Math.floor(context.parameters.chapter);
                 const verse = Math.floor(context.parameters.verse);
+                const style = getSelectedStyle();
+                
+                // Update context with showingMeaning: true
+                currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
+                currentContext.push({
+                    name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                    lifespanCount: 5,
+                    parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style, showingMeaning: true }
+                });
+                localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+                console.log('handleMeanings: Updated context:', JSON.stringify(currentContext));
                 
                 const meaningText = await fetchShlokaMeaning(chapter, verse);
                 document.getElementById('gurudattaText').innerText = meaningText;
@@ -482,9 +495,10 @@
                 currentContext.push({
                     name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
                     lifespanCount: 5,
-                    parameters: { chapter: parseInt(chapter), verse: 1, style: style }
+                    parameters: { chapter: parseInt(chapter), verse: 1, style: style, showingMeaning: false }
                 });
                 localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+                console.log('handleChapterSelect: Updated context:', JSON.stringify(currentContext));
                 
                 const shlokaText = await fetchShlokaText(chapter, 1, style);
                 document.getElementById('gurudattaText').innerText = shlokaText;
@@ -545,19 +559,24 @@
             if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
                 const chapter = Math.floor(context.parameters.chapter);
                 const verse = Math.floor(context.parameters.verse);
-                // Update context with new style
+                const showingMeaning = context.parameters.showingMeaning || false;
+
+                // Update context with new style, preserve showingMeaning
                 currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
                 currentContext.push({
                     name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
                     lifespanCount: 5,
-                    parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style }
+                    parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style, showingMeaning: showingMeaning }
                 });
                 localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-                
-                // Fetch shloka text in the new style for the active textbox only
-                const shlokaText = await fetchShlokaText(chapter, verse, style);
-                const activeTextbox = style === 'gurudatta' ? gurudattaText : sringeriText;
-                activeTextbox.innerText = shlokaText;
+                console.log('updateTextboxVisibility: Updated context:', JSON.stringify(currentContext));
+
+                // Fetch shloka text only if not showing meaning
+                if (!showingMeaning) {
+                    const shlokaText = await fetchShlokaText(chapter, verse, style);
+                    const activeTextbox = style === 'gurudatta' ? gurudattaText : sringeriText;
+                    activeTextbox.innerText = shlokaText;
+                }
             }
         }
 
@@ -622,7 +641,13 @@
                 
                 if (data.outputContexts && data.outputContexts.length > 0) {
                     currentContext = data.outputContexts;
+                    // Ensure showingMeaning is false for new shloka
+                    const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+                    if (context && context.parameters) {
+                        context.parameters.showingMeaning = false;
+                    }
                     localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+                    console.log('sendCommand: Updated context:', JSON.stringify(currentContext));
                 }
 
                 const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
