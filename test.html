@@ -391,7 +391,7 @@
             audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
             try {
                 await audioPlayer.play();
-                if (typeof audioResult !== 'string' && audioResult.error) {
+                if (typeof audioResult === 'object' && audioResult.error) {
                     document.getElementById('gurudattaText').innerText = `${shlokaText}\n${audioResult.error}`;
                     document.getElementById('sringeriText').innerText = `${shlokaText}\n${audioResult.error}`;
                 }
@@ -437,7 +437,7 @@
                 audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
                 try {
                     await audioPlayer.play();
-                    if (typeof audioResult !== 'string' && audioResult.error) {
+                    if (typeof audioResult === 'object' && audioResult.error) {
                         document.getElementById('gurudattaText').innerText = `${shlokaText}\n${audioResult.error}`;
                         document.getElementById('sringeriText').innerText = `${shlokaText}\n${audioResult.error}`;
                     }
@@ -495,7 +495,7 @@
                 audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
                 try {
                     await audioPlayer.play();
-                    if (typeof audioResult !== 'string' && audioResult.error) {
+                    if (typeof audioResult === 'object' && audioResult.error) {
                         document.getElementById('gurudattaText').innerText = `${shlokaText}\n${audioResult.error}`;
                         document.getElementById('sringeriText').innerText = `${shlokaText}\n${audioResult.error}`;
                     }
@@ -627,10 +627,10 @@
                     try {
                         audioPlayer.load();
                         await audioPlayer.play();
-                        if (typeof audioResult !== 'string' && audioResult.error)精力
-
-                        document.getElementById('gurudattaText').innerText = `${shlokaText}\n${audioResult.error}`;
-                        document.getElementById('sringeriText').innerText = `${shlokaText}\n${audioResult.error}`;
+                        if (typeof audioResult === 'object' && audioResult.error) {
+                            document.getElementById('gurudattaText').innerText = `${shlokaText}\n${audioResult.error}`;
+                            document.getElementById('sringeriText').innerText = `${shlokaText}\n${audioResult.error}`;
+                        }
                     } catch (error) {
                         document.getElementById('gurudattaText').innerText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
                         document.getElementById('sringeriText').innerText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
