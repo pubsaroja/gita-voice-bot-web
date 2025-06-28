@@ -520,13 +520,14 @@
             return document.querySelector('input[name="style"]:checked').value;
         }
 
-        function updateTextboxVisibility() {
+        async function updateTextboxVisibility() {
             const style = getSelectedStyle();
             const gurudattaText = document.getElementById('gurudattaText');
             const sringeriText = document.getElementById('sringeriText');
             const gurudattaLabel = document.getElementById('gurudattaLabel');
             const sringeriLabel = document.getElementById('sringeriLabel');
 
+            // Toggle visibility
             if (style === 'gurudatta') {
                 gurudattaText.classList.add('active');
                 gurudattaLabel.classList.add('active');
@@ -537,6 +538,26 @@
                 gurudattaLabel.classList.remove('active');
                 sringeriText.classList.add('active');
                 sringeriLabel.classList.add('active');
+            }
+
+            // Check if a shloka is selected and update text if necessary
+            const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+            if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
+                const chapter = Math.floor(context.parameters.chapter);
+                const verse = Math.floor(context.parameters.verse);
+                // Update context with new style
+                currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
+                currentContext.push({
+                    name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                    lifespanCount: 5,
+                    parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style }
+                });
+                localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+                
+                // Fetch shloka text in the new style for the active textbox only
+                const shlokaText = await fetchShlokaText(chapter, verse, style);
+                const activeTextbox = style === 'gurudatta' ? gurudattaText : sringeriText;
+                activeTextbox.innerText = shlokaText;
             }
         }
 
