@@ -267,48 +267,47 @@
         };
 
         async function fetchAudioUrl(chapter, verse, quarter = null) {
-            const url = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/gita_audio_index.json';
+            const baseUrl = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main';
             const key = `${chapter}.${verse}`;
             console.log(`Fetching audio URL for ${key}, quarter: ${quarter}`);
+            let audioUrl;
+            
+            if (quarter === 'pada1') {
+                audioUrl = `${baseUrl}/AudioPada1/${chapter}.${verse}.mp3`;
+            } else if (quarter === 'pada1_or_pada3') {
+                audioUrl = `${baseUrl}/AudioPada1/${chapter}.${verse}.mp3`; // Try Pada1 first
+            } else {
+                audioUrl = `${baseUrl}/AudioFull/${chapter}.${verse}.mp3`;
+            }
+
             try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`HTTP error: ${response.status}`);
-                }
-                const data = await response.json();
-                let audioUrl;
-                if (quarter === 'pada1') {
-                    audioUrl = data[key]?.AudioPada1;
-                    if (!audioUrl) {
-                        console.warn(`No AudioPada1 for ${key}, trying AudioFull`);
-                        audioUrl = data[key]?.AudioFull || `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioFull/${chapter}.${verse}.mp3`;
-                    }
-                } else if (quarter === 'pada1_or_pada3') {
-                    audioUrl = data[key]?.AudioPada1 || data[key]?.AudioPada3;
-                    if (!audioUrl) {
-                        console.warn(`No AudioPada1 or AudioPada3 for ${key}, trying AudioFull`);
-                        audioUrl = data[key]?.AudioFull || `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioFull/${chapter}.${verse}.mp3`;
-                    }
-                } else {
-                    audioUrl = data[key]?.AudioFull || `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioFull/${chapter}.${verse}.mp3`;
-                }
-                // Validate URL
+                // Validate primary URL
                 const audioCheck = await fetch(audioUrl, { method: 'HEAD', mode: 'cors' });
-                if (!audioCheck.ok) {
-                    console.warn(`Audio URL inaccessible: ${audioUrl}, falling back to AudioFull`);
-                    audioUrl = `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioFull/${chapter}.${verse}.mp3`;
-                    const fallbackCheck = await fetch(audioUrl, { method: 'HEAD', mode: 'cors' });
-                    if (!fallbackCheck.ok) {
-                        throw new Error(`Fallback AudioFull URL inaccessible: ${audioUrl}`);
+                if (!audioCheck.ok && quarter === 'pada1_or_pada3') {
+                    console.warn(`Primary URL inaccessible: ${audioUrl}, trying AudioPada3`);
+                    audioUrl = `${baseUrl}/AudioPada3/${chapter}.${verse}.mp3`;
+                    const pada3Check = await fetch(audioUrl, { method: 'HEAD', mode: 'cors' });
+                    if (!pada3Check.ok) {
+                        console.warn(`AudioPada3 inaccessible: ${audioUrl}, falling back to AudioFull`);
+                        audioUrl = `${baseUrl}/AudioFull/${chapter}.${verse}.mp3`;
+                        const fullCheck = await fetch(audioUrl, { method: 'HEAD', mode: 'cors' });
+                        if (!fullCheck.ok) {
+                            throw new Error(`All audio URLs inaccessible for ${key}`);
+                        }
+                    }
+                } else if (!audioCheck.ok) {
+                    console.warn(`Primary URL inaccessible: ${audioUrl}, falling back to AudioFull`);
+                    audioUrl = `${baseUrl}/AudioFull/${chapter}.${verse}.mp3`;
+                    const fullCheck = await fetch(audioUrl, { method: 'HEAD', mode: 'cors' });
+                    if (!fullCheck.ok) {
+                        throw new Error(`All audio URLs inaccessible for ${key}`);
                     }
                 }
                 console.log(`Audio URL for ${key}: ${audioUrl}`);
                 return audioUrl;
             } catch (error) {
                 console.error(`Error fetching audio URL for ${key}: ${error}`);
-                const fallbackUrl = `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioFull/${chapter}.${verse}.mp3`;
-                console.log(`Using fallback audio URL: ${fallbackUrl}`);
-                return fallbackUrl;
+                return `${baseUrl}/AudioFull/${chapter}.${verse}.mp3`; // Final fallback
             }
         }
 
@@ -321,7 +320,8 @@
                     throw new Error(`HTTP error: ${response.status}`);
                 }
                 const data = await response.json();
-                console.log(`Meaning JSON fetched, keys: ${Object.keys(data).length}`);
+                const keys = Object.keys(data);
+                console.log(`Meaning JSON fetched, available keys: ${keys.join(', ')}`);
                 
                 const key = `${chapter}.${verse}`;
                 if (data[key] && data[key].అర్థము) {
@@ -391,6 +391,8 @@
                 console.log(`Playing audio: ${audioUrl}`);
             } catch (error) {
                 console.error(`Error playing audio for ${chapter}.${verse}: ${error}`);
+                document.getElementById('gurudattaText').innerText = `Error playing audio for ${chapter}.${verse}`;
+                document.getElementById('sringeriText').innerText = `Error playing audio for ${chapter}.${verse}`;
             }
             
             updateTextboxVisibility();
@@ -435,6 +437,8 @@
                     console.log(`Playing audio: ${audioUrl}`);
                 } catch (error) {
                     console.error(`Error playing audio for ${chapter}.${verse}: ${error}`);
+                    document.getElementById('gurudattaText').innerText = `Error playing audio for ${chapter}.${verse}`;
+                    document.getElementById('sringeriText').innerText = `Error playing audio for ${chapter}.${verse}`;
                 }
                 
                 updateTextboxVisibility();
@@ -493,6 +497,8 @@
                     console.log(`Playing audio: ${audioUrl}`);
                 } catch (error) {
                     console.error(`Error playing audio for ${chapter}.1: ${error}`);
+                    document.getElementById('gurudattaText').innerText = `Error playing audio for ${chapter}.1`;
+                    document.getElementById('sringeriText').innerText = `Error playing audio for ${chapter}.1`;
                 }
                 
                 updateTextboxVisibility();
@@ -624,8 +630,8 @@
                         console.log(`Playing audio: ${audioUrl}`);
                     } catch (error) {
                         console.error(`Error playing audio for ${chapter}.${verse}: ${error}`);
-                        document.getElementById('gurudattaText').innerText = `Error playing audio for ${chapter}.${verse}`;
-                        document.getElementById('sringeriText').innerText = `Error playing audio for ${chapter}.${verse}`;
+                        document.getElementById('gurudattaText').innerText = `Error playing audio for ${chapter}.${verse}: ${error.message}`;
+                        document.getElementById('sringeriText').innerText = `Error playing audio for ${chapter}.${verse}: ${error.message}`;
                     }
                 } else {
                     console.log(`No valid context for ${intent}`);
