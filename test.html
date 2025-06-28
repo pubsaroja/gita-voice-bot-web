@@ -96,7 +96,8 @@
         }
         .textbox-label.active {
             display: block;
-åloka-text {
+        }
+        .shloka-text {
             display: none;
         }
         .shloka-text.active {
@@ -279,6 +280,11 @@
                 }
                 const data = await response.json();
                 const audioUrl = data[key]?.AudioFull || `https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/AudioFull/${chapter}.${verse}.mp3`;
+                // Validate URL
+                const audioCheck = await fetch(audioUrl, { method: 'HEAD' });
+                if (!audioCheck.ok) {
+                    throw new Error(`Audio URL inaccessible: ${audioUrl}`);
+                }
                 console.log(`Audio URL for ${key}: ${audioUrl}`);
                 return audioUrl;
             } catch (error) {
@@ -331,7 +337,7 @@
             });
             localStorage.setItem('gitaContext', JSON.stringify(currentContext));
             
-            document.getElementById('previousButton').disabled = false;
+            document.getElementById('previousButton').disabled = (chapter === 1 && verse === 1);
             
             const shlokaText = await fetchShlokaText(chapter, verse, style);
             document.getElementById('gurudattaText').innerText = shlokaText;
@@ -378,6 +384,8 @@
                 });
                 localStorage.setItem('gitaContext', JSON.stringify(currentContext));
                 
+                document.getElementById('previousButton').disabled = (chapter === 1 && verse === 1);
+                
                 const shlokaText = await fetchShlokaText(chapter, verse, style);
                 document.getElementById('gurudattaText').innerText = shlokaText;
                 document.getElementById('sringeriText').innerText = shlokaText;
@@ -415,7 +423,7 @@
                 });
                 localStorage.setItem('gitaContext', JSON.stringify(currentContext));
                 
-                document.getElementById('previousButton').disabled = false;
+                document.getElementById('previousButton').disabled = (chapter === 1 && verse === 1);
                 
                 const shlokaText = await fetchShlokaText(chapter, 1, style);
                 document.getElementById('gurudattaText').innerText = shlokaText;
@@ -546,7 +554,7 @@
                     const verse = Math.floor(context.parameters.verse);
                     console.log(`Updating for chapter ${chapter}, verse ${verse}, style ${style}`);
                     
-                    document.getElementById('previousButton').disabled = false;
+                    document.getElementById('previousButton').disabled = (chapter === 1 && verse === 1);
                     
                     const shlokaText = await fetchShlokaText(chapter, verse, style);
                     document.getElementById('gurudattaText').innerText = shlokaText;
