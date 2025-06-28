@@ -316,7 +316,7 @@
                 try {
                     const check = await fetch(url, { method: 'HEAD', mode: 'cors' });
                     if (!check.ok) {
-                        throw new Error(`${type} inaccessible: ${check.status}`);
+                        throw new Error(`${type} inaccessible: HTTP ${check.status}`);
                     }
                     console.log(`${type} URL valid: ${url}`);
                     addDebugMessage(`${type} URL valid: ${url}`);
@@ -328,30 +328,41 @@
                 }
             };
 
+            const namingVariations = [
+                { folder: 'AudioPada1', key: key },
+                { folder: 'AudioPada1', key: keyAlt },
+                { folder: 'audio_pada1', key: key },
+                { folder: 'audio_pada1', key: keyAlt },
+                { folder: 'AUDIO_PADA1', key: key },
+                { folder: 'AUDIO_PADA1', key: keyAlt }
+            ];
+            const pada3Variations = [
+                { folder: 'AudioPada3', key: key },
+                { folder: 'AudioPada3', key: keyAlt },
+                { folder: 'audio_pada3', key: key },
+                { folder: 'audio_pada3', key: keyAlt },
+                { folder: 'AUDIO_PADA3', key: key },
+                { folder: 'AUDIO_PADA3', key: keyAlt }
+            ];
+
             if (quarter === 'pada1') {
-                audioUrl = await tryUrl(`${baseUrl}/AudioPada1/${key}.mp3`, 'AudioPada1');
-                if (!audioUrl) {
-                    audioUrl = await tryUrl(`${baseUrl}/AudioPada1/${keyAlt}.mp3`, 'AudioPada1 (alt)');
+                for (const { folder, key } of namingVariations) {
+                    audioUrl = await tryUrl(`${baseUrl}/${folder}/${key}.mp3`, `${folder}/${key}.mp3`);
+                    if (audioUrl) return audioUrl;
                 }
-                if (!audioUrl) {
-                    errorMessage = `Quarter audio (Pada1) not found for ${key}`;
-                    audioUrl = `${baseUrl}/AudioFull/${key}.mp3`;
-                }
+                errorMessage = `Quarter audio (Pada1) not found for ${key}, check repository for AudioPada1/${key}.mp3 or variations`;
+                audioUrl = `${baseUrl}/AudioFull/${key}.mp3`;
             } else if (quarter === 'pada1_or_pada3') {
-                audioUrl = await tryUrl(`${baseUrl}/AudioPada1/${key}.mp3`, 'AudioPada1');
-                if (!audioUrl) {
-                    audioUrl = await tryUrl(`${baseUrl}/AudioPada1/${keyAlt}.mp3`, 'AudioPada1 (alt)');
+                for (const { folder, key } of namingVariations) {
+                    audioUrl = await tryUrl(`${baseUrl}/${folder}/${key}.mp3`, `${folder}/${key}.mp3`);
+                    if (audioUrl) return audioUrl;
                 }
-                if (!audioUrl) {
-                    audioUrl = await tryUrl(`${baseUrl}/AudioPada3/${key}.mp3`, 'AudioPada3');
+                for (const { folder, key } of pada3Variations) {
+                    audioUrl = await tryUrl(`${baseUrl}/${folder}/${key}.mp3`, `${folder}/${key}.mp3`);
+                    if (audioUrl) return audioUrl;
                 }
-                if (!audioUrl) {
-                    audioUrl = await tryUrl(`${baseUrl}/AudioPada3/${keyAlt}.mp3`, 'AudioPada3 (alt)');
-                }
-                if (!audioUrl) {
-                    errorMessage = `Quarter audio (Pada1 or Pada3) not found for ${key}`;
-                    audioUrl = `${baseUrl}/AudioFull/${key}.mp3`;
-                }
+                errorMessage = `Quarter audio (Pada1 or Pada3) not found for ${key}, check repository for AudioPada1 or AudioPada3`;
+                audioUrl = `${baseUrl}/AudioFull/${key}.mp3`;
             } else {
                 audioUrl = `${baseUrl}/AudioFull/${key}.mp3`;
             }
@@ -362,7 +373,7 @@
             try {
                 const fullCheck = await fetch(audioUrl, { method: 'HEAD', mode: 'cors' });
                 if (!fullCheck.ok) {
-                    throw new Error(`AudioFull inaccessible: ${fullCheck.status}`);
+                    throw new Error(`AudioFull inaccessible: HTTP ${fullCheck.status}`);
                 }
                 console.log(`AudioFull URL valid: ${audioUrl}`);
                 addDebugMessage(`AudioFull URL valid: ${audioUrl}`);
