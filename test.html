@@ -360,7 +360,7 @@
             </div>
         </div>
         <div class="button-group">
-            <button onclick="showInstructions()">Instructions</button>
+            <button id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
         </div>
     </div>
     
@@ -401,12 +401,31 @@
 
         let isContinuousPlaying = false;
         let continuousPlayInterval = null;
+        let isInstructionsVisible = false;
 
-        function showInstructions() {
+        function toggleInstructions() {
             isContinuousPlaying = false;
+            const instructionsButton = document.getElementById('instructionsButton');
+            const gurudattaText = document.getElementById('gurudattaText');
+            const sringeriText = document.getElementById('sringeriText');
+            const style = getSelectedStyle();
+            const activeTextbox = style === 'gurudatta' ? gurudattaText : sringeriText;
+            const inactiveTextbox = style === 'gurudatta' ? sringeriText : gurudattaText;
             const instructionsText = `<b style="color:red;">Your Shloka will appear here.</b> <br>Shloka Q1: Get Random Shloka with 1st pada. <br>Shloka Q1 or Q3: Get 1st Pada or 3rd Pada.<br>Full: Get full Shloka<br>Previous: Get previous Shloka.<br>Select Shloka: Get individual Shloka.<br>Meanings: Get meanings of Shlokas.<br>Dropdown "Select Chapter": Get random shloka from particular chapter.<br>`;
-            document.getElementById('gurudattaText').innerHTML = instructionsText;
-            document.getElementById('sringeriText').innerHTML = instructionsText;
+            const defaultText = 'Your Shloka will appear here.';
+
+            if (!isInstructionsVisible) {
+                activeTextbox.innerHTML = instructionsText;
+                inactiveTextbox.innerText = defaultText;
+                instructionsButton.innerText = 'Close Instructions';
+                isInstructionsVisible = true;
+            } else {
+                activeTextbox.innerText = defaultText;
+                inactiveTextbox.innerText = defaultText;
+                instructionsButton.innerText = 'Instructions';
+                isInstructionsVisible = false;
+            }
+
             adjustTextboxHeight();
             updateTextboxVisibility();
         }
@@ -565,6 +584,8 @@
                     isContinuousPlaying = false;
                     selectElement.selectedIndex = 0;
                     audioPlayer.src = '';
+                    document.getElementById('instructionsButton').innerText = 'Instructions';
+                    isInstructionsVisible = false;
                     return;
                 }
 
@@ -617,6 +638,8 @@
             chapterSelect.value = '';
             updateVerseGrid();
             modal.style.display = 'flex';
+            document.getElementById('instructionsButton').innerText = 'Instructions';
+            isInstructionsVisible = false;
         }
 
         function updateVerseGrid() {
@@ -640,10 +663,14 @@
 
         function closeVerseTable() {
             document.getElementById('verseTableModal').style.display = 'none';
+            document.getElementById('instructionsButton').innerText = 'Instructions';
+            isInstructionsVisible = false;
         }
 
         async function selectVerse(chapter, verse) {
             isContinuousPlaying = false;
+            document.getElementById('instructionsButton').innerText = 'Instructions';
+            isInstructionsVisible = false;
             const style = getSelectedStyle();
             currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
             currentContext.push({
@@ -683,6 +710,8 @@
 
         async function handlePreviousShloka() {
             isContinuousPlaying = false;
+            document.getElementById('instructionsButton').innerText = 'Instructions';
+            isInstructionsVisible = false;
             const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
             if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
                 let chapter = Math.floor(context.parameters.chapter);
@@ -742,6 +771,8 @@
 
         async function handleMeanings() {
             isContinuousPlaying = false;
+            document.getElementById('instructionsButton').innerText = 'Instructions';
+            isInstructionsVisible = false;
             const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
             if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
                 const chapter = Math.floor(context.parameters.chapter);
@@ -774,6 +805,8 @@
 
         async function handleChapterSelect(selectElement) {
             isContinuousPlaying = false;
+            document.getElementById('instructionsButton').innerText = 'Instructions';
+            isInstructionsVisible = false;
             const chapter = parseInt(selectElement.value);
             if (chapter) {
                 const style = getSelectedStyle();
@@ -802,17 +835,26 @@
             const sringeriText = document.getElementById('sringeriText');
             const gurudattaLabel = document.getElementById('gurudattaLabel');
             const sringeriLabel = document.getElementById('sringeriLabel');
+            const defaultText = 'Your Shloka will appear here.';
 
             if (style === 'gurudatta') {
                 gurudattaText.classList.add('active');
                 gurudattaLabel.classList.add('active');
                 sringeriText.classList.remove('active');
                 sringeriLabel.classList.remove('active');
+                if (!isInstructionsVisible && !gurudattaText.innerText.trim()) {
+                    gurudattaText.innerText = defaultText;
+                }
+                sringeriText.innerText = defaultText;
             } else {
                 gurudattaText.classList.remove('active');
                 gurudattaLabel.classList.remove('active');
                 sringeriText.classList.add('active');
                 sringeriLabel.classList.add('active');
+                gurudattaText.innerText = defaultText;
+                if (!isInstructionsVisible && !sringeriText.innerText.trim()) {
+                    sringeriText.innerText = defaultText;
+                }
             }
 
             const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
@@ -830,17 +872,21 @@
                 localStorage.setItem('gitaContext', JSON.stringify(currentContext));
                 console.log('updateTextboxVisibility: Updated context:', JSON.stringify(currentContext));
 
-                if (!showingMeaning) {
-                    const shlokaText = await fetchShlokaText(chapter, verse, style);
+                if (!showingMeaning && !isInstructionsVisible) {
+                    const shlokaText = await fetchShlokaText(chapter, verse, style egzample
                     const activeTextbox = style === 'gurudatta' ? gurudattaText : sringeriText;
                     activeTextbox.innerText = shlokaText;
                     adjustTextboxHeight();
                 }
             }
+
+            adjustTextboxHeight();
         }
 
         async function sendCommand(intent, params) {
             isContinuousPlaying = false;
+            document.getElementById('instructionsButton').innerText = 'Instructions';
+            isInstructionsVisible = false;
             const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
             const style = params.style || getSelectedStyle();
             const quarter = params.quarter || params.pada || null;
