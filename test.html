@@ -68,12 +68,17 @@
             width: 100%;
             max-width: 150px;
         }
+        .dropdown-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 15px;
+        }
         .dropdown-container {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 10px;
-            margin: 10px 0;
             width: 100%;
             max-width: 600px;
             border: 2px solid #357EC7;
@@ -263,6 +268,30 @@
             <button onclick="handleMeanings()">Meanings</button>
             <button onclick="showVerseTable()">Select Shloka</button>
         </div>
+    </div>
+    
+    <div class="radio-group">
+        <label>Full Shloka Style:</label>
+        <input type="radio" name="style" value="gurudatta" id="gurudatta" checked onchange="updateTextboxVisibility()">
+        <label for="gurudatta">Gurudatta Style</label>
+        <input type="radio" name="style" value="sringeri" id="sringeri" onchange="updateTextboxVisibility()">
+        <label for="sringeri">Sringeri Style</label>
+    </div>
+    
+    <div class="textbox-container">
+        <div>
+            <div id="gurudattaLabel" class="textbox-label active">Gurudatta Style Shloka</div>
+            <div id="gurudattaText" class="shloka-text active"><b style="color:red;">Your Shloka will appear here.</b>  <br>Shloka Q1: Get Random Shloka with 1st pada. <br>Shloka Q1 or Q3: Get 1st Pada or 3rd Pada.<br>Full: Get full Shloka<br>Previous: Get previous Shloka.<br>Select Shloka: Get individual Shloka.<br>Meanings: Get meanings of Shlokas.<br>Dropdown "Select Chapter": Get random shloka from particular chapter.<br></div>
+        </div>
+        <div>
+            <div id="sringeriLabel" class="textbox-label">Sringeri Style Shloka</div>
+            <div id="sringeriText" class="shloka-text">Your Shloka will appear here</div>
+        </div>
+    </div>
+    
+    <audio id="audioPlayer" controls></audio>
+    
+    <div class="dropdown-section">
         <div class="dropdown-container">
             <div>
                 <label for="chapterSelect">Select Chapter:</label>
@@ -314,27 +343,6 @@
             </div>
         </div>
     </div>
-    
-    <div class="radio-group">
-        <label>Full Shloka Style:</label>
-        <input type="radio" name="style" value="gurudatta" id="gurudatta" checked onchange="updateTextboxVisibility()">
-        <label for="gurudatta">Gurudatta Style</label>
-        <input type="radio" name="style" value="sringeri" id="sringeri" onchange="updateTextboxVisibility()">
-        <label for="sringeri">Sringeri Style</label>
-    </div>
-    
-    <div class="textbox-container">
-        <div>
-            <div id="gurudattaLabel" class="textbox-label active">Gurudatta Style Shloka</div>
-            <div id="gurudattaText" class="shloka-text active"><b style="color:red;">Your Shloka will appear here.</b>  <br>Shloka Q1: Get Random Shloka with 1st pada. <br>Shloka Q1 or Q3: Get 1st Pada or 3rd Pada.<br>Full: Get full Shloka<br>Previous: Get previous Shloka.<br>Select Shloka: Get individual Shloka.<br>Meanings: Get meanings of Shlokas.<br>Dropdown "Select Chapter": Get random shloka from particular chapter.<br></div>
-        </div>
-        <div>
-            <div id="sringeriLabel" class="textbox-label">Sringeri Style Shloka</div>
-            <div id="sringeriText" class="shloka-text">Your Shloka will appear here</div>
-        </div>
-    </div>
-    
-    <audio id="audioPlayer" controls></audio>
     
     <div id="verseTableModal" class="modal">
         <div class="modal-content">
@@ -896,4 +904,4 @@
     </script>
     <h2>Developed by Dr.P.Udayabhaskar</h2>
 </body>
-    </html>
+</html>
