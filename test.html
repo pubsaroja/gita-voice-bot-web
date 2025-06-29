@@ -35,7 +35,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 0.95em;
+            font-size: 1.1em;
             max-width: 140px;
         }
         button:hover {
@@ -46,6 +46,24 @@
             margin: 5px;
             font-size: 1em;
             border-radius: 5px;
+            width: 100%;
+            max-width: 150px;
+        }
+        .dropdown-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .dropdown-container label {
+            font-weight: bold;
+            margin-right: 5px;
+            font-size: 1em;
+        }
+        .dropdown-container div {
+            display: flex;
+            align-items: center;
         }
         .shloka-text {
             margin-top: 10px;
@@ -182,10 +200,19 @@
                 max-width: 120px;
                 margin: 5px 0;
                 padding: 6px;
-                font-size: 0.85em;
+                font-size: 1em;
             }
             .verse-grid {
                 grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            }
+            .dropdown-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .dropdown-container div {
+                width: 100%;
+                max-width: 200px;
+                justify-content: center;
             }
         }
     </style>
@@ -203,28 +230,55 @@
         <button onclick="showVerseTable()">Select Shloka</button>
     </div>
     
-    <div>
-        <select id="chapterSelect" onchange="handleChapterSelect(this)">
-            <option value="" selected disabled>-- Select Chapter --</option>
-            <option value="1">Chapter 1</option>
-            <option value="2">Chapter 2</option>
-            <option value="3">Chapter 3</option>
-            <option value="4">Chapter 4</option>
-            <option value="5">Chapter 5</option>
-            <option value="6">Chapter 6</option>
-            <option value="7">Chapter 7</option>
-            <option value="8">Chapter 8</option>
-            <option value="9">Chapter 9</option>
-            <option value="10">Chapter 10</option>
-            <option value="11">Chapter 11</option>
-            <option value="12">Chapter 12</option>
-            <option value="13">Chapter 13</option>
-            <option value="14">Chapter 14</option>
-            <option value="15">Chapter 15</option>
-            <option value="16">Chapter 16</option>
-            <option value="17">Chapter 17</option>
-            <option value="18">Chapter 18</option>
-        </select>
+    <div class="dropdown-container">
+        <div>
+            <label for="chapterSelect">Select Chapter:</label>
+            <select id="chapterSelect" onchange="handleChapterSelect(this)">
+                <option value="" selected disabled>-- Select Chapter --</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+            </select>
+        </div>
+        <div>
+            <label for="continuousPlaySelect">Continuous Play:</label>
+            <select id="continuousPlaySelect" onchange="handleContinuousPlay(this)">
+                <option value="" selected disabled>-- Select Chapter --</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+            </select>
+        </div>
     </div>
     
     <div class="radio-group">
@@ -282,6 +336,9 @@
             9: 34, 10: 42, 11: 55, 12: 20, 13: 34, 14: 27, 15: 20,
             16: 24, 17: 28, 18: 78
         };
+
+        let isContinuousPlaying = false;
+        let continuousPlayInterval = null;
 
         function adjustTextboxHeight() {
             const gurudattaText = document.getElementById('gurudattaText');
@@ -359,6 +416,41 @@
             }
         }
 
+        async function fetchShlokaText(chapter, verse, style) {
+            const url = style === 'gurudatta' 
+                ? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG Telugu with Uvacha2.txt'
+                : 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt';
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+                const text = await response.text();
+                
+                const lines = text.split('\n');
+                const key1 = `${chapter}.${verse}`;
+                const key2 = `${chapter}-${verse}`;
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line.match(new RegExp(`^${key1}\\s+|^${key2}\\s+|^${key1}\\t|^${key2}\\t|^${key1}$|^${key2}$`))) {
+                        let shlokaLines = [line.substring(line.indexOf(' ') + 1 || line.indexOf('\t') + 1 || line.length)];
+                        let j = i + 1;
+                        while (j < lines.length && !lines[j].match(/^\d+[.-]\d+/)) {
+                            shlokaLines.push(lines[j].trim());
+                            j++;
+                        }
+                        let shlokaText = shlokaLines.join('\n').trim();
+                        return `${chapter}.${verse} ${shlokaText}`;
+                    }
+                }
+
+                return `Shloka ${chapter}.${verse} not found`;
+            } catch (error) {
+                return `Error loading shloka ${chapter}.${verse}: ${error.message}`;
+            }
+        }
+
         async function fetchShlokaMeaning(chapter, verse) {
             const url = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/meanings.txt';
             try {
@@ -376,6 +468,70 @@
             } catch (error) {
                 return `Error loading meaning for ${chapter}.${verse}: ${error.message}`;
             }
+        }
+
+        async function handleContinuousPlay(selectElement) {
+            const chapter = parseInt(selectElement.value);
+            if (!chapter) return;
+
+            const style = getSelectedStyle();
+            const audioPlayer = document.getElementById('audioPlayer');
+            isContinuousPlaying = true;
+
+            if (continuousPlayInterval) {
+                clearInterval(continuousPlayInterval);
+            }
+
+            let verse = 1;
+            const playNextVerse = async () => {
+                if (!isContinuousPlaying || verse > verseCounts[chapter]) {
+                    isContinuousPlaying = false;
+                    selectElement.selectedIndex = 0;
+                    audioPlayer.src = '';
+                    return;
+                }
+
+                currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
+                currentContext.push({
+                    name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                    lifespanCount: 5,
+                    parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style, showingMeaning: false }
+                });
+                localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+                console.log(`handleContinuousPlay: Updated context for ${chapter}.${verse}:`, JSON.stringify(currentContext));
+
+                const shlokaText = await fetchShlokaText(chapter, verse, style);
+                document.getElementById('gurudattaText').innerText = shlokaText;
+                document.getElementById('sringeriText').innerText = shlokaText;
+                adjustTextboxHeight();
+                updateTextboxVisibility();
+
+                const audioResult = await fetchAudioUrl(chapter, verse);
+                audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
+                try {
+                    audioPlayer.load();
+                    await audioPlayer.play();
+                    if (typeof audioResult === 'object' && audioResult.error) {
+                        const errorText = `${shlokaText}\n${audioResult.error}`;
+                        document.getElementById('gurudattaText').innerText = errorText;
+                        document.getElementById('sringeriText').innerText = errorText;
+                        adjustTextboxHeight();
+                    }
+                } catch (error) {
+                    const errorText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
+                    document.getElementById('gurudattaText').innerText = errorText;
+                    document.getElementById('sringeriText').innerText = errorText;
+                    adjustTextboxHeight();
+                }
+
+                audioPlayer.onended = () => {
+                    verse++;
+                    playNextVerse();
+                };
+            };
+
+            await playNextVerse();
+            selectElement.selectedIndex = 0;
         }
 
         function showVerseTable() {
@@ -410,6 +566,7 @@
         }
 
         async function selectVerse(chapter, verse) {
+            isContinuousPlaying = false;
             const style = getSelectedStyle();
             currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
             currentContext.push({
@@ -448,6 +605,7 @@
         }
 
         async function handlePreviousShloka() {
+            isContinuousPlaying = false;
             const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
             if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
                 let chapter = Math.floor(context.parameters.chapter);
@@ -506,6 +664,7 @@
         }
 
         async function handleMeanings() {
+            isContinuousPlaying = false;
             const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
             if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
                 const chapter = Math.floor(context.parameters.chapter);
@@ -537,6 +696,7 @@
         }
 
         async function handleChapterSelect(selectElement) {
+            isContinuousPlaying = false;
             const chapter = parseInt(selectElement.value);
             if (chapter) {
                 const style = getSelectedStyle();
@@ -602,42 +762,8 @@
             }
         }
 
-        async function fetchShlokaText(chapter, verse, style) {
-            const url = style === 'gurudatta' 
-                ? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG Telugu with Uvacha2.txt'
-                : 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt';
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`HTTP error: ${response.status}`);
-                }
-                const text = await response.text();
-                
-                const lines = text.split('\n');
-                const key1 = `${chapter}.${verse}`;
-                const key2 = `${chapter}-${verse}`;
-                
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (line.match(new RegExp(`^${key1}\\s+|^${key2}\\s+|^${key1}\\t|^${key2}\\t|^${key1}$|^${key2}$`))) {
-                        let shlokaLines = [line.substring(line.indexOf(' ') + 1 || line.indexOf('\t') + 1 || line.length)];
-                        let j = i + 1;
-                        while (j < lines.length && !lines[j].match(/^\d+[.-]\d+/)) {
-                            shlokaLines.push(lines[j].trim());
-                            j++;
-                        }
-                        let shlokaText = shlokaLines.join('\n').trim();
-                        return `${chapter}.${verse} ${shlokaText}`;
-                    }
-                }
-
-                return `Shloka ${chapter}.${verse} not found`;
-            } catch (error) {
-                return `Error loading shloka ${chapter}.${verse}: ${error.message}`;
-            }
-        }
-
         async function sendCommand(intent, params) {
+            isContinuousPlaying = false;
             const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
             const style = params.style || getSelectedStyle();
             const quarter = params.quarter || params.pada || null;
@@ -677,7 +803,7 @@
                 if (data.payload && data.payload.google && data.payload.google.richResponse && data.payload.google.richResponse.items) {
                     const mediaItem = data.payload.google.richResponse.items.find(item => item.mediaResponse && item.mediaResponse.mediaObjects);
                     if (mediaItem && mediaItem.mediaResponse.mediaObjects[0]) {
-                        backendAudioUrl = mediaItem.mediaResponse.mediaObjects[0].contentUrl;
+                        backendAudioUrl = data.payload.google.richResponse.items[0].mediaResponse.mediaObjects[0].contentUrl;
                         console.log(`sendCommand: Backend audio URL: ${backendAudioUrl}`);
                     }
                 }
