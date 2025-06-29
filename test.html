@@ -47,6 +47,9 @@
         .button-group:nth-child(3) button {
             max-width: 140px;
         }
+        .dropdown-section .button-group button {
+            max-width: 140px;
+        }
         button {
             background-color: #357EC7;
             color: white;
@@ -73,6 +76,7 @@
             flex-direction: column;
             align-items: center;
             margin-top: 15px;
+            gap: 15px;
         }
         .dropdown-container {
             display: flex;
@@ -100,7 +104,6 @@
             font-size: 1.2em;
             color: #333;
             white-space: pre-wrap;
-            text-align: left;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
@@ -110,6 +113,14 @@
             padding: 10px;
             border: 2px solid #357EC7;
             border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .shloka-text.multiline {
+            text-align: left;
+            display: block;
         }
         #audioPlayer {
             margin-top: 20px;
@@ -146,6 +157,9 @@
             display: none;
         }
         .shloka-text.active {
+            display: flex;
+        }
+        .shloka-text.active.multiline {
             display: block;
         }
         .modal {
@@ -229,6 +243,9 @@
             .button-group:nth-child(3) button {
                 max-width: 120px;
             }
+            .dropdown-section .button-group button {
+                max-width: 120px;
+            }
             .dropdown-container {
                 flex-direction: column;
                 align-items: center;
@@ -281,11 +298,11 @@
     <div class="textbox-container">
         <div>
             <div id="gurudattaLabel" class="textbox-label active">Gurudatta Style Shloka</div>
-            <div id="gurudattaText" class="shloka-text active"><b style="color:red;">Your Shloka will appear here.</b>  <br>Shloka Q1: Get Random Shloka with 1st pada. <br>Shloka Q1 or Q3: Get 1st Pada or 3rd Pada.<br>Full: Get full Shloka<br>Previous: Get previous Shloka.<br>Select Shloka: Get individual Shloka.<br>Meanings: Get meanings of Shlokas.<br>Dropdown "Select Chapter": Get random shloka from particular chapter.<br></div>
+            <div id="gurudattaText" class="shloka-text active">Your Shloka will appear here.</div>
         </div>
         <div>
             <div id="sringeriLabel" class="textbox-label">Sringeri Style Shloka</div>
-            <div id="sringeriText" class="shloka-text">Your Shloka will appear here</div>
+            <div id="sringeriText" class="shloka-text">Your Shloka will appear here.</div>
         </div>
     </div>
     
@@ -342,6 +359,9 @@
                 </select>
             </div>
         </div>
+        <div class="button-group">
+            <button onclick="showInstructions()">Instructions</button>
+        </div>
     </div>
     
     <div id="verseTableModal" class="modal">
@@ -382,6 +402,15 @@
         let isContinuousPlaying = false;
         let continuousPlayInterval = null;
 
+        function showInstructions() {
+            isContinuousPlaying = false;
+            const instructionsText = `<b style="color:red;">Your Shloka will appear here.</b> <br>Shloka Q1: Get Random Shloka with 1st pada. <br>Shloka Q1 or Q3: Get 1st Pada or 3rd Pada.<br>Full: Get full Shloka<br>Previous: Get previous Shloka.<br>Select Shloka: Get individual Shloka.<br>Meanings: Get meanings of Shlokas.<br>Dropdown "Select Chapter": Get random shloka from particular chapter.<br>`;
+            document.getElementById('gurudattaText').innerHTML = instructionsText;
+            document.getElementById('sringeriText').innerHTML = instructionsText;
+            adjustTextboxHeight();
+            updateTextboxVisibility();
+        }
+
         function adjustTextboxHeight() {
             const gurudattaText = document.getElementById('gurudattaText');
             const sringeriText = document.getElementById('sringeriText');
@@ -389,7 +418,13 @@
                 textbox.style.height = 'auto';
                 const scrollHeight = textbox.scrollHeight;
                 textbox.style.height = `${scrollHeight}px`;
-                console.log(`adjustTextboxHeight: ${textbox.id}, scrollHeight: ${scrollHeight}px, final height: ${textbox.style.height}`);
+                // Toggle multiline class based on content
+                if (textbox.innerText.includes('\n') || textbox.innerHTML.includes('<br>')) {
+                    textbox.classList.add('multiline');
+                } else {
+                    textbox.classList.remove('multiline');
+                }
+                console.log(`adjustTextboxHeight: ${textbox.id}, scrollHeight: ${scrollHeight}px, final height: ${textbox.style.height}, multiline: ${textbox.classList.contains('multiline')}`);
             });
         }
 
