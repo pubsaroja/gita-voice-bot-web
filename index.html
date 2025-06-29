@@ -23,32 +23,11 @@
         .button-container {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
             justify-content: center;
             align-items: center;
-        }
-        .button-group {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
             width: 100%;
             max-width: 600px;
-            border: 2px solid #357EC7;
-            border-radius: 5px;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-        .button-group:nth-child(1) button {
-            flex: 1;
-            min-width: 150px;
-        }
-        .button-group:nth-child(2) button,
-        .button-group:nth-child(3) button {
-            flex: 1;
-        }
-        .dropdown-section .button-group button {
-            width: 100%;
-            max-width: 200px;
         }
         button {
             background-color: #357EC7;
@@ -59,6 +38,8 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 1.1em;
+            width: 100%;
+            max-width: 600px;
         }
         button:hover {
             background-color: #008CBA;
@@ -124,6 +105,16 @@
         }
         #audioPlayer {
             margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .meanings-select-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
         }
         .radio-group {
             margin: 10px 0;
@@ -223,24 +214,14 @@
         }
         @media (max-width: 600px) {
             .button-container {
-                display: flex;
-                flex-direction: column;
-                gap: 15px;
-                align-items: center;
-            }
-            .button-group {
-                flex-direction: row;
-                justify-content: center;
                 gap: 8px;
-                max-width: 100%;
-                padding: 8px;
             }
-            .button-group:nth-child(1) button {
-                min-width: 130px;
+            button {
+                padding: 6px;
+                font-size: 1.05em;
             }
-            .button-group:nth-child(2) button,
-            .button-group:nth-child(3) button {
-                flex: 1;
+            .meanings-select-container {
+                gap: 8px;
             }
             .dropdown-section .button-group button {
                 width: 100%;
@@ -258,10 +239,6 @@
                 max-width: 200px;
                 justify-content: center;
             }
-            button {
-                padding: 6px;
-                font-size: 1.05em;
-            }
             .verse-grid {
                 grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
             }
@@ -272,19 +249,11 @@
     <h1>Bhagavad Gita Bot</h1>
     
     <div class="button-container">
-        <div class="button-group">
-            <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1', style: getSelectedStyle()})">Shloka Q1</button>
-            <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Shloka Q1 or Q3</button>
-        </div>
-        <div class="button-group">
-            <button onclick="sendCommand('NextIntent', {style: getSelectedStyle(), pada: 'pada1'})">Next</button>
-            <button id="previousButton" onclick="handlePreviousShloka()">Previous</button>
-            <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Full</button>
-        </div>
-        <div class="button-group">
-            <button onclick="handleMeanings()">Meanings</button>
-            <button onclick="showVerseTable()">Select Shloka</button>
-        </div>
+        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1', style: getSelectedStyle()})">Shloka Q1</button>
+        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Shloka Q1 or Q3</button>
+        <button onclick="sendCommand('NextIntent', {style: getSelectedStyle(), pada: 'pada1'})">Next</button>
+        <button id="previousButton" onclick="handlePreviousShloka()">Previous</button>
+        <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Full</button>
     </div>
     
     <div class="radio-group">
@@ -358,6 +327,10 @@
                     <option value="18">18</option>
                 </select>
             </div>
+        </div>
+        <div class="meanings-select-container">
+            <button onclick="handleMeanings()">Meanings</button>
+            <button onclick="showVerseTable()">Select Shloka</button>
         </div>
         <div class="button-group">
             <button id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
