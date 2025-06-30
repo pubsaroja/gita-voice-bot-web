@@ -230,7 +230,7 @@
     
     <div class="options-buttons">
         <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1', style: getSelectedStyle()})">Shloka with 1st Paada</button>
-        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Shloka with 1st Paada or 3rd Paada</button>
+        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Shloka with 1st or 3rd Paada</button>
         <button onclick="sendCommand('NextIntent', {style: getSelectedStyle(), pada: 'pada1'})">Next Shloka</button>
         <button id="previousButton" onclick="handlePreviousShloka()">Previous Shloka</button>
         <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Full Shloka</button>
@@ -360,7 +360,7 @@
             const activeTextbox = style === 'gurudatta' ? document.getElementById('gurudattaText') : document.getElementById('sringeriText');
             
             if (!isInstructionsVisible) {
-                const instructionsText = `<b style="color:red;">Your Shloka will appear here.</b> <br>Shloka with first Paada: Get Random Shloka with 1st pada. <br>Shloka with first Paada or Third Paada: Get 1st Pada or 3rd Pada.<br>Full: Get full Shloka<br>Previous: Get previous Shloka.<br>Select Shloka: Get individual Shloka.<br>Meanings: Get meanings of Shlokas.<br>Dropdown "Select Chapter": Get random shloka from particular chapter.<br>`;
+                const instructionsText = `<br>Shloka with first Paada: Get Random Shloka with 1st pada. <br>Shloka with 1st or 3rd Paada: Get 1st Pada or 3rd Pada.<br>Full Shloka: Get full Shloka<br>Previous Shloka: Get previous Shloka.<br>Select Shloka: Get individual Shloka.<br>Meanings: Get meanings of Shlokas.<br>Dropdown "Select Chapter": Get random shloka from particular chapter.<br>Dropdown "Continuous Play": Get a chapter played continuously<br>`;
                 activeTextbox.innerHTML = instructionsText;
                 instructionsButton.textContent = 'Close Instructions';
                 isInstructionsVisible = true;
