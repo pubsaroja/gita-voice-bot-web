@@ -17,13 +17,10 @@
         }
         h2 {
             color: #34495e;
-            font-size: 0.87em;
+            font-size: 1em;
             margin-top: 10px;
         }
-        p {
-  			font-size: 12px;
-		}        
-        .button-container {
+        .options-buttons, .bottom-buttons {
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -36,12 +33,12 @@
         button {
             background-color: #357EC7;
             color: white;
-            padding: 8px 16px;
+            padding: 10px 18px;
             margin: 0 auto;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 1.1em;
+            font-size: 1.6em;
             width: 100%;
             max-width: 600px;
             display: block;
@@ -57,16 +54,6 @@
             width: 100%;
             max-width: 150px;
         }
-        .dropdown-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 15px;
-            gap: 15px;
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-        }
         .dropdown-container {
             display: flex;
             flex-wrap: wrap;
@@ -78,7 +65,7 @@
             border-radius: 5px;
             padding: 10px;
             box-sizing: border-box;
-            margin: 0 auto;
+            margin: 10px auto;
         }
         .dropdown-container label {
             font-weight: bold;
@@ -113,18 +100,8 @@
             display: block;
         }
         #audioPlayer {
-            margin-top: 20px;
-            margin-bottom: 20px;
-        }
-        .meanings-select-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
+            margin: 10px auto;
+            display: block;
         }
         .radio-group {
             margin: 10px 0;
@@ -223,19 +200,12 @@
             background-color: #cc0000;
         }
         @media (max-width: 600px) {
-            .button-container {
+            .options-buttons, .bottom-buttons {
                 gap: 8px;
             }
             button {
-                padding: 6px;
-                font-size: 1.05em;
-            }
-            .meanings-select-container {
-                gap: 8px;
-            }
-            .dropdown-section .button-group button {
-                width: 100%;
-                max-width: 180px;
+                padding: 8px 16px;
+                font-size: 1.15em;
             }
             .dropdown-container {
                 flex-direction: column;
@@ -258,12 +228,65 @@
 <body>
     <h1>Bhagavad Gita Bot</h1>
     
-    <div class="button-container">
-        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1', style: getSelectedStyle()})">Shloka Q1</button>
-        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Shloka Q1 or Q3</button>
-        <button onclick="sendCommand('NextIntent', {style: getSelectedStyle(), pada: 'pada1'})">Next</button>
-        <button id="previousButton" onclick="handlePreviousShloka()">Previous</button>
-        <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Full</button>
+    <div class="options-buttons">
+        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1', style: getSelectedStyle()})">Shloka with 1st Paada</button>
+        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Shloka with 1st or 3rd Paada</button>
+        <button onclick="sendCommand('NextIntent', {style: getSelectedStyle(), pada: 'pada1'})">Next Shloka</button>
+        <button id="previousButton" onclick="handlePreviousShloka()">Previous Shloka</button>
+        <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Full Shloka</button>
+    </div>
+    
+    <audio id="audioPlayer" controls></audio>
+    
+    <div class="dropdown-container">
+        <div>
+            <label for="chapterSelect">Select Chapter:</label>
+            <select id="chapterSelect" onchange="handleChapterSelect(this)">
+                <option value="" selected disabled>-- Select Chapter --</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+            </select>
+        </div>
+        <div>
+            <label for="continuousPlaySelect">Continuous Play:</label>
+            <select id="continuousPlaySelect" onchange="handleContinuousPlay(this)">
+                <option value="" selected disabled>-- Select Chapter --</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+            </select>
+        </div>
     </div>
     
     <div class="radio-group">
@@ -285,66 +308,10 @@
         </div>
     </div>
     
-    <audio id="audioPlayer" controls></audio>
-    
-    <div class="dropdown-section">
-        <div class="dropdown-container">
-            <div>
-                <label for="chapterSelect">Select Chapter:</label>
-                <select id="chapterSelect" onchange="handleChapterSelect(this)">
-                    <option value="" selected disabled>-- Select Chapter --</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                    <option value="11">11</option>
-                    <option value="12">12</option>
-                    <option value="13">13</option>
-                    <option value="14">14</option>
-                    <option value="15">15</option>
-                    <option value="16">16</option>
-                    <option value="17">17</option>
-                    <option value="18">18</option>
-                </select>
-            </div>
-            <div>
-                <label for="continuousPlaySelect">Continuous Play:</label>
-                <select id="continuousPlaySelect" onchange="handleContinuousPlay(this)">
-                    <option value="" selected disabled>-- Select Chapter --</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                    <option value="11">11</option>
-                    <option value="12">12</option>
-                    <option value="13">13</option>
-                    <option value="14">14</option>
-                    <option value="15">15</option>
-                    <option value="16">16</option>
-                    <option value="17">17</option>
-                    <option value="18">18</option>
-                </select>
-            </div>
-        </div>
-        <div class="meanings-select-container">
-            <button onclick="handleMeanings()">Meanings</button>
-            <button onclick="showVerseTable()">Select Shloka</button>
-        </div>
-        <div class="button-group">
-            <button id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
-        </div>
+    <div class="bottom-buttons">
+        <button onclick="handleMeanings()">Meanings</button>
+        <button onclick="showVerseTable()">Select Shloka</button>
+        <button id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
     </div>
     
     <div id="verseTableModal" class="modal">
@@ -393,7 +360,7 @@
             const activeTextbox = style === 'gurudatta' ? document.getElementById('gurudattaText') : document.getElementById('sringeriText');
             
             if (!isInstructionsVisible) {
-                const instructionsText = `<b style="color:red;">Your Shloka will appear here.</b> <br>Shloka Q1: Get Random Shloka with 1st pada. <br>Shloka Q1 or Q3: Get 1st Pada or 3rd Pada.<br>Full: Get full Shloka<br>Previous: Get previous Shloka.<br>Select Shloka: Get individual Shloka.<br>Meanings: Get meanings of Shlokas.<br>Dropdown "Select Chapter": Get random shloka from particular chapter.<br>`;
+                const instructionsText = `<br>Shloka with first Paada: Get Random Shloka with 1st pada. <br>Shloka with 1st or 3rd Paada: Get 1st Pada or 3rd Pada.<br>Full Shloka: Get full Shloka<br>Previous Shloka: Get previous Shloka.<br>Select Shloka: Get individual Shloka.<br>Meanings: Get meanings of Shlokas.<br>Dropdown "Select Chapter": Get random shloka from particular chapter.<br>Dropdown "Continuous Play": Get a chapter played continuously<br>`;
                 activeTextbox.innerHTML = instructionsText;
                 instructionsButton.textContent = 'Close Instructions';
                 isInstructionsVisible = true;
@@ -489,7 +456,7 @@
         }
 
         async function fetchShlokaText(chapter, verse, style) {
-            const url = style === 'gurudatta' 
+            const url = style === 'gurudatta'
                 ? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG Telugu with Uvacha2.txt'
                 : 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt';
             try {
@@ -780,7 +747,6 @@
             }
         }
 
-        // Reset localStorage and initialize session
         localStorage.removeItem('gitaSessionId');
         localStorage.removeItem('gitaContext');
         console.log('Page load: Cleared localStorage (gitaSessionId, gitaContext)');
@@ -939,7 +905,7 @@
 
         updateTextboxVisibility();
     </script>
-    <p>Audio: Pujya Sri Datta Vijayanand Teertha Swamiji</p>
+    <h2>Audio: Pujya Sri Datta Vijayanand Teertha Swamiji</h2>
     <h2>Developed by Dr.P.Udayabhaskar</h2>
 </body>
 </html>
