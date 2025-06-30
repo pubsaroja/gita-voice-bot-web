@@ -229,11 +229,11 @@
     <h1>Bhagavad Gita Bot</h1>
     
     <div class="options-buttons">
-        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1', style: getSelectedStyle()})">Shloka with first Paada</button>
-        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Shloka with first Paada or Third Paada</button>
-        <button onclick="sendCommand('NextIntent', {style: getSelectedStyle(), pada: 'pada1'})">Next</button>
-        <button id="previousButton" onclick="handlePreviousShloka()">Previous</button>
-        <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Full</button>
+        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1', style: getSelectedStyle()})">Shloka with 1st Paada</button>
+        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Shloka with 1st Paada or 3rd Paada</button>
+        <button onclick="sendCommand('NextIntent', {style: getSelectedStyle(), pada: 'pada1'})">Next Shloka</button>
+        <button id="previousButton" onclick="handlePreviousShloka()">Previous Shloka</button>
+        <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Full Shloka</button>
     </div>
     
     <audio id="audioPlayer" controls></audio>
