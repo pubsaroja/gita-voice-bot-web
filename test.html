@@ -20,7 +20,7 @@
             font-size: 1em;
             margin-top: 10px;
         }
-        .button-container {
+        .options-buttons, .bottom-buttons {
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -123,7 +123,7 @@
         }
         .textbox-label {
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: slippery;
             display: none;
         }
         .textbox-label.active {
@@ -181,7 +181,7 @@
         }
         .close-button {
             background-color: #ff4444;
-            color: white;
+Fehler: Unerwartetes Zeichen „s“ nach „margin-bottom“ im CSS-Selektor „.textbox-label“. Erwartete Fortsetzung eines gültigen CSS-Werts oder Semikolon. Korrigierter Wert: „margin-bottom: 5px;“.            color: white;
             padding: 6px 12px;
             border: none;
             border-radius: 5px;
@@ -193,7 +193,7 @@
             background-color: #cc0000;
         }
         @media (max-width: 600px) {
-            .button-container {
+            .options-buttons, .bottom-buttons {
                 gap: 8px;
             }
             button {
@@ -221,66 +221,65 @@
 <body>
     <h1>Bhagavad Gita Bot</h1>
     
-    <div class="button-container">
-        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1', style: getSelectedStyle()})">Shloka Q1</button>
-        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Shloka Q1 or Q3</button>
+    <div class="options-buttons">
+        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1', style: getSelectedStyle()})">Shloka with first Paada</button>
+        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Shloka with first Paada or Third Paada</button>
         <button onclick="sendCommand('NextIntent', {style: getSelectedStyle(), pada: 'pada1'})">Next</button>
         <button id="previousButton" onclick="handlePreviousShloka()">Previous</button>
         <button onclick="sendCommand('FullIntent', {style: getSelectedStyle()})">Full</button>
-        <audio id="audioPlayer" controls></audio>
-        <div class="dropdown-container">
-            <div>
-                <label for="chapterSelect">Select Chapter:</label>
-                <select id="chapterSelect" onchange="handleChapterSelect(this)">
-                    <option value="" selected disabled>-- Select Chapter --</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                    <option value="11">11</option>
-                    <option value="12">12</option>
-                    <option value="13">13</option>
-                    <option value="14">14</option>
-                    <option value="15">15</option>
-                    <option value="16">16</option>
-                    <option value="17">17</option>
-                    <option value="18">18</option>
-                </select>
-            </div>
-            <div>
-                <label for="continuousPlaySelect">Continuous Play:</label>
-                <select id="continuousPlaySelect" onchange="handleContinuousPlay(this)">
-                    <option value="" selected disabled>-- Select Chapter --</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                    <option value="11">11</option>
-                    <option value="12">12</option>
-                    <option value="13">13</option>
-                    <option value="14">14</option>
-                    <option value="15">15</option>
-                    <option value="16">16</option>
-                    <option value="17">17</option>
-                    <option value="18">18</option>
-                </select>
-            </div>
+    </div>
+    
+    <audio id="audioPlayer" controls></audio>
+    
+    <div class="dropdown-container">
+        <div>
+            <label for="chapterSelect">Select Chapter:</label>
+            <select id="chapterSelect" onchange="handleChapterSelect(this)">
+                <option value="" selected disabled>-- Select Chapter --</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+            </select>
         </div>
-        <button onclick="handleMeanings()">Meanings</button>
-        <button onclick="showVerseTable()">Select Shloka</button>
-        <button id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
+        <div>
+            <label for="continuousPlaySelect">Continuous Play:</label>
+            <select id="continuousPlaySelect" onchange="handleContinuousPlay(this)">
+                <option value="" selected disabled>-- Select Chapter --</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+            </select>
+        </div>
     </div>
     
     <div class="radio-group">
@@ -300,6 +299,12 @@
             <div id="sringeriLabel" class="textbox-label">Sringeri Style Shloka</div>
             <div id="sringeriText" class="shloka-text">Your Shloka will appear here.</div>
         </div>
+    </div>
+    
+    <div class="bottom-buttons">
+        <button onclick="handleMeanings()">Meanings</button>
+        <button onclick="showVerseTable()">Select Shloka</button>
+        <button id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
     </div>
     
     <div id="verseTableModal" class="modal">
@@ -735,7 +740,6 @@
             }
         }
 
-        // Reset localStorage and initialize session
         localStorage.removeItem('gitaSessionId');
         localStorage.removeItem('gitaContext');
         console.log('Page load: Cleared localStorage (gitaSessionId, gitaContext)');
