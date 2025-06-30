@@ -33,7 +33,7 @@
         button {
             background-color: #357EC7;
             color: white;
-            padding: 10px 16px;
+            padding: 10px 18px;
             margin: 0 auto;
             border: none;
             border-radius: 5px;
@@ -54,26 +54,27 @@
             width: 100%;
             max-width: 150px;
         }
-        .dropdown-group {
-            border: 2px solid #357EC7;
-            border-radius: 5px;
-            padding: 10px;
-            margin: 10px auto;
-            width: 100%;
-            max-width: 600px;
+        .dropdown-container {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 10px;
+            width: 100%;
+            max-width: 600px;
+            border: 2px solid #357EC7;
+            border-radius: 5px;
+            padding: 10px;
+            box-sizing: border-box;
+            margin: 10px auto;
         }
-        .dropdown-group div {
-            display: flex;
-            align-items: center;
-        }
-        .dropdown-group label {
+        .dropdown-container label {
             font-weight: bold;
             margin-right: 5px;
-            font-size: 0.9em;
+            font-size: 1em;
+        }
+        .dropdown-container div {
+            display: flex;
+            align-items: center;
         }
         .shloka-text {
             margin-top: 10px;
@@ -168,14 +169,20 @@
             width: 100%;
             max-width: 200px;
         }
+        .verse-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 10px;
+            padding: 10px;
+        }
         .verse-button {
             background-color: #f9f9f9;
             border: 1px solid #357EC7;
             border-radius: 5px;
-            padding: 12px;
+            padding: 10px;
             text-align: center;
             cursor: pointer;
-            font-size: 1em;
+            font-size: 0.9em;
         }
         .verse-button:hover {
             background-color: #e0e0e0;
@@ -183,12 +190,11 @@
         .close-button {
             background-color: #ff4444;
             color: white;
-            padding: 6px 12px;
+            padding: 5px 10px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             float: right;
-            font-size: 1em;
         }
         .close-button:hover {
             background-color: #cc0000;
@@ -198,17 +204,17 @@
                 gap: 8px;
             }
             button {
-                padding: 8px;
+                padding: 8px 16px;
                 font-size: 1.15em;
             }
-            .dropdown-group {
+            .dropdown-container {
                 flex-direction: column;
                 align-items: center;
                 gap: 8px;
                 max-width: 100%;
                 padding: 8px;
             }
-            .dropdown-group div {
+            .dropdown-container div {
                 width: 100%;
                 max-width: 200px;
                 justify-content: center;
@@ -232,7 +238,7 @@
     
     <audio id="audioPlayer" controls></audio>
     
-    <div class="dropdown-group">
+    <div class="dropdown-container">
         <div>
             <label for="chapterSelect">Select Chapter:</label>
             <select id="chapterSelect" onchange="handleChapterSelect(this)">
@@ -325,7 +331,7 @@
                 <option value="10">Chapter 10 (42 verses)</option>
                 <option value="11">Chapter 11 (55 verses)</option>
                 <option value="12">Chapter 12 (20 verses)</option>
-                <option value="13">Chapter 13 (34 drafts)</option>
+                <option value="13">Chapter 13 (34 verses)</option>
                 <option value="14">Chapter 14 (27 verses)</option>
                 <option value="15">Chapter 15 (20 verses)</option>
                 <option value="16">Chapter 16 (24 verses)</option>
@@ -354,7 +360,7 @@
             const activeTextbox = style === 'gurudatta' ? document.getElementById('gurudattaText') : document.getElementById('sringeriText');
             
             if (!isInstructionsVisible) {
-                const instructionsText = `<b style="color:red;">Your Shloka will appear here.</b> <br>Shloka Q1: Get Random Shloka with 1st pada. <br>Shloka Q1 or Q3: Get 1st Pada or 3rd Pada.<br>Full: Get full Shloka<br>Previous: Get previous Shloka.<br>Select Shloka: Get individual Shloka.<br>Meanings: Get meanings of Shlokas.<br>Dropdown "Select Chapter": Get random shloka from particular chapter.<br>`;
+                const instructionsText = `<b style="color:red;">Your Shloka will appear here.</b> <br>Shloka with first Paada: Get Random Shloka with 1st pada. <br>Shloka with first Paada or Third Paada: Get 1st Pada or 3rd Pada.<br>Full: Get full Shloka<br>Previous: Get previous Shloka.<br>Select Shloka: Get individual Shloka.<br>Meanings: Get meanings of Shlokas.<br>Dropdown "Select Chapter": Get random shloka from particular chapter.<br>`;
                 activeTextbox.innerHTML = instructionsText;
                 instructionsButton.textContent = 'Close Instructions';
                 isInstructionsVisible = true;
@@ -450,7 +456,7 @@
         }
 
         async function fetchShlokaText(chapter, verse, style) {
-            const url = style === 'gurudatta Environmental Impact Factor (EIF) = style === 'gurudatta' 
+            const url = style === 'gurudatta'
                 ? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG Telugu with Uvacha2.txt'
                 : 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt';
             try {
@@ -807,7 +813,7 @@
         async function sendCommand(intent, params) {
             isContinuousPlaying = false;
             isInstructionsVisible = false;
-            document.getElementById('instructionsButton').textContent = 'Instructions FIG';
+            document.getElementById('instructionsButton').textContent = 'Instructions';
             const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
             const style = params.style || getSelectedStyle();
             const activeTextbox = style === 'gurudatta' ? document.getElementById('gurudattaText') : document.getElementById('sringeriText');
@@ -826,7 +832,7 @@
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON observation.stringify(payload)
+                    body: JSON.stringify(payload)
                 });
                 if (!response.ok) {
                     throw new Error(`HTTP error: ${response.status}`);
