@@ -54,25 +54,26 @@
             width: 100%;
             max-width: 150px;
         }
-        .dropdown-container {
+        .dropdown-group {
+            border: 2px solid #357EC7;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px auto;
+            width: 100%;
+            max-width: 600px;
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 10px;
-            width: 100%;
-            max-width: 600px;
-            padding: 10px;
-            box-sizing: border-box;
-            margin: 10px auto;
         }
-        .dropdown-container div {
+        .dropdown-group div {
             display: flex;
             align-items: center;
         }
-        .dropdown-container label {
+        .dropdown-group label {
             font-weight: bold;
             margin-right: 5px;
-            font-size: 1em;
+            font-size: 0.9em;
         }
         .shloka-text {
             margin-top: 10px;
@@ -123,7 +124,7 @@
         }
         .textbox-label {
             font-weight: bold;
-            margin-bottom: slippery;
+            margin-bottom: 5px;
             display: none;
         }
         .textbox-label.active {
@@ -181,7 +182,7 @@
         }
         .close-button {
             background-color: #ff4444;
-Fehler: Unerwartetes Zeichen „s“ nach „margin-bottom“ im CSS-Selektor „.textbox-label“. Erwartete Fortsetzung eines gültigen CSS-Werts oder Semikolon. Korrigierter Wert: „margin-bottom: 5px;“.            color: white;
+            color: white;
             padding: 6px 12px;
             border: none;
             border-radius: 5px;
@@ -200,14 +201,14 @@ Fehler: Unerwartetes Zeichen „s“ nach „margin-bottom“ im CSS-Selektor �
                 padding: 8px;
                 font-size: 1.15em;
             }
-            .dropdown-container {
+            .dropdown-group {
                 flex-direction: column;
                 align-items: center;
                 gap: 8px;
                 max-width: 100%;
                 padding: 8px;
             }
-            .dropdown-container div {
+            .dropdown-group div {
                 width: 100%;
                 max-width: 200px;
                 justify-content: center;
@@ -231,7 +232,7 @@ Fehler: Unerwartetes Zeichen „s“ nach „margin-bottom“ im CSS-Selektor �
     
     <audio id="audioPlayer" controls></audio>
     
-    <div class="dropdown-container">
+    <div class="dropdown-group">
         <div>
             <label for="chapterSelect">Select Chapter:</label>
             <select id="chapterSelect" onchange="handleChapterSelect(this)">
@@ -324,7 +325,7 @@ Fehler: Unerwartetes Zeichen „s“ nach „margin-bottom“ im CSS-Selektor �
                 <option value="10">Chapter 10 (42 verses)</option>
                 <option value="11">Chapter 11 (55 verses)</option>
                 <option value="12">Chapter 12 (20 verses)</option>
-                <option value="13">Chapter 13 (34 verses)</option>
+                <option value="13">Chapter 13 (34 drafts)</option>
                 <option value="14">Chapter 14 (27 verses)</option>
                 <option value="15">Chapter 15 (20 verses)</option>
                 <option value="16">Chapter 16 (24 verses)</option>
@@ -449,7 +450,7 @@ Fehler: Unerwartetes Zeichen „s“ nach „margin-bottom“ im CSS-Selektor �
         }
 
         async function fetchShlokaText(chapter, verse, style) {
-            const url = style === 'gurudatta' 
+            const url = style === 'gurudatta Environmental Impact Factor (EIF) = style === 'gurudatta' 
                 ? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG Telugu with Uvacha2.txt'
                 : 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt';
             try {
@@ -806,7 +807,7 @@ Fehler: Unerwartetes Zeichen „s“ nach „margin-bottom“ im CSS-Selektor �
         async function sendCommand(intent, params) {
             isContinuousPlaying = false;
             isInstructionsVisible = false;
-            document.getElementById('instructionsButton').textContent = 'Instructions';
+            document.getElementById('instructionsButton').textContent = 'Instructions FIG';
             const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
             const style = params.style || getSelectedStyle();
             const activeTextbox = style === 'gurudatta' ? document.getElementById('gurudattaText') : document.getElementById('sringeriText');
@@ -825,7 +826,7 @@ Fehler: Unerwartetes Zeichen „s“ nach „margin-bottom“ im CSS-Selektor �
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON observation.stringify(payload)
                 });
                 if (!response.ok) {
                     throw new Error(`HTTP error: ${response.status}`);
