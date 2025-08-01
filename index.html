@@ -634,6 +634,7 @@
             const audioPlayer = document.getElementById('audioPlayer');
             audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
             try {
+                audioPlayer.load();
                 await audioPlayer.play();
                 if (typeof audioResult === 'object' && audioResult.error) {
                     const errorText = `${shlokaText}\n${audioResult.error}`;
@@ -687,6 +688,7 @@
                 const audioPlayer = document.getElementById('audioPlayer');
                 audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
                 try {
+                    audioPlayer.load();
                     await audioPlayer.play();
                     if (typeof audioResult === 'object' && audioResult.error) {
                         const errorText = `${shlokaText}\n${audioResult.error}`;
@@ -877,14 +879,16 @@
                     audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
                     try {
                         audioPlayer.load();
-                        await audioPlayer.play();
+                        if (intent !== 'NextIntent') { // Skip auto-play for NextIntent
+                            await audioPlayer.play();
+                        }
                         if (typeof audioResult === 'object' && audioResult.error) {
                             const errorText = `${shlokaText}\n${audioResult.error}`;
                             activeTextbox.innerText = errorText;
                             adjustTextboxHeight();
                         }
                     } catch (error) {
-                        const errorText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
+                        const errorText = `${shlokaText}\nError loading audio for ${chapter}.${verse}: ${error.message}`;
                         activeTextbox.innerText = errorText;
                         adjustTextboxHeight();
                     }
