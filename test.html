@@ -245,7 +245,7 @@
     
     <div class="dropdown-container">
         <div>
-            <label for="chapterSelect">Select Chapter:</label>
+            <label for="chapterSelect">Select Random Shloka from Chapter:</label>
             <select id="chapterSelect" onchange="handleChapterSelect(this)">
                 <option value="" selected disabled>-- Select Chapter --</option>
                 <option value="1">1. అర్జునవిషాదయోగః</option>
@@ -468,12 +468,9 @@
                     audioUrl = await tryUrl(`${baseUrl}/AudioQuarter/Chapter ${chapter}/${verse}.1.mp3`, `AudioQuarter/Chapter ${chapter}/${verse}.1.mp3`);
                     if (!audioUrl) {
                         errorMessage = `Quarter audio (Pada1) not found in AudioQuarter/Chapter ${chapter} for ${key}`;
-                        audioUrl = style === 'sringeri' 
-                            ? `${baseUrl}/AudioFullSringeri/${key}.mp3`
-                            : `${baseUrl}/AudioFullSGS/${key}.mp3`;
                     }
                 } else if (quarter === 'pada1_or_pada3') {
-                    const folder = style === 'sringeri' ? 'AQ4PaadasSringeri' : 'AQ4PaadasSGS';
+                    const folder = style === 'sringeri' ? 'AQ4PaadasSringeri' : 'AudioQuarterSGS';
                     const pada1Url = `${baseUrl}/${folder}/Chapter ${chapter}/${verse}.1.mp3`;
                     const pada3Url = `${baseUrl}/${folder}/Chapter ${chapter}/${verse}.3.mp3`;
                     audioUrl = await tryUrl(pada1Url, `${folder}/Chapter ${chapter}/${verse}.1.mp3`);
@@ -482,9 +479,6 @@
                     }
                     if (!audioUrl) {
                         errorMessage = `Quarter audio (Pada1 or Pada3) not found in ${folder}/Chapter ${chapter} for ${key}`;
-                        audioUrl = style === 'sringeri' 
-                            ? `${baseUrl}/AudioFullSringeri/${key}.mp3`
-                            : `${baseUrl}/AudioFullSGS/${key}.mp3`;
                     }
                     if (backendAudioUrl) {
                         const backendUrlResult = await tryUrl(backendAudioUrl, `Backend-provided ${quarter}`);
@@ -497,6 +491,10 @@
                     audioUrl = style === 'sringeri' 
                         ? `${baseUrl}/AudioFullSringeri/${key}.mp3`
                         : `${baseUrl}/AudioFullSGS/${key}.mp3`;
+                }
+
+                if (!audioUrl) {
+                    throw new Error(errorMessage || `No audio available for ${key}`);
                 }
 
                 const fullCheck = await fetch(audioUrl, { method: 'HEAD', mode: 'cors' });
@@ -859,14 +857,15 @@
                 const chapter = parseInt(selectElement.value);
                 if (chapter) {
                     const style = getSelectedStyle();
-                    console.log(`handleChapterSelect: Sending ChapterIntent for chapter ${chapter}, style: ${style}`);
-                    await sendCommand('ChapterIntent', { chapter: chapter, style: style });
+                    const verse = Math.floor(Math.random() * verseCounts[chapter]) + 1;
+                    console.log(`handleChapterSelect: Selected random verse ${chapter}.${verse}, style: ${style}`);
+                    await sendCommand('ZeroIntent', { chapter: chapter, verse: verse, quarter: 'pada1_or_pada3', style: style });
                     selectElement.selectedIndex = 0;
                 }
             } catch (error) {
                 console.error('Error in handleChapterSelect:', error);
                 const activeTextbox = getSelectedStyle() === 'sgs' ? document.getElementById('sgsText') : document.getElementById('sringeriText');
-                activeTextbox.innerText = `Error selecting chapter: ${error.message}`;
+                activeTextbox.innerText = `Error selecting random shloka: ${error.message}`;
                 adjustTextboxHeight();
             }
         }
