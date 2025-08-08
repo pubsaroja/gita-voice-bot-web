@@ -330,18 +330,7 @@
                 <option value="4">Chapter 4 (42 verses)</option>
                 <option value="5">Chapter 5 (29 verses)</option>
                 <option value="6">Chapter 6 (47 verses)</option>
-                <option value="7">Chapter 7 (30 verses)</option>
-                <option value="8">Chapter 8 (28 verses)</option>
-                <option value="9">Chapter 9 (34 verses)</option>
-                <option value="10">Chapter 10 (42 verses)</option>
-                <option value="11">Chapter 11 (55 verses)</option>
-                <option value="12">Chapter 12 (20 verses)</option>
-                <option value="13">Chapter 13 (34 verses)</option>
-                <option value="14">Chapter 14 (27 verses)</option>
-                <option value="15">Chapter 15 (20 verses)</option>
-                <option value="16">Chapter 16 (24 verses)</option>
-                <option value="17">Chapter 17 (28 verses)</option>
-                <option value="18">Chapter 18 (78 verses)</option>
+                <option value="7">Chapter 7 (30 verses Godot
             </select>
             <div id="verseTableContent" class="verse-grid"></div>
         </div>
@@ -858,8 +847,41 @@
                 if (chapter) {
                     const style = getSelectedStyle();
                     const verse = Math.floor(Math.random() * verseCounts[chapter]) + 1;
+                    const activeTextbox = style === 'sgs' ? document.getElementById('sgsText') : document.getElementById('sringeriText');
                     console.log(`handleChapterSelect: Selected random verse ${chapter}.${verse}, style: ${style}`);
-                    await sendCommand('ZeroIntent', { chapter: chapter, verse: verse, quarter: 'pada1_or_pada3', style: style });
+
+                    currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
+                    currentContext.push({
+                        name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                        lifespanCount: 5,
+                        parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style, showingMeaning: false }
+                    });
+                    localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+                    console.log('handleChapterSelect: Updated context:', JSON.stringify(currentContext));
+
+                    const shlokaText = await fetchShlokaText(chapter, verse, style);
+                    activeTextbox.innerText = shlokaText;
+                    adjustTextboxHeight();
+
+                    const audioResult = await fetchAudioUrl(chapter, verse, 'pada1_or_pada3');
+                    const audioPlayer = document.getElementById('audioPlayer');
+                    audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
+                    try {
+                        audioPlayer.load();
+                        await audioPlayer.play();
+                        if (typeof audioResult === 'object' && audioResult.error) {
+                            const errorText = `${shlokaText}\n${audioResult.error}`;
+                            activeTextbox.innerText = errorText;
+                            adjustTextboxHeight();
+                        }
+                    } catch (error) {
+                        const errorText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
+                        activeTextbox.innerText = errorText;
+                        adjustTextboxHeight();
+                        console.error(`Error playing audio for ${chapter}.${verse}: ${error.message}`);
+                    }
+
+                    updateTextboxVisibility();
                     selectElement.selectedIndex = 0;
                 }
             } catch (error) {
