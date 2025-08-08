@@ -236,9 +236,9 @@
     <div class="options-buttons">
         <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1', style: getSelectedStyle()})">SGS (First Paada)</button>
         <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Sringeri (First or Third Paada)</button>
-        <button onclick="sendCommand('NextIntent', {style: getSelectedStyle()})">Next Shloka</button>
+        <button onclick="sendCommand('NextIntent', {style: getSelectedStyle()})">Next Full Shloka</button>
         <button id="previousButton" onclick="handlePreviousShloka()">Previous Shloka</button>
-        <button onclick="sendCommand('FullIntent', {style: getSelectedStyle(), isFullForQuarter: true})">Full Shloka</button>
+        <button onclick="sendCommand('FullIntent', {style: getSelectedStyle(), isFullForQuarter: true})">Full Shloka of Quarter</button>
     </div>
     
     <audio id="audioPlayer" controls></audio>
@@ -465,15 +465,15 @@
                 };
 
                 if (quarter === 'pada1') {
-                    audioUrl = await tryUrl(`${baseUrl}/AudioQuarterSGS/Chapter ${chapter}/${verse}.1.mp3`, `AudioQuarterSGS/Chapter ${chapter}/${verse}.1.mp3`);
+                    audioUrl = await tryUrl(`${baseUrl}/AudioQuarter/Chapter ${chapter}/${verse}.1.mp3`, `AudioQuarter/Chapter ${chapter}/${verse}.1.mp3`);
                     if (!audioUrl) {
-                        errorMessage = `Quarter audio (Pada1) not found in AudioQuarterSGS/Chapter ${chapter} for ${key}`;
+                        errorMessage = `Quarter audio (Pada1) not found in AudioQuarter/Chapter ${chapter} for ${key}`;
                         audioUrl = style === 'sringeri' 
                             ? `${baseUrl}/AudioFullSringeri/${key}.mp3`
                             : `${baseUrl}/AudioFullSGS/${key}.mp3`;
                     }
                 } else if (quarter === 'pada1_or_pada3') {
-                    const folder = style === 'sringeri' ? 'AudioQuarterSringeri' : 'AudioQuarterSGS';
+                    const folder = style === 'sringeri' ? 'AQ4PaadasSringeri' : 'AQ4PaadasSGS';
                     const pada1Url = `${baseUrl}/${folder}/Chapter ${chapter}/${verse}.1.mp3`;
                     const pada3Url = `${baseUrl}/${folder}/Chapter ${chapter}/${verse}.3.mp3`;
                     audioUrl = await tryUrl(pada1Url, `${folder}/Chapter ${chapter}/${verse}.1.mp3`);
@@ -896,7 +896,7 @@
                     sgsLabel.classList.add('active');
                     sringeriText.classList.remove('active');
                     sringeriLabel.classList.remove('active');
-                    if (!isInstructionsVisible && sringeriText.innerText !== 'Your Shloka will appear here.') {
+                    if (!isInstructionsVisible && !sringeriText.innerText.includes('Please select a Shloka first') && !sringeriText.innerText.includes('Error')) {
                         sringeriText.innerText = 'Your Shloka will appear here.';
                         adjustTextboxHeight();
                     }
@@ -905,7 +905,7 @@
                     sgsLabel.classList.remove('active');
                     sringeriText.classList.add('active');
                     sringeriLabel.classList.add('active');
-                    if (!isInstructionsVisible && sgsText.innerText !== 'Your Shloka will appear here.') {
+                    if (!isInstructionsVisible && !sgsText.innerText.includes('Please select a Shloka first') && !sgsText.innerText.includes('Error')) {
                         sgsText.innerText = 'Your Shloka will appear here.';
                         adjustTextboxHeight();
                     }
@@ -1004,7 +1004,7 @@
                     audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
                     try {
                         audioPlayer.load();
-                        if (intent !== 'NextIntent' && !isFullForQuarter) {
+                        if (intent !== 'NextIntent') {
                             await audioPlayer.play();
                         }
                         if (typeof audioResult === 'object' && audioResult.error) {
