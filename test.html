@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bhagavad Gita Bot test</title>
+    <title>Bhagavad Gita Bot</title>
     <link href="https://fonts.googleapis.com/css2?family=Ramabhadra&display=swap" rel="stylesheet">
     <style>
         body {
@@ -444,7 +444,7 @@
                 console.log(`fetchAudioUrl called: chapter=${chapter}, verse=${verse}, quarter=${quarter}, backendAudioUrl=${backendAudioUrl}, isFullForQuarter=${isFullForQuarter}`);
                 const baseUrl = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main';
                 const style = getSelectedStyle();
-                const key = `${chapter}.${verse}`;
+                const key = `${chapter || 'unknown'}.${verse || 'unknown'}`;
                 let audioUrl;
                 let errorMessage = '';
 
@@ -453,8 +453,15 @@
                         console.log(`fetchAudioUrl: Attempting ${type}: ${url}`);
                         const response = await fetch(url, { method: 'HEAD', mode: 'cors' });
                         if (!response.ok) {
-                            console.log(`fetchAudioUrl: Failed to fetch ${type}, HTTP status: ${response.status}, headers:`, response.headers);
-                            throw new Error(`${type} inaccessible: HTTP ${response.status}`);
+                            let errorDetails = `HTTP status: ${response.status}`;
+                            try {
+                                const text = await response.text();
+                                errorDetails += `, Response: ${text.substring(0, 100)}...`;
+                            } catch (e) {
+                                errorDetails += `, No response text available`;
+                            }
+                            console.log(`fetchAudioUrl: Failed to fetch ${type}, ${errorDetails}`);
+                            throw new Error(`${type} inaccessible: ${errorDetails}`);
                         }
                         console.log(`fetchAudioUrl: Successfully fetched ${type}: ${url}`);
                         return url;
@@ -465,13 +472,13 @@
                 };
 
                 if (quarter === 'pada1') {
-                    // Hardcode to test a known audio file
-                    audioUrl = await tryUrl(`${baseUrl}/AudioQuarter/Chapter 1/2.1.mp3`, `AudioQuarter/Chapter 1/2.1.mp3`);
+                    // Try an alternative audio file for testing
+                    audioUrl = await tryUrl(`${baseUrl}/AudioQuarter/Chapter 1/1.1.mp3`, `AudioQuarter/Chapter 1/1.1.mp3`);
                     chapter = 1;
-                    verse = 2;
+                    verse = 1;
                     if (!audioUrl) {
-                        errorMessage = `Hardcoded audio (Pada1) not found at AudioQuarter/Chapter 1/2.1.mp3`;
-                        console.log(`fetchAudioUrl: Failed to fetch hardcoded audio for ${key}`);
+                        errorMessage = `Audio (Pada1) not found at AudioQuarter/Chapter 1/1.1.mp3`;
+                        console.log(`fetchAudioUrl: Failed to fetch audio for ${key} in AudioQuarter`);
                     }
                 } else if (quarter === 'pada1_or_pada3') {
                     const folder = style === 'sringeri' ? 'AQ4PaadasSringeri' : 'AudioQuarterSGS';
@@ -995,66 +1002,51 @@
                 isContinuousPlaying = false;
                 isInstructionsVisible = false;
                 document.getElementById('instructionsButton').textContent = 'Instructions';
+                const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
                 const style = params.style || getSelectedStyle();
                 const activeTextbox = style === 'sgs' ? document.getElementById('sgsText') : document.getElementById('sringeriText');
                 const quarter = params.quarter || null;
-                const isFullForQuarter = params.isFullForQuarter || false;
-
-                let chapter, verse;
-                if (intent === 'ZeroIntent' && quarter === 'pada1') {
-                    // Bypass webhook for testing
-                    chapter = 1;
-                    verse = 2;
-                    currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
-                    currentContext.push({
-                        name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
-                        lifespanCount: 5,
-                        parameters: { chapter: chapter, verse: verse, style: style, showingMeaning: false }
-                    });
-                    localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-                    console.log('sendCommand: Bypassed webhook, set context:', JSON.stringify(currentContext));
-                } else {
-                    const webhookUrl = 'https://gita-voice-bot-504694669439.us-central1.run.app/webhook';
-                    const payload = {
-                        session: sessionId,
-                        queryResult: {
-                            intent: { displayName: intent },
-                            parameters: { ...params, style: style },
-                            outputContexts: currentContext
-                        }
-                    };
-
-                    console.log('sendCommand: Sending webhook request with payload:', JSON.stringify(payload));
-                    const response = await fetch(webhookUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if (!response.ok) {
-                        throw new Error(`Webhook HTTP error: ${response.status}`);
+                const isFullForQuarter = params.quarter || null;
+                const payload = {
+                    session: sessionId,
+                    queryResult: {
+                        intent: { displayName: intent },
+                        parameters: { ...params, style: style },
+                        outputContexts: currentContext
                     }
-                    const data = await response.json();
-                    console.log('sendCommand: Webhook response:', JSON.stringify(data));
+                };
 
-                    if (data.outputContexts && data.outputContexts.length > 0) {
-                        currentContext = data.outputContexts;
-                        const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-                        if (context && context.parameters) {
-                            context.parameters.showingMeaning = false;
-                        }
-                        localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-                        console.log('sendCommand: Updated context from webhook:', JSON.stringify(currentContext));
-                    }
+                console.log('sendCommand: Sending webhook request with payload:', JSON.stringify(payload));
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    throw new Error(`Webhook HTTP error: ${response.status}`);
+                }
+                const data = await response.json();
+                console.log('sendCommand: Webhook response:', JSON.stringify(data));
 
+                if (data.outputContexts && data.outputContexts.length > 0) {
+                    currentContext = data.outputContexts;
                     const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-                    if (!context || !context.parameters || !Number.isInteger(context.parameters.chapter) || !Number.isInteger(context.parameters.verse)) {
-                        throw new Error('Invalid context: chapter or verse missing or not integers');
+                    if (context && context.parameters) {
+                        context.parameters.showingMeaning = false;
                     }
-                    chapter = Math.floor(context.parameters.chapter);
-                    verse = Math.floor(context.parameters.verse);
-                    if (chapter < 1 || chapter > 18 || verse < 1 || verse > verseCounts[chapter]) {
-                        throw new Error(`Invalid chapter (${chapter}) or verse (${verse}) for verseCounts`);
-                    }
+                    localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+                    console.log('sendCommand: Updated context:', JSON.stringify(currentContext));
+                }
+
+                const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+                if (!context || !context.parameters || !Number.isInteger(context.parameters.chapter) || !Number.isInteger(context.parameters.verse)) {
+                    throw new Error('Invalid context: chapter or verse missing or not integers');
+                }
+
+                let chapter = Math.floor(context.parameters.chapter);
+                let verse = Math.floor(context.parameters.verse);
+                if (chapter < 1 || chapter > 18 || verse < 1 || verse > verseCounts[chapter]) {
+                    throw new Error(`Invalid chapter (${chapter}) or verse (${verse}) for verseCounts`);
                 }
 
                 const shlokaText = await fetchShlokaText(chapter, verse, style);
@@ -1062,7 +1054,15 @@
                 adjustTextboxHeight();
 
                 let backendAudioUrl = null;
-                const audioResult = await fetchAudioUrl(chapter, verse, quarter, backendAudioUrl, isFullForQuarter);
+                if (data.payload && data.payload.google && data.payload.google.richResponse && data.payload.google.richResponse.items) {
+                    const mediaItem = data.payload.google.richResponse.items.find(item => item.mediaResponse && item.mediaResponse.mediaObjects);
+                    if (mediaItem && mediaItem.mediaResponse.mediaObjects[0]) {
+                        backendAudioUrl = data.payload.google.richResponse.items[0].mediaResponse.mediaObjects[0].contentUrl;
+                        console.log(`sendCommand: Backend audio URL: ${backendAudioUrl}`);
+                    }
+                }
+
+                const audioResult = intent === 'ChapterIntent' ? backendAudioUrl : await fetchAudioUrl(chapter, verse, quarter, backendAudioUrl, isFullForQuarter);
                 const audioPlayer = document.getElementById('audioPlayer');
                 if (audioResult.url) {
                     audioPlayer.src = audioResult.url;
@@ -1113,7 +1113,7 @@
             } catch (error) {
                 console.error(`sendCommand: Error for ${intent}: ${error.message}`);
                 const activeTextbox = getSelectedStyle() === 'sgs' ? document.getElementById('sgsText') : document.getElementById('sringeriText');
-                activeTextbox.innerText = `Error communicating with server for ${intent}: ${error.message}`;
+                activeTextbox.innerText = `Error for ${intent}: ${error.message}`;
                 adjustTextboxHeight();
                 updateTextboxVisibility();
             }
