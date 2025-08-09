@@ -330,7 +330,18 @@
                 <option value="4">Chapter 4 (42 verses)</option>
                 <option value="5">Chapter 5 (29 verses)</option>
                 <option value="6">Chapter 6 (47 verses)</option>
-                <option value="7">Chapter 7 (30 verses Godot
+                <option value="7">Chapter 7 (30 verses)</option>
+                <option value="8">Chapter 8 (28 verses)</option>
+                <option value="9">Chapter 9 (34 verses)</option>
+                <option value="10">Chapter 10 (42 verses)</option>
+                <option value="11">Chapter 11 (55 verses)</option>
+                <option value="12">Chapter 12 (20 verses)</option>
+                <option value="13">Chapter 13 (34 verses)</option>
+                <option value="14">Chapter 14 (27 verses)</option>
+                <option value="15">Chapter 15 (20 verses)</option>
+                <option value="16">Chapter 16 (24 verses)</option>
+                <option value="17">Chapter 17 (28 verses)</option>
+                <option value="18">Chapter 18 (78 verses)</option>
             </select>
             <div id="verseTableContent" class="verse-grid"></div>
         </div>
@@ -462,12 +473,15 @@
                     const folder = style === 'sringeri' ? 'AQ4PaadasSringeri' : 'AudioQuarterSGS';
                     const pada1Url = `${baseUrl}/${folder}/Chapter ${chapter}/${verse}.1.mp3`;
                     const pada3Url = `${baseUrl}/${folder}/Chapter ${chapter}/${verse}.3.mp3`;
+                    console.log(`fetchAudioUrl: Trying ${folder} for ${key}, style: ${style}`);
                     audioUrl = await tryUrl(pada1Url, `${folder}/Chapter ${chapter}/${verse}.1.mp3`);
                     if (!audioUrl) {
+                        console.log(`fetchAudioUrl: Pada1 not found, trying Pada3`);
                         audioUrl = await tryUrl(pada3Url, `${folder}/Chapter ${chapter}/${verse}.3.mp3`);
                     }
                     if (!audioUrl) {
                         errorMessage = `Quarter audio (Pada1 or Pada3) not found in ${folder}/Chapter ${chapter} for ${key}`;
+                        console.log(`fetchAudioUrl: Failed to fetch audio for ${key} in ${folder}`);
                     }
                     if (backendAudioUrl) {
                         const backendUrlResult = await tryUrl(backendAudioUrl, `Backend-provided ${quarter}`);
@@ -844,51 +858,57 @@
                 isInstructionsVisible = false;
                 document.getElementById('instructionsButton').textContent = 'Instructions';
                 const chapter = parseInt(selectElement.value);
-                if (chapter) {
-                    const style = getSelectedStyle();
-                    const verse = Math.floor(Math.random() * verseCounts[chapter]) + 1;
-                    const activeTextbox = style === 'sgs' ? document.getElementById('sgsText') : document.getElementById('sringeriText');
-                    console.log(`handleChapterSelect: Selected random verse ${chapter}.${verse}, style: ${style}`);
+                if (!chapter) {
+                    console.log('No chapter selected');
+                    return;
+                }
 
-                    currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
-                    currentContext.push({
-                        name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
-                        lifespanCount: 5,
-                        parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style, showingMeaning: false }
-                    });
-                    localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-                    console.log('handleChapterSelect: Updated context:', JSON.stringify(currentContext));
+                const style = getSelectedStyle();
+                const verse = Math.floor(Math.random() * verseCounts[chapter]) + 1;
+                const activeTextbox = style === 'sgs' ? document.getElementById('sgsText') : document.getElementById('sringeriText');
+                console.log(`handleChapterSelect: Selected random verse ${chapter}.${verse}, style: ${style}`);
 
-                    const shlokaText = await fetchShlokaText(chapter, verse, style);
-                    activeTextbox.innerText = shlokaText;
-                    adjustTextboxHeight();
+                currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
+                currentContext.push({
+                    name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                    lifespanCount: 5,
+                    parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style, showingMeaning: false }
+                });
+                localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+                console.log('handleChapterSelect: Updated context:', JSON.stringify(currentContext));
 
-                    const audioResult = await fetchAudioUrl(chapter, verse, 'pada1_or_pada3');
-                    const audioPlayer = document.getElementById('audioPlayer');
-                    audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
-                    try {
-                        audioPlayer.load();
-                        await audioPlayer.play();
-                        if (typeof audioResult === 'object' && audioResult.error) {
-                            const errorText = `${shlokaText}\n${audioResult.error}`;
-                            activeTextbox.innerText = errorText;
-                            adjustTextboxHeight();
-                        }
-                    } catch (error) {
-                        const errorText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
+                const shlokaText = await fetchShlokaText(chapter, verse, style);
+                activeTextbox.innerText = shlokaText;
+                adjustTextboxHeight();
+
+                const audioResult = await fetchAudioUrl(chapter, verse, 'pada1_or_pada3');
+                const audioPlayer = document.getElementById('audioPlayer');
+                audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
+                try {
+                    audioPlayer.load();
+                    await audioPlayer.play();
+                    console.log(`handleChapterSelect: Playing audio for ${chapter}.${verse}`);
+                    if (typeof audioResult === 'object' && audioResult.error) {
+                        const errorText = `${shlokaText}\n${audioResult.error}`;
                         activeTextbox.innerText = errorText;
                         adjustTextboxHeight();
-                        console.error(`Error playing audio for ${chapter}.${verse}: ${error.message}`);
+                        console.warn(`handleChapterSelect: Audio error for ${chapter}.${verse}: ${audioResult.error}`);
                     }
-
-                    updateTextboxVisibility();
-                    selectElement.selectedIndex = 0;
+                } catch (error) {
+                    const errorText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
+                    activeTextbox.innerText = errorText;
+                    adjustTextboxHeight();
+                    console.error(`handleChapterSelect: Error playing audio for ${chapter}.${verse}: ${error.message}`);
                 }
+
+                updateTextboxVisibility();
+                selectElement.selectedIndex = 0;
             } catch (error) {
                 console.error('Error in handleChapterSelect:', error);
                 const activeTextbox = getSelectedStyle() === 'sgs' ? document.getElementById('sgsText') : document.getElementById('sringeriText');
                 activeTextbox.innerText = `Error selecting random shloka: ${error.message}`;
                 adjustTextboxHeight();
+                updateTextboxVisibility();
             }
         }
 
