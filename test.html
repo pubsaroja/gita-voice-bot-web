@@ -466,11 +466,19 @@
 
                 if (quarter === 'pada1') {
                     audioUrl = await tryUrl(`${baseUrl}/AudioQuarter/Chapter ${chapter}/${verse}.1.mp3`, `AudioQuarter/Chapter ${chapter}/${verse}.1.mp3`);
-                    if (!audioUrl && chapter === 1 && verse === 1) {
+                    if (!audioUrl) {
                         console.log('fetchAudioUrl: Fallback to Chapter 1, Verse 2 for pada1');
                         audioUrl = await tryUrl(`${baseUrl}/AudioQuarter/Chapter 1/2.1.mp3`, `AudioQuarter/Chapter 1/2.1.mp3`);
                         if (audioUrl) {
-                            verse = 2; // Update verse for context
+                            chapter = 1;
+                            verse = 2;
+                        } else {
+                            console.log('fetchAudioUrl: Fallback to default audio');
+                            audioUrl = await tryUrl(`${baseUrl}/AudioQuarter/Chapter 1/2.1.mp3`, `Default AudioQuarter/Chapter 1/2.1.mp3`);
+                            if (audioUrl) {
+                                chapter = 1;
+                                verse = 2;
+                            }
                         }
                     }
                     if (!audioUrl) {
@@ -491,7 +499,8 @@
                         console.log('fetchAudioUrl: Fallback to Chapter 1, Verse 2 for pada1_or_pada3');
                         audioUrl = await tryUrl(`${baseUrl}/${folder}/Chapter 1/2.1.mp3`, `${folder}/Chapter 1/2.1.mp3`);
                         if (audioUrl) {
-                            verse = 2; // Update verse for context
+                            chapter = 1;
+                            verse = 2;
                         }
                     }
                     if (!audioUrl) {
@@ -518,11 +527,11 @@
                     throw new Error(errorMessage || `No audio available for ${key}`);
                 }
 
-                console.log(`fetchAudioUrl: Using audio for ${key}: ${audioUrl}`);
-                return { url: audioUrl, updatedVerse: verse };
+                console.log(`fetchAudioUrl: Using audio for ${key}: ${audioUrl}, updated chapter: ${chapter}, verse: ${verse}`);
+                return { url: audioUrl, updatedChapter: chapter, updatedVerse: verse };
             } catch (error) {
                 console.error(`fetchAudioUrl: Error for ${key}: ${error.message}`);
-                return { url: '', error: `No audio available for ${key}: ${error.message}`, updatedVerse: verse };
+                return { url: '', error: `No audio available for ${key}: ${error.message}`, updatedChapter: chapter, updatedVerse: verse };
             }
         }
 
@@ -998,7 +1007,7 @@
 
         async function sendCommand(intent, params) {
             try {
-                console.log(`sendCommand called: intent=${intent}, params=`, params);
+                console.log(`sendCommand called: intent=${intent}, params=`, JSON.stringify(params));
                 isContinuousPlaying = false;
                 isInstructionsVisible = false;
                 document.getElementById('instructionsButton').textContent = 'Instructions';
@@ -1016,16 +1025,18 @@
                     }
                 };
 
+                console.log('sendCommand: Sending webhook request with payload:', JSON.stringify(payload));
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 if (!response.ok) {
-                    throw new Error(`HTTP error: ${response.status}`);
+                    throw new Error(`Webhook HTTP error: ${response.status}`);
                 }
                 const data = await response.json();
-                
+                console.log('sendCommand: Webhook response:', JSON.stringify(data));
+
                 if (data.outputContexts && data.outputContexts.length > 0) {
                     currentContext = data.outputContexts;
                     const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
@@ -1058,6 +1069,7 @@
                     const audioPlayer = document.getElementById('audioPlayer');
                     if (audioResult.url) {
                         audioPlayer.src = audioResult.url;
+                        console.log(`sendCommand: Setting audio source to ${audioResult.url}`);
                         try {
                             audioPlayer.load();
                             if (intent !== 'NextIntent') {
@@ -1069,7 +1081,8 @@
                                 activeTextbox.innerText = errorText;
                                 adjustTextboxHeight();
                             }
-                            if (audioResult.updatedVerse !== verse) {
+                            if (audioResult.updatedChapter !== chapter || audioResult.updatedVerse !== verse) {
+                                chapter = audioResult.updatedChapter;
                                 verse = audioResult.updatedVerse;
                                 currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
                                 currentContext.push({
@@ -1078,9 +1091,12 @@
                                     parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style, showingMeaning: false }
                                 });
                                 localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-                                console.log('sendCommand: Updated context with new verse:', JSON.stringify(currentContext));
+                                console.log('sendCommand: Updated context with new chapter/verse:', JSON.stringify(currentContext));
                                 const updatedShlokaText = await fetchShlokaText(chapter, verse, style);
                                 activeTextbox.innerText = updatedShlokaText;
+                                if (audioResult.error) {
+                                    activeTextbox.innerText = `${updatedShlokaText}\n${audioResult.error}`;
+                                }
                                 adjustTextboxHeight();
                             }
                         } catch (error) {
