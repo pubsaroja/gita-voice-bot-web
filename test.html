@@ -466,8 +466,16 @@
 
                 if (quarter === 'pada1') {
                     audioUrl = await tryUrl(`${baseUrl}/AudioQuarter/Chapter ${chapter}/${verse}.1.mp3`, `AudioQuarter/Chapter ${chapter}/${verse}.1.mp3`);
+                    if (!audioUrl && chapter === 1 && verse === 1) {
+                        console.log('fetchAudioUrl: Fallback to Chapter 1, Verse 2 for pada1');
+                        audioUrl = await tryUrl(`${baseUrl}/AudioQuarter/Chapter 1/2.1.mp3`, `AudioQuarter/Chapter 1/2.1.mp3`);
+                        if (audioUrl) {
+                            verse = 2; // Update verse for context
+                        }
+                    }
                     if (!audioUrl) {
                         errorMessage = `Quarter audio (Pada1) not found in AudioQuarter/Chapter ${chapter} for ${key}`;
+                        console.log(`fetchAudioUrl: Failed to fetch audio for ${key} in AudioQuarter`);
                     }
                 } else if (quarter === 'pada1_or_pada3') {
                     const folder = style === 'sringeri' ? 'AQ4PaadasSringeri' : 'AudioQuarterSGS';
@@ -478,6 +486,13 @@
                     if (!audioUrl) {
                         console.log(`fetchAudioUrl: Pada1 not found, trying Pada3`);
                         audioUrl = await tryUrl(pada3Url, `${folder}/Chapter ${chapter}/${verse}.3.mp3`);
+                    }
+                    if (!audioUrl && chapter === 1 && verse === 1) {
+                        console.log('fetchAudioUrl: Fallback to Chapter 1, Verse 2 for pada1_or_pada3');
+                        audioUrl = await tryUrl(`${baseUrl}/${folder}/Chapter 1/2.1.mp3`, `${folder}/Chapter 1/2.1.mp3`);
+                        if (audioUrl) {
+                            verse = 2; // Update verse for context
+                        }
                     }
                     if (!audioUrl) {
                         errorMessage = `Quarter audio (Pada1 or Pada3) not found in ${folder}/Chapter ${chapter} for ${key}`;
@@ -492,23 +507,22 @@
                     }
                 } else {
                     audioUrl = style === 'sringeri' 
-                        ? `${baseUrl}/AudioFullSringeri/${key}.mp3`
-                        : `${baseUrl}/AudioFullSGS/${key}.mp3`;
+                        ? await tryUrl(`${baseUrl}/AudioFullSringeri/${key}.mp3`, `AudioFullSringeri/${key}.mp3`)
+                        : await tryUrl(`${baseUrl}/AudioFullSGS/${key}.mp3`, `AudioFullSGS/${key}.mp3`);
+                    if (!audioUrl) {
+                        errorMessage = `Full audio not found in ${style === 'sringeri' ? 'AudioFullSringeri' : 'AudioFullSGS'} for ${key}`;
+                    }
                 }
 
                 if (!audioUrl) {
                     throw new Error(errorMessage || `No audio available for ${key}`);
                 }
 
-                const fullCheck = await fetch(audioUrl, { method: 'HEAD', mode: 'cors' });
-                if (!fullCheck.ok) {
-                    throw new Error(`Audio inaccessible: HTTP ${fullCheck.status}`);
-                }
                 console.log(`fetchAudioUrl: Using audio for ${key}: ${audioUrl}`);
-                return errorMessage ? { url: audioUrl, error: errorMessage } : audioUrl;
+                return { url: audioUrl, updatedVerse: verse };
             } catch (error) {
                 console.error(`fetchAudioUrl: Error for ${key}: ${error.message}`);
-                return { url: audioUrl || '', error: `No audio available for ${key}: ${error.message}` };
+                return { url: '', error: `No audio available for ${key}: ${error.message}`, updatedVerse: verse };
             }
         }
 
@@ -615,11 +629,11 @@
                     updateTextboxVisibility();
 
                     const audioResult = await fetchAudioUrl(chapter, verse);
-                    audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
+                    audioPlayer.src = audioResult.url || '';
                     try {
                         audioPlayer.load();
                         await audioPlayer.play();
-                        if (typeof audioResult === 'object' && audioResult.error) {
+                        if (audioResult.error) {
                             const errorText = `${shlokaText}\n${audioResult.error}`;
                             activeTextbox.innerText = errorText;
                             adjustTextboxHeight();
@@ -718,11 +732,11 @@
                 
                 const audioResult = await fetchAudioUrl(chapter, verse);
                 const audioPlayer = document.getElementById('audioPlayer');
-                audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
+                audioPlayer.src = audioResult.url || '';
                 try {
                     audioPlayer.load();
                     await audioPlayer.play();
-                    if (typeof audioResult === 'object' && audioResult.error) {
+                    if (audioResult.error) {
                         const errorText = `${shlokaText}\n${audioResult.error}`;
                         activeTextbox.innerText = errorText;
                         adjustTextboxHeight();
@@ -781,11 +795,11 @@
                     
                     const audioResult = await fetchAudioUrl(chapter, verse);
                     const audioPlayer = document.getElementById('audioPlayer');
-                    audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
+                    audioPlayer.src = audioResult.url || '';
                     try {
                         audioPlayer.load();
                         await audioPlayer.play();
-                        if (typeof audioResult === 'object' && audioResult.error) {
+                        if (audioResult.error) {
                             const errorText = `${shlokaText}\n${audioResult.error}`;
                             activeTextbox.innerText = errorText;
                             adjustTextboxHeight();
@@ -883,12 +897,12 @@
 
                 const audioResult = await fetchAudioUrl(chapter, verse, 'pada1_or_pada3');
                 const audioPlayer = document.getElementById('audioPlayer');
-                audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
+                audioPlayer.src = audioResult.url || '';
                 try {
                     audioPlayer.load();
                     await audioPlayer.play();
                     console.log(`handleChapterSelect: Playing audio for ${chapter}.${verse}`);
-                    if (typeof audioResult === 'object' && audioResult.error) {
+                    if (audioResult.error) {
                         const errorText = `${shlokaText}\n${audioResult.error}`;
                         activeTextbox.innerText = errorText;
                         adjustTextboxHeight();
@@ -1033,8 +1047,8 @@
                 }
 
                 if (context && context.parameters && Number.isInteger(context.parameters.chapter) && Number.isInteger(context.parameters.verse)) {
-                    const chapter = Math.floor(context.parameters.chapter);
-                    const verse = Math.floor(context.parameters.verse);
+                    let chapter = Math.floor(context.parameters.chapter);
+                    let verse = Math.floor(context.parameters.verse);
                     
                     const shlokaText = await fetchShlokaText(chapter, verse, style);
                     activeTextbox.innerText = shlokaText;
@@ -1042,22 +1056,44 @@
                     
                     const audioResult = intent === 'ChapterIntent' ? backendAudioUrl : await fetchAudioUrl(chapter, verse, quarter, backendAudioUrl, isFullForQuarter);
                     const audioPlayer = document.getElementById('audioPlayer');
-                    audioPlayer.src = typeof audioResult === 'string' ? audioResult : audioResult.url;
-                    try {
-                        audioPlayer.load();
-                        if (intent !== 'NextIntent') {
-                            await audioPlayer.play();
-                        }
-                        if (typeof audioResult === 'object' && audioResult.error) {
-                            const errorText = `${shlokaText}\n${audioResult.error}`;
+                    if (audioResult.url) {
+                        audioPlayer.src = audioResult.url;
+                        try {
+                            audioPlayer.load();
+                            if (intent !== 'NextIntent') {
+                                await audioPlayer.play();
+                                console.log(`sendCommand: Playing audio for ${chapter}.${verse}`);
+                            }
+                            if (audioResult.error) {
+                                const errorText = `${shlokaText}\n${audioResult.error}`;
+                                activeTextbox.innerText = errorText;
+                                adjustTextboxHeight();
+                            }
+                            if (audioResult.updatedVerse !== verse) {
+                                verse = audioResult.updatedVerse;
+                                currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
+                                currentContext.push({
+                                    name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                                    lifespanCount: 5,
+                                    parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: style, showingMeaning: false }
+                                });
+                                localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+                                console.log('sendCommand: Updated context with new verse:', JSON.stringify(currentContext));
+                                const updatedShlokaText = await fetchShlokaText(chapter, verse, style);
+                                activeTextbox.innerText = updatedShlokaText;
+                                adjustTextboxHeight();
+                            }
+                        } catch (error) {
+                            const errorText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
                             activeTextbox.innerText = errorText;
                             adjustTextboxHeight();
+                            console.error(`Error playing audio for ${chapter}.${verse}: ${error.message}`);
                         }
-                    } catch (error) {
-                        const errorText = `${shlokaText}\nError loading audio for ${chapter}.${verse}: ${error.message}`;
+                    } else {
+                        const errorText = `${shlokaText}\n${audioResult.error || 'No audio available'}`;
                         activeTextbox.innerText = errorText;
                         adjustTextboxHeight();
-                        console.error(`Error loading audio for ${chapter}.${verse}: ${error.message}`);
+                        console.error(`sendCommand: No audio available for ${chapter}.${verse}`);
                     }
                 } else {
                     activeTextbox.innerText = 'Please select a Shloka first';
