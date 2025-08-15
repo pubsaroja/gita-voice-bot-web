@@ -7,28 +7,28 @@
 <title>Bhagavad Gita Bot</title>
 <style>
     body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Segoe UI', Tahoma, sans-serif;
         background-color: #f4f6f9;
         color: #333;
         margin: 0;
-        padding: 0;
     }
     header {
-        background-color: #0078d4; /* Microsoft Blue */
+        background-color: #0078d4;
         padding: 1rem;
         text-align: center;
         color: white;
     }
     header h1 {
         margin: 0;
-        font-size: 1.8rem;
+        font-size: 1.6rem;
         font-weight: 600;
     }
     header p {
         margin: 0;
-        font-size: 1rem;
+        font-size: 0.95rem;
         opacity: 0.9;
     }
+
     main {
         display: flex;
         flex-wrap: wrap;
@@ -37,36 +37,43 @@
         max-width: 1200px;
         margin: auto;
     }
+
     .controls, .display {
         background: white;
         padding: 1rem;
         border-radius: 8px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         flex: 1;
-        min-width: 280px;
+        min-width: 300px;
     }
+
     .controls h2, .display h2 {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         margin-bottom: 0.5rem;
-        color: #005a9e; /* Darker Microsoft Blue */
+        color: #005a9e;
     }
+
     label {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         font-weight: 500;
-        color: #444;
+        display: block;
+        margin-top: 0.5rem;
     }
+
     select, button {
         width: 100%;
         padding: 0.6rem;
-        margin-bottom: 0.8rem;
+        margin-top: 0.3rem;
         border: 1px solid #ccc;
         border-radius: 4px;
-        font-size: 1rem;
+        font-size: 0.95rem;
         box-sizing: border-box;
     }
+
     select:focus, button:focus {
         outline: 2px solid #0078d4;
     }
+
     button {
         background-color: #0078d4;
         color: white;
@@ -74,22 +81,26 @@
         cursor: pointer;
         transition: background 0.3s ease;
     }
+
     button:hover {
         background-color: #005a9e;
     }
+
     .shloka-text {
-        font-size: 1.3rem;
-        line-height: 1.8rem;
+        font-size: 1.2rem;
+        line-height: 1.6rem;
         padding: 1rem;
         background: #f9fbfd;
         border-radius: 6px;
-        min-height: 150px;
+        min-height: 120px;
         transition: opacity 0.5s ease;
     }
+
     audio {
         width: 100%;
         margin-top: 1rem;
     }
+
     footer {
         background-color: #0078d4;
         text-align: center;
@@ -98,9 +109,23 @@
         color: white;
         font-size: 0.9rem;
     }
+
     footer a {
         color: #cce6ff;
         text-decoration: underline;
+    }
+
+    /* Mobile-friendly adjustments */
+    @media (max-width: 768px) {
+        main {
+            flex-direction: column;
+        }
+        .controls, .display {
+            min-width: 100%;
+        }
+        .shloka-text {
+            font-size: 1rem;
+        }
     }
 </style>
 </head>
@@ -112,7 +137,7 @@
 </header>
 
 <main>
-    <!-- Controls -->
+    <!-- Controls (keep your existing IDs and structure) -->
     <section class="controls">
         <h2>Controls</h2>
         <label for="chapter">Select Chapter:</label>
@@ -122,13 +147,15 @@
             <option value="1">Chapter 1</option>
             <option value="2">Chapter 2</option>
             <option value="3">Chapter 3</option>
-            <!-- Add up to Chapter 18 -->
+            <!-- Continue until Chapter 18 -->
         </select>
+
         <label for="style">Recitation Style:</label>
         <select id="style">
             <option value="gurudatta">Gurudatta</option>
             <option value="sringeri">Sringeri</option>
         </select>
+
         <button id="randomBtn">🎲 Random Shloka</button>
         <button id="fullBtn">📜 Full Shloka</button>
         <button id="nextBtn">➡ Next Shloka</button>
@@ -166,6 +193,7 @@
 </footer>
 
 <script>
+    // Placeholder for your existing JS logic
     const shlokaText = document.getElementById('shlokaText');
     const audioPlayer = document.getElementById('audioPlayer');
 
