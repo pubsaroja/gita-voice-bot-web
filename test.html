@@ -3,222 +3,161 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Bhagavad Gita Bot – Read, listen, and learn shlokas in Hindi and Telugu with Gurudatta and Sringeri styles.">
-<title>Bhagavad Gita Bot Test1</title>
+<title>Bhagavad Gita Web App</title>
 <style>
+    :root {
+        --primary-color: #0078D4; /* Microsoft blue */
+        --primary-hover: #005a9e;
+        --bg-color: #f5f7fa;
+        --text-color: #333;
+        --border-radius: 8px;
+    }
+
     body {
         font-family: 'Segoe UI', Tahoma, sans-serif;
-        background-color: #f4f6f9;
-        color: #333;
         margin: 0;
+        background: var(--bg-color);
+        color: var(--text-color);
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
     }
+
     header {
-        background-color: #0078d4;
+        background: var(--primary-color);
+        color: white;
         padding: 1rem;
         text-align: center;
-        color: white;
-    }
-    header h1 {
-        margin: 0;
-        font-size: 1.6rem;
-        font-weight: 600;
-    }
-    header p {
-        margin: 0;
-        font-size: 0.95rem;
-        opacity: 0.9;
+        font-size: 1.5rem;
+        font-weight: bold;
     }
 
     main {
-        display: flex;
-        flex-wrap: wrap;
+        flex: 1;
         padding: 1rem;
-        gap: 1rem;
-        max-width: 1200px;
+        max-width: 800px;
         margin: auto;
     }
 
-    .controls, .display {
-        background: white;
-        padding: 1rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        flex: 1;
-        min-width: 300px;
+    .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-bottom: 1rem;
     }
 
-    .controls h2, .display h2 {
-        font-size: 1.1rem;
-        margin-bottom: 0.5rem;
-        color: #005a9e;
-    }
-
-    label {
-        font-size: 0.85rem;
-        font-weight: 500;
-        display: block;
-        margin-top: 0.5rem;
-    }
-
-    select, button {
-        width: 100%;
-        padding: 0.6rem;
-        margin-top: 0.3rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 0.95rem;
-        box-sizing: border-box;
-    }
-
-    select:focus, button:focus {
-        outline: 2px solid #0078d4;
-    }
-
-    button {
-        background-color: #0078d4;
+    button, select {
+        background: var(--primary-color);
         color: white;
         border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: var(--border-radius);
         cursor: pointer;
-        transition: background 0.3s ease;
+        font-size: 1rem;
+        transition: background 0.3s, transform 0.2s;
     }
 
-    button:hover {
-        background-color: #005a9e;
+    button:hover, select:hover {
+        background: var(--primary-hover);
+        transform: translateY(-2px);
     }
 
-    .shloka-text {
-        font-size: 1.2rem;
-        line-height: 1.6rem;
+    select {
+        appearance: none;
+    }
+
+    .shloka-box {
+        background: white;
         padding: 1rem;
-        background: #f9fbfd;
-        border-radius: 6px;
-        min-height: 120px;
-        transition: opacity 0.5s ease;
+        border-radius: var(--border-radius);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        min-height: 100px;
     }
 
     audio {
         width: 100%;
-        margin-top: 1rem;
+        margin-top: 0.5rem;
     }
 
     footer {
-        background-color: #0078d4;
+        background: #e1e1e1;
         text-align: center;
-        padding: 1rem;
-        margin-top: 1rem;
-        color: white;
+        padding: 0.8rem;
         font-size: 0.9rem;
+        color: #555;
     }
 
-    footer a {
-        color: #cce6ff;
-        text-decoration: underline;
-    }
-
-    /* Mobile-friendly adjustments */
-    @media (max-width: 768px) {
-        main {
+    /* Responsive */
+    @media (max-width: 600px) {
+        .controls {
             flex-direction: column;
         }
-        .controls, .display {
-            min-width: 100%;
-        }
-        .shloka-text {
-            font-size: 1rem;
+        button, select {
+            width: 100%;
         }
     }
 </style>
 </head>
 <body>
 
-<header>
-    <h1>Bhagavad Gita Bot</h1>
-    <p>Learn, recite, and listen to Bhagavad Gita shlokas</p>
-</header>
+<header>Bhagavad Gita Web App</header>
 
 <main>
-    <!-- Controls (keep your existing IDs and structure) -->
-    <section class="controls">
-        <h2>Controls</h2>
-        <label for="chapter">Select Chapter:</label>
-        <select id="chapter">
-            <option value="">-- Choose Chapter --</option>
-            <option value="0">Random Shloka</option>
+    <div class="controls">
+        <select id="chapterSelect">
+            <option value="">Select Chapter</option>
             <option value="1">Chapter 1</option>
             <option value="2">Chapter 2</option>
-            <option value="3">Chapter 3</option>
-            <!-- Continue until Chapter 18 -->
+            <!-- Add all chapters up to 18 -->
         </select>
 
-        <label for="style">Recitation Style:</label>
-        <select id="style">
-            <option value="gurudatta">Gurudatta</option>
-            <option value="sringeri">Sringeri</option>
-        </select>
+        <button id="randomShlokaBtn">Random Shloka</button>
+        <button id="fullShlokaBtn">Full Shloka</button>
+        <button id="nextBtn">Next</button>
+        <button id="styleToggleBtn">Switch Style</button>
+    </div>
 
-        <button id="randomBtn">🎲 Random Shloka</button>
-        <button id="fullBtn">📜 Full Shloka</button>
-        <button id="nextBtn">➡ Next Shloka</button>
-        <button id="stopBtn">⏹ Stop Audio</button>
-    </section>
+    <div class="shloka-box" id="shlokaDisplay">
+        Shloka text will appear here...
+    </div>
 
-    <!-- Display -->
-    <section class="display">
-        <h2>Shloka Display</h2>
-        <div id="shlokaText" class="shloka-text">
-            🔹 Select a chapter or use the controls to display a shloka 🔹
-        </div>
-        <audio id="audioPlayer" controls>
-            <source src="" type="audio/mpeg">
-            Your browser does not support the audio element.
-        </audio>
-    </section>
+    <audio id="audioPlayer" controls>
+        <source src="" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
 </main>
 
 <footer>
-    <h2>
-        Developed by 
-        <a href="https://github.com/pubsaroja" target="_blank" rel="noopener">
-            Dr. P. Udayabhaskar – Bhagavad Gita Projects
-        </a>
-    </h2>
-    <p>
-        <a href="https://github.com/pubsaroja/bhagavad-gita-bot" target="_blank" rel="noopener">
-            Open-source Bhagavad Gita Bot on GitHub
-        </a> | 
-        <a href="/instructions" target="_blank" rel="noopener">
-            How to Use the Bhagavad Gita Bot – Setup Guide
-        </a>
-    </p>
+    Developed by Dr.P. Udayabhaskar
 </footer>
 
 <script>
-    // Placeholder for your existing JS logic
-    const shlokaText = document.getElementById('shlokaText');
+    // Minimal JS for interactivity
+    const shlokaDisplay = document.getElementById('shlokaDisplay');
     const audioPlayer = document.getElementById('audioPlayer');
 
-    document.getElementById('randomBtn').addEventListener('click', () => {
-        showShloka("Random shloka will be displayed here", "audio/random.mp3");
-    });
-    document.getElementById('fullBtn').addEventListener('click', () => {
-        showShloka("Full shloka text here", "audio/full.mp3");
-    });
-    document.getElementById('nextBtn').addEventListener('click', () => {
-        showShloka("Next shloka text here", "audio/next.mp3");
-    });
-    document.getElementById('stopBtn').addEventListener('click', () => {
-        audioPlayer.pause();
-        audioPlayer.currentTime = 0;
+    document.getElementById('randomShlokaBtn').addEventListener('click', () => {
+        shlokaDisplay.textContent = 'Random shloka text...';
+        audioPlayer.src = ''; // set audio file path
     });
 
-    function showShloka(text, audioSrc) {
-        shlokaText.style.opacity = 0;
-        setTimeout(() => {
-            shlokaText.textContent = text;
-            audioPlayer.src = audioSrc;
-            shlokaText.style.opacity = 1;
-        }, 300);
-    }
+    document.getElementById('fullShlokaBtn').addEventListener('click', () => {
+        shlokaDisplay.textContent = 'Full shloka text...';
+        audioPlayer.src = ''; // set audio file path
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+        shlokaDisplay.textContent = 'Next shloka text...';
+        audioPlayer.src = ''; // set audio file path
+    });
+
+    document.getElementById('styleToggleBtn').addEventListener('click', () => {
+        alert('Switching style...');
+    });
 </script>
 
 </body>
