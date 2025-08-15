@@ -3,7 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bhagavad Gita Bot</title>
+    <title>Bhagavad Gita Bot - SGS & Sringeri Telugu Shlokas</title>
+    <meta name="description" content="Explore Bhagavad Gita shlokas in Telugu with SGS and Sringeri styles, featuring audio recitations and meanings. Developed by Dr. P. Udayabhaskar.">
+    <meta name="keywords" content="Bhagavad Gita, SGS, Sringeri, Telugu shlokas, audio recitation, spiritual app">
+    <meta name="author" content="Dr. P. Udayabhaskar">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://pubsaroja.github.io/bhagavad-gita-bot/">
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="Bhagavad Gita Bot - Telugu Audio & Shlokas">
+    <meta property="og:description" content="Listen to Bhagavad Gita shlokas in Telugu with SGS and Sringeri styles, including audio and meanings.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pubsaroja.github.io/bhagavad-gita-bot/">
+    <meta property="og:image" content="https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/og-image.jpg">
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Bhagavad Gita Bot - Telugu Audio & Shlokas">
+    <meta name="twitter:description" content="Listen to Bhagavad Gita shlokas in Telugu with SGS and Sringeri styles, including audio and meanings.">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/og-image.jpg">
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Bhagavad Gita Bot",
+        "description": "A web application to explore Bhagavad Gita shlokas in Telugu with SGS and Sringeri styles, featuring audio recitations and meanings.",
+        "url": "https://pubsaroja.github.io/bhagavad-gita-bot/",
+        "creator": {
+            "@type": "Person",
+            "name": "Dr. P. Udayabhaskar"
+        },
+        "inLanguage": "en",
+        "applicationCategory": "Education"
+    }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Ramabhadra&display=swap" rel="stylesheet">
     <style>
         body {
@@ -11,6 +43,9 @@
             text-align: center;
             margin: 20px;
             background-color: #f0f0f0;
+        }
+        header {
+            margin-bottom: 20px;
         }
         h1 {
             color: #2c3e50;
@@ -22,8 +57,11 @@
             margin-top: 10px;
         }
         p {
-            font-size: 12px;
-        }         
+            font-size: 14px;
+            color: #333;
+            max-width: 600px;
+            margin: 10px auto;
+        }
         .options-buttons, .bottom-buttons {
             display: flex;
             flex-direction: column;
@@ -38,14 +76,12 @@
             background-color: #357EC7;
             color: white;
             padding: 10px 18px;
-            margin: 0 auto;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             font-size: 1.6em;
             width: 100%;
             max-width: 600px;
-            display: block;
         }
         button:hover {
             background-color: #008CBA;
@@ -56,7 +92,7 @@
             font-size: 1em;
             border-radius: 5px;
             width: 100%;
-            max-width: 150px;            
+            max-width: 150px;
         }
         .dropdown-container {
             display: flex;
@@ -231,121 +267,134 @@
     </style>
 </head>
 <body>
-    <h1>Bhagavad Gita Bot</h1>
+    <header>
+        <h1>Bhagavad Gita Bot</h1>
+        <p>Explore Bhagavad Gita shlokas in Telugu with SGS and Sringeri styles, featuring audio recitations and meanings by Dr. P. Udayabhaskar.</p>
+    </header>
     
-    <div class="options-buttons">
-        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1', style: getSelectedStyle()})">SGS (First Paada)</button>
-        <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})">Sringeri (First or Third Paada)</button>
-        <button onclick="sendCommand('NextIntent', {style: getSelectedStyle()})">Next Full Shloka</button>
-        <button id="previousButton" onclick="handlePreviousShloka()">Previous Shloka</button>
-        <button onclick="sendCommand('FullIntent', {style: getSelectedStyle(), isFullForQuarter: true})">Full Shloka of Quarter</button>
-    </div>
-    
-    <audio id="audioPlayer" controls></audio>
-    
-    <div class="dropdown-container">
-        <div>
-            <label for="chapterSelect">Select Random Shloka from Chapter:</label>
-            <select id="chapterSelect" onchange="handleChapterSelect(this)">
-                <option value="" selected disabled>-- Select Chapter --</option>
-                <option value="1">1. అర్జునవిషాదయోగః</option>
-                <option value="2">2. సాఙ్ఖ్యయోగః</option>
-                <option value="3">3. కర్మయోగః</option>
-                <option value="4">4. జ్ఞానయోగః</option>
-                <option value="5">5. కర్మసన్న్యాసయోగః</option>
-                <option value="6">6. ఆత్మసంయమయోగః</option>
-                <option value="7">7. జ్ఞానవిజ్ఞానయోగః</option>
-                <option value="8">8. అక్షరపరబ్రహ్మయోగః</option>
-                <option value="9">9. రాజవిద్యారాజగుహ్యయోగః</option>
-                <option value="10">10. విభూతియోగః</option>
-                <option value="11">11. విశ్వరూపసన్దర్శనయోగః</option>
-                <option value="12">12. భక్తియోగః</option>
-                <option value="13">13. క్షేత్రక్షేత్రజ్ఞవిభాగయోగః</option>
-                <option value="14">14. గుణత్రయవిభాగయోగః</option>
-                <option value="15">15. పురుషోత్తమప్రాప్తియోగః</option>
-                <option value="16">16. దైవాసురసమ్పద్విభాగయోగః</option>
-                <option value="17">17. శ్రద్ధాత్రయవిభాగయోగః</option>
-                <option value="18">18. మోక్షసన్న్యాసయోగః</option>
-            </select>
+    <main role="main">
+        <nav class="options-buttons" role="navigation" aria-label="Shloka selection options">
+            <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1', style: getSelectedStyle()})" aria-label="Play SGS style first paada shloka">SGS (First Paada)</button>
+            <button onclick="sendCommand('ZeroIntent', {quarter: 'pada1_or_pada3', style: getSelectedStyle()})" aria-label="Play Sringeri style first or third paada shloka">Sringeri (First or Third Paada)</button>
+            <button onclick="sendCommand('NextIntent', {style: getSelectedStyle()})" aria-label="Play next full shloka">Next Full Shloka</button>
+            <button id="previousButton" onclick="handlePreviousShloka()" aria-label="Play previous shloka">Previous Shloka</button>
+            <button onclick="sendCommand('FullIntent', {style: getSelectedStyle(), isFullForQuarter: true})" aria-label="Play full shloka of selected quarter">Full Shloka of Quarter</button>
+        </nav>
+        
+        <audio id="audioPlayer" controls aria-describedby="audioDescription" loading="lazy">
+            <p id="audioDescription">Audio player for Bhagavad Gita shlokas in Telugu (SGS or Sringeri style).</p>
+        </audio>
+        
+        <div class="dropdown-container" role="form" aria-label="Chapter and playback options">
+            <div>
+                <label for="chapterSelect">Select Random Shloka from Chapter:</label>
+                <select id="chapterSelect" onchange="handleChapterSelect(this)" aria-label="Select a chapter for random shloka">
+                    <option value="" selected disabled>-- Select Chapter --</option>
+                    <option value="1">1. అర్జునవిషాదయోగః</option>
+                    <option value="2">2. సాఙ్ఖ్యయోగః</option>
+                    <option value="3">3. కర్మయోగః</option>
+                    <option value="4">4. జ్ఞానయోగః</option>
+                    <option value="5">5. కర్మసన్న్యాసయోగః</option>
+                    <option value="6">6. ఆత్మసంయమయోగః</option>
+                    <option value="7">7. జ్ఞానవిజ్ఞానయోగః</option>
+                    <option value="8">8. అక్షరపరబ్రహ్మయోగః</option>
+                    <option value="9">9. రాజవిద్యారాజగుహ్యయోగః</option>
+                    <option value="10">10. విభూతియోగః</option>
+                    <option value="11">11. విశ్వరూపసన్దర్శనయోగః</option>
+                    <option value="12">12. భక్తియోగః</option>
+                    <option value="13">13. క్షేత్రక్షేత్రజ్ఞవిభాగయోగః</option>
+                    <option value="14">14. గుణత్రయవిభాగయోగః</option>
+                    <option value="15">15. పురుషోత్తమప్రాప్తియోగః</option>
+                    <option value="16">16. దైవాసురసమ్పద్విభాగయోగః</option>
+                    <option value="17">17. శ్రద్ధాత్రయవిభాగయోగః</option>
+                    <option value="18">18. మోక్షసన్న్యాసయోగః</option>
+                </select>
+            </div>
+            <div>
+                <label for="continuousPlaySelect">Continuous Play:</label>
+                <select id="continuousPlaySelect" onchange="handleContinuousPlay(this)" aria-label="Select a chapter for continuous playback">
+                    <option value="" selected disabled>-- Select Chapter --</option>
+                    <option value="1">1. అర్జునవిషాదయోగః</option>
+                    <option value="2">2. సాఙ్ఖ్యయోగః</option>
+                    <option value="3">3. కర్మయోగః</option>
+                    <option value="4">4. జ్ఞానయోగః</option>
+                    <option value="5">5. కర్మసన్న్యాసయోగః</option>
+                    <option value="6">6. ఆత్మసంయమయోగః</option>
+                    <option value="7">7. జ్ఞానవిజ్ఞానయోగః</option>
+                    <option value="8">8. అక్షరపరబ్రహ్మయోగః</option>
+                    <option value="9">9. రాజవిద్యారాజగుహ్యయోగః</option>
+                    <option value="10">10. విభూతియోగః</option>
+                    <option value="11">11. విశ్వరూపసన్దర్శనయోగః</option>
+                    <option value="12">12. భక్తియోగః</option>
+                    <option value="13">13. క్షేత్రక్షేత్రజ్ఞవిభాగయోగః</option>
+                    <option value="14">14. గుణత్రయవిభాగయోగః</option>
+                    <option value="15">15. పురుషోత్తమప్రాప్తియోగః</option>
+                    <option value="16">16. దైవాసురసమ్పద్విభాగయోగః</option>
+                    <option value="17">17. శ్రద్ధాత్రయవిభాగయోగః</option>
+                    <option value="18">18. మోక్షసన్న్యాసయోగః</option>
+                </select>
+            </div>
         </div>
-        <div>
-            <label for="continuousPlaySelect">Continuous Play:</label>
-            <select id="continuousPlaySelect" onchange="handleContinuousPlay(this)">
-                <option value="" selected disabled>-- Select Chapter --</option>
-                <option value="1">1. అర్జునవిషాదయోగః</option>
-                <option value="2">2. సాఙ్ఖ్యయోగః</option>
-                <option value="3">3. కర్మయోగః</option>
-                <option value="4">4. జ్ఞానయోగః</option>
-                <option value="5">5. కర్మసన్న్యాసయోగః</option>
-                <option value="6">6. ఆత్మసంయమయోగః</option>
-                <option value="7">7. జ్ఞానవిజ్ఞానయోగః</option>
-                <option value="8">8. అక్షరపరబ్రహ్మయోగః</option>
-                <option value="9">9. రాజవిద్యారాజగుహ్యయోగః</option>
-                <option value="10">10. విభూతియోగః</option>
-                <option value="11">11. విశ్వరూపసన్దర్శనయోగః</option>
-                <option value="12">12. భక్తియోగః</option>
-                <option value="13">13. క్షేత్రక్షేత్రజ్ఞవిభాగయోగః</option>
-                <option value="14">14. గుణత్రయవిభాగయోగః</option>
-                <option value="15">15. పురుషోత్తమప్రాప్తియోగః</option>
-                <option value="16">16. దైవాసురసమ్పద్విభాగయోగః</option>
-                <option value="17">17. శ్రద్ధాత్రయవిభాగయోగః</option>
-                <option value="18">18. మోక్షసన్న్యాసయోగః</option>
-            </select>
+        
+        <div class="radio-group" role="radiogroup" aria-label="Select shloka style">
+            <label>Full Shloka Style:</label>
+            <input type="radio" name="style" value="sgs" id="sgs" onchange="updateTextboxVisibility()" aria-label="SGS style">
+            <label for="sgs">SGS Style</label>
+            <input type="radio" name="style" value="sringeri" id="sringeri" checked onchange="updateTextboxVisibility()" aria-label="Sringeri style">
+            <label for="sringeri">Sringeri Style</label>
         </div>
-    </div>
-    
-    <div class="radio-group">
-        <label>Full Shloka Style:</label>
-        <input type="radio" name="style" value="sgs" id="sgs" onchange="updateTextboxVisibility()">
-        <label for="sgs">SGS Style</label>
-        <input type="radio" name="style" value="sringeri" id="sringeri" checked onchange="updateTextboxVisibility()">
-        <label for="sringeri">Sringeri Style</label>
-    </div>
-    
-    <div class="textbox-container">
-        <div>
-            <div id="sgsLabel" class="textbox-label">SGS Style Shloka</div>
-            <div id="sgsText" class="shloka-text">Your Shloka will appear here.</div>
+        
+        <div class="textbox-container">
+            <div>
+                <div id="sgsLabel" class="textbox-label">SGS Style Shloka</div>
+                <div id="sgsText" class="shloka-text" aria-live="polite">Your Shloka will appear here.</div>
+            </div>
+            <div>
+                <div id="sringeriLabel" class="textbox-label active">Sringeri Style Shloka</div>
+                <div id="sringeriText" class="shloka-text active" aria-live="polite">Your Shloka will appear here.</div>
+            </div>
         </div>
-        <div>
-            <div id="sringeriLabel" class="textbox-label active">Sringeri Style Shloka</div>
-            <div id="sringeriText" class="shloka-text active">Your Shloka will appear here.</div>
+        
+        <nav class="bottom-buttons" role="navigation" aria-label="Additional options">
+            <button onclick="handleMeanings()" aria-label="View shloka meanings">Meanings</button>
+            <button onclick="showVerseTable()" aria-label="Select a specific shloka">Select Shloka</button>
+            <button id="instructionsButton" onclick="toggleInstructions()" aria-label="View instructions">Instructions</button>
+        </nav>
+        
+        <div id="verseTableModal" class="modal" role="dialog" aria-label="Verse selection modal">
+            <div class="modal-content">
+                <button class="close-button" onclick="closeVerseTable()" aria-label="Close verse selection modal">Close</button>
+                <select id="chapterTableSelect" class="chapter-select" onchange="updateVerseGrid()" aria-label="Select a chapter to view verses">
+                    <option value="" selected disabled>-- Select Chapter --</option>
+                    <option value="1">Chapter 1 (47 verses)</option>
+                    <option value="2">Chapter 2 (72 verses)</option>
+                    <option value="3">Chapter 3 (43 verses)</option>
+                    <option value="4">Chapter 4 (42 verses)</option>
+                    <option value="5">Chapter 5 (29 verses)</option>
+                    <option value="6">Chapter 6 (47 verses)</option>
+                    <option value="7">Chapter 7 (30 verses)</option>
+                    <option value="8">Chapter 8 (28 verses)</option>
+                    <option value="9">Chapter 9 (34 verses)</option>
+                    <option value="10">Chapter 10 (42 verses)</option>
+                    <option value="11">Chapter 11 (55 verses)</option>
+                    <option value="12">Chapter 12 (20 verses)</option>
+                    <option value="13">Chapter 13 (34 verses)</option>
+                    <option value="14">Chapter 14 (27 verses)</option>
+                    <option value="15">Chapter 15 (20 verses)</option>
+                    <option value="16">Chapter 16 (24 verses)</option>
+                    <option value="17">Chapter 17 (28 verses)</option>
+                    <option value="18">Chapter 18 (78 verses)</option>
+                </select>
+                <div id="verseTableContent" class="verse-grid" aria-label="Verse selection grid"></div>
+            </div>
         </div>
-    </div>
+    </main>
     
-    <div class="bottom-buttons">
-        <button onclick="handleMeanings()">Meanings</button>
-        <button onclick="showVerseTable()">Select Shloka</button>
-        <button id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
-    </div>
-    
-    <div id="verseTableModal" class="modal">
-        <div class="modal-content">
-            <button class="close-button" onclick="closeVerseTable()">Close</button>
-            <select id="chapterTableSelect" class="chapter-select" onchange="updateVerseGrid()">
-                <option value="" selected disabled>-- Select Chapter --</option>
-                <option value="1">Chapter 1 (47 verses)</option>
-                <option value="2">Chapter 2 (72 verses)</option>
-                <option value="3">Chapter 3 (43 verses)</option>
-                <option value="4">Chapter 4 (42 verses)</option>
-                <option value="5">Chapter 5 (29 verses)</option>
-                <option value="6">Chapter 6 (47 verses)</option>
-                <option value="7">Chapter 7 (30 verses)</option>
-                <option value="8">Chapter 8 (28 verses)</option>
-                <option value="9">Chapter 9 (34 verses)</option>
-                <option value="10">Chapter 10 (42 verses)</option>
-                <option value="11">Chapter 11 (55 verses)</option>
-                <option value="12">Chapter 12 (20 verses)</option>
-                <option value="13">Chapter 13 (34 verses)</option>
-                <option value="14">Chapter 14 (27 verses)</option>
-                <option value="15">Chapter 15 (20 verses)</option>
-                <option value="16">Chapter 16 (24 verses)</option>
-                <option value="17">Chapter 17 (28 verses)</option>
-                <option value="18">Chapter 18 (78 verses)</option>
-            </select>
-            <div id="verseTableContent" class="verse-grid"></div>
-        </div>
-    </div>
+    <footer>
+        <h2>SGS Audio: Pujya Sri Datta Vijayanand Teertha Swamiji</h2>
+        <h2>Sringeri Audio courtesy: Smt Mathangi Kailasnath</h2>
+        <h2>Developed by Dr. P. Udayabhaskar</h2>
+    </footer>
     
     <script>
         console.log('Script loaded at', new Date().toLocaleString());
@@ -691,6 +740,7 @@
                         const verseButton = document.createElement('div');
                         verseButton.className = 'verse-button';
                         verseButton.textContent = `${chapter}.${verse}`;
+                        verseButton.setAttribute('aria-label', `Select verse ${chapter}.${verse}`);
                         verseButton.onclick = () => selectVerse(chapter, verse);
                         verseGrid.appendChild(verseButton);
                     }
@@ -934,7 +984,7 @@
                 return style;
             } catch (error) {
                 console.error('Error in getSelectedStyle:', error);
-                return 'sringeri'; // Default to sringeri if error
+                return 'sringeri';
             }
         }
 
@@ -1142,11 +1192,7 @@
             audioPlayer.muted = false;
         }, { once: true });
 
-        // Initialize the application
         initialize();
     </script>
-    <h2>SGS Audio: Pujya Sri Datta Vijayanand Teertha Swamiji</h2>
-    <h2>Sringeri Audio courtesy: Smt Mathangi Kailasnath</h2>
-    <h2>Developed by Dr.P.Udayabhaskar</h2>
 </body>
 </html>
