@@ -1,40 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bhagavad Gita Web App</title>
-<style>
-    :root {
-        --primary-color: #0078D4; /* Microsoft blue */
-        --primary-hover: #005a9e;
-        --bg-color: #f5f7fa;
-        --text-color: #333;
-        --border-radius: 8px;
-    }
-
-    body {
-        font-family: 'Segoe UI', Tahoma, sans-serif;
-        margin: 0;
-        background: var(--bg-color);
-        color: var(--text-color);
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-    }
-
-    header {
-        background: var(--primary-color);
-        color: white;
-        padding: 1rem;
-        text-align: center;
-        font-size: 1.5rem;
-        font-weight: bold;
-    }
-
-    main {
-        flex: 1;
-        padding: 1rem;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:image" content="https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/og-image.jpg">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/og-image.jpg">
+    <title>Bhagavad Gita Bot</title>
+    <style>
+        .button-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .glossy-button {
+            background: linear-gradient(to bottom, #ffd700, #d4af37);
+            border: none;
+            padding: 12px 25px;
+            margin: 5px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 2px 5px rgba(255, 255, 255, 0.5);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .glossy-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), inset 0 2px 5px rgba(255, 255, 255, 0.7);
+        }
+        .glossy-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), inset 0 1px 3px rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <h1>Bhagavad Gita Bot</h1>
+    <div class="button-container">
+        <button class="glossy-button" onclick="playShloka()">Play Shloka</button>
+        <button class="glossy-button" onclick="showVerse()">Read Verse</button>
+        <button class="glossy-button" onclick="sharePage()">Share</button>
+    </div>
+    <!-- Rest of your content -->
+</body>
+</html>        padding: 1rem;
         max-width: 800px;
         margin: auto;
     }
