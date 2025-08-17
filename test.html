@@ -235,9 +235,6 @@
     <div class="options-buttons">
         <button onclick="sendCommand('SGSFirstPaada')">SGS (First Paada)</button>
         <button onclick="sendCommand('SringeriPaada')">Sringeri (First or Third Paada)</button>
-        <button onclick="sendCommand('NextFullShloka')">Next Full Shloka</button>
-        <button onclick="sendCommand('PreviousShloka')">Previous Shloka</button>
-        <button onclick="sendCommand('FullShloka')">Full Shloka</button>
     </div>
     
     <audio id="audioPlayer" controls></audio>
@@ -354,7 +351,11 @@
         Developed by<br>
         Dr. P. Udayabhaskar
     </div>
-    
+        <div class="options-buttons">
+        <button onclick="sendCommand('NextFullShloka')">Next Full Shloka</button>
+        <button onclick="sendCommand('PreviousShloka')">Previous Shloka</button>
+        <button onclick="sendCommand('FullShloka')">Full Shloka</button>
+    </div>
     <script>
         console.log('Script loaded at', new Date('2025-08-17T10:44:00+05:30').toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
 
