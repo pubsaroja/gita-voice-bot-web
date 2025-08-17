@@ -308,7 +308,11 @@
             <div id="sringeriText" class="shloka-text active">Your Shloka will appear here.</div>
         </div>
     </div>
-    
+   <div class="options-buttons">
+        <button onclick="sendCommand('NextFullShloka')">Next Full Shloka</button>
+        <button onclick="sendCommand('PreviousShloka')">Previous Shloka</button>
+        <button onclick="sendCommand('FullShloka')">Full Shloka</button>
+    </div>
     <div class="bottom-buttons">
         <button id="meaningsButton" onclick="handleMeanings()">Meanings</button>
         <button onclick="showVerseTable()">Select Shloka</button>
@@ -343,11 +347,7 @@
         </div>
     </div>
     </div>
-        <div class="options-buttons">
-        <button onclick="sendCommand('NextFullShloka')">Next Full Shloka</button>
-        <button onclick="sendCommand('PreviousShloka')">Previous Shloka</button>
-        <button onclick="sendCommand('FullShloka')">Full Shloka</button>
-    </div>    
+    
     <div class="credits">
         SGS Audio:<br>
         Pujya Sri Datta Vijayanand Teertha Swamiji<br>
