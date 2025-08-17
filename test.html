@@ -348,7 +348,7 @@
     </div>
     
     <script>
-        console.log('Script loaded at', new Date('2025-08-17T09:03:00+05:30').toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+        console.log('Script loaded at', new Date('2025-08-17T09:13:00+05:30').toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
 
         const verseCounts = {
             1: 47, 2: 72, 3: 43, 4: 42, 5: 29, 6: 47, 7: 30, 8: 28,
@@ -528,17 +528,24 @@
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i].trim();
                     if (line.match(new RegExp(`^${key1}\\s+|^${key2}\\s+|^${key1}\\t|^${key2}\\t|^${key1}$|^${key2}$`))) {
-                        let shlokaLines = [line.substring(line.indexOf(' ') + 1 || line.indexOf('\t') + 1 || line.length)];
+                        let shlokaLines = [line.substring(line.indexOf(' ') + 1 || line.indexOf('\t') + 1 || line.length).trim()];
                         let j = i + 1;
                         while (j < lines.length && !lines[j].match(/^\d+[.-]\d+/)) {
-                            shlokaLines.push(lines[j].trim());
+                            if (lines[j].trim()) {
+                                shlokaLines.push(lines[j].trim());
+                            }
                             j++;
                         }
                         let shlokaText = shlokaLines.join('\n').trim();
+                        if (!shlokaText) {
+                            console.warn(`Empty shloka text for ${chapter}.${verse}, style=${style}`);
+                            return `Shloka ${chapter}.${verse} not found or empty`;
+                        }
                         return `${chapter}.${verse} ${shlokaText}`;
                     }
                 }
 
+                console.warn(`Shloka ${chapter}.${verse} not found in ${url}`);
                 return `Shloka ${chapter}.${verse} not found`;
             } catch (error) {
                 console.error(`Error loading shloka ${chapter}.${verse}: ${error.message}`);
@@ -607,7 +614,7 @@
                     console.log(`handleContinuousPlay: Updated context for ${chapter}.${verse}`);
 
                     const shlokaText = await fetchShlokaText(chapter, verse, style);
-                    activeTextbox.innerText = shlokaText;
+                    activeTextbox.innerText = shlokaText || `Shloka ${chapter}.${verse} not found`;
                     adjustTextboxHeight();
                     updateTextboxVisibility();
 
@@ -619,7 +626,7 @@
                         audioPlayer.load();
                         await audioPlayer.play();
                     } catch (error) {
-                        const errorText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
+                        const errorText = `${activeTextbox.innerText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
                         activeTextbox.innerText = errorText;
                         adjustTextboxHeight();
                         console.error(`Error playing audio for ${chapter}.${verse}: ${error.message}`);
@@ -707,7 +714,7 @@
                 console.log('selectVerse: Updated context:', JSON.stringify(currentContext));
                 
                 const shlokaText = await fetchShlokaText(chapter, verse, style);
-                activeTextbox.innerText = shlokaText;
+                activeTextbox.innerText = shlokaText || `Shloka ${chapter}.${verse} not found`;
                 adjustTextboxHeight();
                 
                 const audioUrl = await fetchAudioUrl(chapter, verse);
@@ -717,7 +724,7 @@
                     audioPlayer.load();
                     await audioPlayer.play();
                 } catch (error) {
-                    const errorText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
+                    const errorText = `${activeTextbox.innerText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
                     activeTextbox.innerText = errorText;
                     adjustTextboxHeight();
                     console.error(`Error playing audio for ${chapter}.${verse}: ${error.message}`);
@@ -764,7 +771,7 @@
                     console.log('handlePreviousShloka: Updated context:', JSON.stringify(currentContext));
                     
                     const shlokaText = await fetchShlokaText(chapter, verse, style);
-                    activeTextbox.innerText = shlokaText;
+                    activeTextbox.innerText = shlokaText || `Shloka ${chapter}.${verse} not found`;
                     adjustTextboxHeight();
                     
                     const audioUrl = style === 'sringeri' 
@@ -804,7 +811,7 @@
                     if (!isShowingMeanings) {
                         previousText = activeTextbox.innerText;
                         const meaningText = await fetchShlokaMeaning(chapter, verse);
-                        activeTextbox.innerText = meaningText;
+                        activeTextbox.innerText = meaningText || `Meaning for ${chapter}.${verse} not found`;
                         meaningsButton.textContent = 'Close Meanings';
                         isShowingMeanings = true;
                     } else {
@@ -852,7 +859,7 @@
                 console.log('handleChapterSelect: Updated context:', JSON.stringify(currentContext));
 
                 const shlokaText = await fetchShlokaText(chapter, verse, style);
-                activeTextbox.innerText = shlokaText;
+                activeTextbox.innerText = shlokaText || `Shloka ${chapter}.${verse} not found`;
                 adjustTextboxHeight();
 
                 const folder = style === 'sringeri' ? 'AQ4PaadasSringeri' : 'AQ4PaadasSGS';
@@ -864,7 +871,7 @@
                     audioPlayer.load();
                     await audioPlayer.play();
                 } catch (error) {
-                    const errorText = `${shlokaText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
+                    const errorText = `${activeTextbox.innerText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
                     activeTextbox.innerText = errorText;
                     adjustTextboxHeight();
                     console.error(`Error playing audio for ${chapter}.${verse}: ${error.message}`);
@@ -920,7 +927,7 @@
                     sgsLabel.classList.add('active');
                     sringeriText.classList.remove('active');
                     sringeriLabel.classList.remove('active');
-                    if (!isInstructionsVisible && !isShowingMeanings && !sringeriText.innerText.includes('Error')) {
+                    if (!isInstructionsVisible && !isShowingMeanings && !sringeriText.innerText.includes('Error') && !sringeriText.innerText.includes('not found')) {
                         sringeriText.innerText = 'Your Shloka will appear here.';
                     }
                 } else {
@@ -928,7 +935,7 @@
                     sgsLabel.classList.remove('active');
                     sringeriText.classList.add('active');
                     sringeriLabel.classList.add('active');
-                    if (!isInstructionsVisible && !isShowingMeanings && !sgsText.innerText.includes('Error')) {
+                    if (!isInstructionsVisible && !isShowingMeanings && !sgsText.innerText.includes('Error') && !sgsText.innerText.includes('not found')) {
                         sgsText.innerText = 'Your Shloka will appear here.';
                     }
                 }
@@ -1005,12 +1012,12 @@
                 console.log('sendCommand: Updated context:', JSON.stringify(currentContext));
 
                 const shlokaText = await fetchShlokaText(chapter, verse, style);
-                activeTextbox.innerText = shlokaText;
+                activeTextbox.innerText = shlokaText || `Shloka ${chapter}.${verse} not found`;
                 adjustTextboxHeight();
 
                 const audioUrl = await fetchAudioUrl(chapter, verse, quarter, isFullForQuarter);
                 if (audioUrl && audioUrl.error) {
-                    activeTextbox.innerText = `${shlokaText}\n${audioUrl.error}`;
+                    activeTextbox.innerText = `${activeTextbox.innerText}\n${audioUrl.error}`;
                     adjustTextboxHeight();
                     return;
                 }
@@ -1019,7 +1026,7 @@
                 if (autoplay) {
                     await audioPlayer.play().catch(error => {
                         console.error(`Error playing audio for ${chapter}.${verse}: ${error.message}`);
-                        activeTextbox.innerText = `${shlokaText}\nError playing audio: ${error.message}`;
+                        activeTextbox.innerText = `${activeTextbox.innerText}\nError playing audio: ${error.message}`;
                         adjustTextboxHeight();
                     });
                 }
