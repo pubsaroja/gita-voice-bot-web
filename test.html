@@ -232,7 +232,7 @@
         <button onclick="sendCommand('SringeriPaada')">Sringeri (First or Third Paada)</button>
         <button onclick="sendCommand('NextFullShloka')">Next Full Shloka</button>
         <button onclick="sendCommand('PreviousShloka')">Previous Shloka</button>
-        <button onclick="sendCommand('FullShloka')">Full Shloka</button>
+        <button onclick="sendCommand('FullShloka')">Full</button>
     </div>
     
     <audio id="audioPlayer" controls></audio>
@@ -342,7 +342,7 @@
     </div>
     
     <script>
-        console.log('Script loaded at', new Date('2025-08-17T09:38:00+05:30').toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+        console.log('Script loaded at', new Date('2025-08-17T09:55:00+05:30').toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
 
         const verseCounts = {
             1: 47, 2: 72, 3: 43, 4: 42, 5: 29, 6: 47, 7: 30, 8: 28,
@@ -916,23 +916,22 @@
                 const sgsLabel = document.getElementById('sgsLabel');
                 const sringeriLabel = document.getElementById('sringeriLabel');
 
+                // Preserve existing content if it contains valid data
                 if (style === 'sgs') {
                     sgsText.classList.add('active');
                     sgsLabel.classList.add('active');
                     sringeriText.classList.remove('active');
                     sringeriLabel.classList.remove('active');
-                    // Only reset to default if no valid content is present
-                    if (!isInstructionsVisible && !isShowingMeanings && !sgsText.innerText.includes('Shloka') && !sgsText.innerText.includes('Error') && !sgsText.innerText.includes('Meaning')) {
-                        sgsText.innerText = 'Your Shloka will appear here.';
+                    if (!isInstructionsVisible && !isShowingMeanings && sgsText.innerText === 'Your Shloka will appear here.') {
+                        sgsText.innerText = sgsText.innerText; // No reset if already set
                     }
                 } else {
                     sgsText.classList.remove('active');
                     sgsLabel.classList.remove('active');
                     sringeriText.classList.add('active');
                     sringeriLabel.classList.add('active');
-                    // Only reset to default if no valid content is present
-                    if (!isInstructionsVisible && !isShowingMeanings && !sringeriText.innerText.includes('Shloka') && !sringeriText.innerText.includes('Error') && !sringeriText.innerText.includes('Meaning')) {
-                        sringeriText.innerText = 'Your Shloka will appear here.';
+                    if (!isInstructionsVisible && !isShowingMeanings && sringeriText.innerText === 'Your Shloka will appear here.') {
+                        sringeriText.innerText = sringeriText.innerText; // No reset if already set
                     }
                 }
                 adjustTextboxHeight();
