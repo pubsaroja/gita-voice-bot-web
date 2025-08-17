@@ -348,7 +348,7 @@
     </div>
     
     <script>
-        console.log('Script loaded at', new Date('2025-08-17T09:13:00+05:30').toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+        console.log('Script loaded at', new Date('2025-08-17T09:21:00+05:30').toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
 
         const verseCounts = {
             1: 47, 2: 72, 3: 43, 4: 42, 5: 29, 6: 47, 7: 30, 8: 28,
@@ -996,8 +996,13 @@
                     autoplay = false;
                 } else if (intent === 'FullShloka') {
                     const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-                    chapter = context ? Math.floor(context.parameters.chapter) : 1;
-                    verse = context ? Math.floor(context.parameters.verse) : 1;
+                    if (!context || !context.parameters || !Number.isInteger(context.parameters.chapter) || !Number.isInteger(context.parameters.verse)) {
+                        chapter = 1;
+                        verse = 1;
+                    } else {
+                        chapter = Math.floor(context.parameters.chapter);
+                        verse = Math.floor(context.parameters.verse);
+                    }
                     isFullForQuarter = true;
                     autoplay = true;
                 }
