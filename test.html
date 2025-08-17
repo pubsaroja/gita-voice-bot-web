@@ -94,15 +94,18 @@
             padding: 10px;
             border: 2px solid #357EC7;
             border-radius: 5px;
-            display: flex;
+            display: none;
             justify-content: center;
             align-items: center;
             text-align: center;
             font-family: 'Ramabhadra', sans-serif;
         }
-        .shloka-text.multiline {
-            text-align: left;
+        .shloka-text.active {
+            display: flex;
+        }
+        .shloka-text.active.multiline {
             display: block;
+            text-align: left;
         }
         #audioPlayer {
             margin: 10px auto;
@@ -134,15 +137,6 @@
             display: none;
         }
         .textbox-label.active {
-            display: block;
-        }
-        .shloka-text {
-            display: none;
-        }
-        .shloka-text.active {
-            display: flex;
-        }
-        .shloka-text.active.multiline {
             display: block;
         }
         .modal {
@@ -238,7 +232,7 @@
         <button onclick="sendCommand('SringeriPaada')">Sringeri (First or Third Paada)</button>
         <button onclick="sendCommand('NextFullShloka')">Next Full Shloka</button>
         <button onclick="sendCommand('PreviousShloka')">Previous Shloka</button>
-        <button onclick="sendCommand('FullShloka')">Full</button>
+        <button onclick="sendCommand('FullShloka')">Full Shloka</button>
     </div>
     
     <audio id="audioPlayer" controls></audio>
@@ -348,7 +342,7 @@
     </div>
     
     <script>
-        console.log('Script loaded at', new Date('2025-08-17T09:29:00+05:30').toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+        console.log('Script loaded at', new Date('2025-08-17T09:38:00+05:30').toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
 
         const verseCounts = {
             1: 47, 2: 72, 3: 43, 4: 42, 5: 29, 6: 47, 7: 30, 8: 28,
