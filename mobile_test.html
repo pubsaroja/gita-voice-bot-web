@@ -37,42 +37,53 @@
             margin-top: 10px;
          }
 
+         .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px auto;
+            flex-wrap: wrap;
+            max-width: 600px;
+         }
+
+         button {
+            background-color: #357EC7;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4em;
+            width: 100%;
+            max-width: 250px;
+            margin: 0;
+            transition: background 0.3s ease;
+         }
+
+         button:hover {
+            background-color: #ffffff;
+            color: transparent;
+         }
+
          .top-buttons {
             display: flex;
             justify-content: center;
             gap: 15px;
             margin: 20px auto;
+            flex-wrap: wrap;
+            max-width: 600px;
          }
 
          .top-buttons button {
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 1.2em;
             width: 150px;
             height: 150px;
-            border-radius: 75%;
-            border: none;
-            background-color: #357EC7;
-            background-image: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-         }
-
-         @media (hover: hover) {
-            .top-buttons button:hover {
-               background-image: url('chakra.png');
-               background-repeat: no-repeat;
-               background-position: center;
-               background-size: cover;
-            }
-         }
-
-         @media (hover: none) {
-            .top-buttons button:active {
-               background-image: url('chakra.png');
-               background-repeat: no-repeat;
-               background-position: center;
-               background-size: cover;
-            }
+            display: flex;
+            align-items: center;
+            justify-content: center;
          }
 
          .top-buttons button:hover {
@@ -82,44 +93,46 @@
             background-size: cover;
          }
 
+         .player-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px auto;
+            flex-wrap: wrap;
+            max-width: 600px;
+         }
+
+         .player-container button {
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 1.2em;
+            width: 150px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+         }
+
+         .player-container button:hover {
+            background-color: #1e40af;
+         }
+
          .button-groups {
             display: flex;
             justify-content: center;
-            align-items: flex-start;
             gap: 10px;
+            margin: 20px auto;
             flex-wrap: wrap;
-            margin: 0 auto;
             max-width: 600px;
          }
 
          .button-group {
-            flex: 1;
-            min-width: 200px;
-            max-width: 280px;
-            width: 50%;
-            text-align: center;
             display: flex;
             flex-direction: column;
             gap: 20px;
-         }
-
-         button {
-            background-color: #357EC7;
-            color: white;
-            padding: 10px 18px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.6em;
-            width: 100%;
-            max-width: 250px;
-            margin: 0;
-         }
-
-         button:hover {
-            background-color: #ffffff;
-            color: transparent;
+            width: 50%;
+            min-width: 200px;
+            max-width: 280px;
          }
 
          select {
@@ -201,6 +214,8 @@
          #audioPlayer {
             margin: 10px auto;
             display: block;
+            width: 100%;
+            max-width: 350px;
          }
 
          .radio-group {
@@ -309,35 +324,35 @@
          }
 
          @media (max-width: 400px) {
-            .top-buttons {
-               flex-direction: row;
-               gap: 5px;
-            }
-            .button-groups {
-               flex-direction: row;
+            .button-container {
                gap: 10px;
-               justify-content: center;
-               align-items: flex-start;
-               flex-wrap: wrap;
-               margin: 0 auto;
-               max-width: 600px;
-            }
-            .button-group {
-               flex: 1;
-               min-width: 200px;
-               max-width: 280px;
-               width: 50%;
-               text-align: center;
-               display: flex;
-               flex-direction: column;
-               gap: 20px;
             }
             button {
-               padding: 6px 12px;
+               padding: 8px 15px;
                font-size: 1.2em;
+               max-width: 200px;
+            }
+            .top-buttons button {
+               padding: 8px 15px;
+               font-size: 1.0em;
+               width: 120px;
+               height: 120px;
+               border-radius: 8px;
+            }
+            .player-container button {
+               padding: 8px 15px;
+               font-size: 1.0em;
+               width: 120px;
+               height: 120px;
+               border-radius: 8px;
+            }
+            .button-groups {
+               gap: 8px;
+            }
+            .button-group {
                width: 100%;
-               max-width: 250px;
-               margin: 0;
+               min-width: 0;
+               max-width: 100%;
             }
             .dropdown-container {
                flex-direction: column;
@@ -354,38 +369,9 @@
             .verse-grid {
                grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
             }
-         }
-
-         .player-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px auto;
-            max-width: 500px;
-         }
-
-         .player-container button {
-            width: 150px;
-            height: 40px;
-            border: none;
-            border-radius: 25px;
-            background-color: #357EC7;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-            flex-shrink: 0;
-         }
-
-         .player-container button:hover {
-            background-color: #1e40af;
-         }
-
-         #audioPlayer {
-            width: 350px;
-            height: 40px;
-            flex-shrink: 0;
+            #audioPlayer {
+               max-width: 300px;
+            }
          }
       </style>
    </head>
@@ -393,8 +379,8 @@
       <h1>Bhagavad Gita Bot</h1>
       <p>Listen, understand and memorize Bhagavad Gita shlokas <br>in Telugu with SGS and Sringeri styles</p>
       <div class="top-buttons">
-         <button onclick="sendCommand('SGSFirstPaada')">SGS<br>(1st Paada)</button>
-         <button onclick="sendCommand('SringeriPaada')">Sringeri<br>(1st or 3rd Paada)</button>
+         <button onclick="sendCommand('SGSFirstPaada')">SGS (1st Paada)</button>
+         <button onclick="sendCommand('SringeriPaada')">Sringeri (1st or 3rd Paada)</button>
       </div>
       <div class="player-container">
          <audio id="audioPlayer" controls></audio>
@@ -406,18 +392,16 @@
          <input type="radio" name="style" value="sringeri" id="sringeri" checked onchange="updateTextboxVisibility()">
          <label for="sringeri">Sringeri Style</label>
       </div>
-      <div class="player-container">
-         <div class="button-groups">
-            <div class="button-group">
-               <button id="meaningsButton" onclick="handleMeanings()">Meanings</button>
-               <button onclick="showVerseTable()">Select Shloka</button>
-               <button id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
-            </div>
-            <div class="button-group">
-               <button onclick="sendCommand('NextFullShloka')">Next Full Shloka</button>
-               <button onclick="sendCommand('PreviousShloka')">Previous Shloka</button>
-               <button onclick="sendCommand('FullShloka')">Full Shloka</button>
-            </div>
+      <div class="button-groups">
+         <div class="button-group">
+            <button id="meaningsButton" onclick="handleMeanings()">Meanings</button>
+            <button onclick="showVerseTable()">Select Shloka</button>
+            <button id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
+         </div>
+         <div class="button-group">
+            <button onclick="sendCommand('NextFullShloka')">Next Full Shloka</button>
+            <button onclick="sendCommand('PreviousShloka')">Previous Shloka</button>
+            <button onclick="sendCommand('FullShloka')">Full Shloka</button>
          </div>
       </div>
       <div class="textbox-container">
