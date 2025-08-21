@@ -323,11 +323,15 @@
             margin-top: 10px;
          }
 
-         @media (max-width: 400px) {
-            .top-buttons {
-               gap: 10px;
-               max-width: 320px; /* Fits two 140px buttons with 10px gap */
-            }
+/* Existing styles remain the same unless overridden below */
+
+@media (max-width: 600px) {
+    .top-buttons, .button-groups {
+        flex-direction: column; /* Stack buttons vertically for better mobile usability */
+        gap: 10px; /* Increase gap for readability */
+        max-width: 100%; /* Ensure full width usage */
+    }
+
             .top-buttons button {
                padding: 8px 15px;
                font-size: 1.0em;
@@ -352,33 +356,32 @@
                gap: 8px;
                max-width: 100%;
             }
-            .button-group {
-               width: 50%;
-               min-width: 0;
-               max-width: 50%;
-               align-items: center;
+.button-group {
+        width: 100%; /* Full width for each group in mobile */
+        max-width: 100%; /* Remove max-width constraint */
+        align-items: center; /* Center buttons within each group */
+    }
             }
-            button {
-               padding: 8px 15px;
-               font-size: 1.2em;
-               max-width: 200px;
-               margin: 0 auto;
-            }
-            .dropdown-container {
-               flex-direction: column;
-               align-items: center;
-               gap: 8px;
-               max-width: 100%;
-               padding: 8px;
-            }
-            .dropdown-container div {
-               width: 100%;
-               max-width: 100px;
-               justify-content: center;
-            }
-            .verse-grid {
-               grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-            }
+button {
+        padding: 8px 15px; /* Slightly larger padding for touch targets */
+        font-size: 1.1em; /* Smaller font for mobile */
+        max-width: 200px; /* Increase max-width to avoid truncation */
+        width: 100%; /* Ensure buttons fill the group width */
+        margin: 0 auto; /* Center horizontally */
+    }
+.dropdown-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+    }
+.dropdown-container div {
+        width: 100%;
+        max-width: 250px; /* Adjusted for better fit */
+    }
+  .verse-grid {
+        grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); /* Slightly smaller grid items */
+    }
             #audioPlayer {
                max-width: 300px;
             }
