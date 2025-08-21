@@ -56,7 +56,7 @@
             font-family: 'Outfit', sans-serif;
             font-size: 1.4em;
             width: 100%;
-            max-width: 200px;
+            max-width: 250px;
             margin: 0;
             transition: background 0.3s ease;
          }
@@ -131,7 +131,7 @@
             flex-direction: column;
             gap: 20px;
             width: 50%;
-            /*min-width: 200px;*/
+            min-width: 200px;
             max-width: 280px;
          }
 
@@ -324,13 +324,10 @@
          }
 
          @media (max-width: 400px) {
-            .button-container {
+            .top-buttons {
+               flex-direction: column;
                gap: 10px;
-            }
-            button {
-               padding: 8px 15px;
-               font-size: 1.2em;
-               max-width: 200px;
+               max-width: 100%;
             }
             .top-buttons button {
                padding: 8px 15px;
@@ -338,6 +335,12 @@
                width: 120px;
                height: 120px;
                border-radius: 8px;
+               margin: 0 auto;
+            }
+            .player-container {
+               flex-direction: column;
+               gap: 10px;
+               max-width: 100%;
             }
             .player-container button {
                padding: 8px 15px;
@@ -345,14 +348,24 @@
                width: 120px;
                height: 120px;
                border-radius: 8px;
+               margin: 0 auto;
             }
             .button-groups {
+               flex-direction: column;
                gap: 8px;
+               max-width: 100%;
             }
             .button-group {
                width: 100%;
                min-width: 0;
                max-width: 100%;
+               align-items: center;
+            }
+            button {
+               padding: 8px 15px;
+               font-size: 1.2em;
+               max-width: 200px;
+               margin: 0 auto;
             }
             .dropdown-container {
                flex-direction: column;
@@ -1235,5 +1248,3 @@
       </script>
    </body>
 </html>
-
-
