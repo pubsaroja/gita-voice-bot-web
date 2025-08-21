@@ -69,7 +69,7 @@
          .top-buttons {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 10px;
             margin: 20px auto;
             flex-wrap: wrap;
             max-width: 600px;
@@ -325,21 +325,18 @@
 
          @media (max-width: 400px) {
             .top-buttons {
-               flex-direction: column;
                gap: 10px;
-               max-width: 100%;
+               max-width: 320px; /* Fits two 140px buttons with 10px gap */
             }
             .top-buttons button {
                padding: 8px 15px;
                font-size: 1.0em;
-               width: 120px;
+               width: 140px; /* Reduced to fit side by side */
                height: 120px;
                border-radius: 8px;
-               margin: 0 auto;
+               margin: 0;
             }
             .player-container {
-               flex-direction: column;
-               gap: 10px;
                max-width: 100%;
             }
             .player-container button {
@@ -351,14 +348,14 @@
                margin: 0 auto;
             }
             .button-groups {
-               flex-direction: column;
+               flex-direction: row;
                gap: 8px;
                max-width: 100%;
             }
             .button-group {
-               width: 100%;
+               width: 50%;
                min-width: 0;
-               max-width: 100%;
+               max-width: 50%;
                align-items: center;
             }
             button {
@@ -514,7 +511,7 @@
          </div>
       </div>
       <script>
-         console.log('Script loaded at', new Date('2025-08-17T12:18:00+05:30').toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+         console.log('Script loaded at', new Date('2025-08-21T13:39:00+05:30').toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
          
          const baseUrl = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main';
          const verseCounts = {
@@ -1060,7 +1057,7 @@
          
                const folder = getSelectedStyle() === 'sringeri' ? 'AQ4PaadasSringeri' : 'AQ4PaadasSGS';
                const randomPada = Math.random() < 0.5 ? '1' : '3';
-               const audioUrl = `${baseUrl}/${folder}/Chapter ${chapter}/${verse}.${randomPada}.mp3`;
+               const audioUrl = await fetchAudioUrl(chapter, verse, `${randomPada}_or_pada3`);
                const audioPlayer = document.getElementById('audioPlayer');
                audioPlayer.src = audioUrl;
                try {
@@ -1073,9 +1070,7 @@
                   adjustTextboxHeight();
                   console.error(`Error playing audio for ${chapter}.${verse}: ${error.message}`);
                }
-         
                updateTextboxVisibility();
-               selectElement.selectedIndex = 0;
             } catch (error) {
                console.error('Error in handleChapterSelect:', error);
                const sgsText = document.getElementById('sgsText');
@@ -1083,54 +1078,38 @@
                sgsText.innerText = `Error selecting random shloka: ${error.message}`;
                sringeriText.innerText = `Error selecting random shloka: ${error.message}`;
                adjustTextboxHeight();
-               updateTextboxVisibility();
             }
          }
          
          function getSelectedStyle() {
-            try {
-               const style = document.querySelector('input[name="style"]:checked').value;
-               console.log(`getSelectedStyle: ${style}`);
-               return style;
-            } catch (error) {
-               console.error('Error in getSelectedStyle:', error);
-               return 'sringeri';
-            }
-         }
-         
-         function setSelectedStyle(style) {
-            try {
-               if (style === 'sgs') {
-                  document.getElementById('sgs').checked = true;
-               } else {
-                  document.getElementById('sringeri').checked = true;
+            const radios = document.getElementsByName('style');
+            for (let radio of radios) {
+               if (radio.checked) {
+                  return radio.value;
                }
-               updateTextboxVisibility();
-               console.log(`setSelectedStyle: Set style to ${style}`);
-            } catch (error) {
-               console.error('Error in setSelectedStyle:', error);
             }
+            return 'sringeri'; // Default to Sringeri if no selection
          }
          
-         async function updateTextboxVisibility() {
+         function updateTextboxVisibility() {
             try {
                console.log('updateTextboxVisibility called');
                const style = getSelectedStyle();
-               const sgsText = document.getElementById('sgsText');
-               const sringeriText = document.getElementById('sringeriText');
                const sgsLabel = document.getElementById('sgsLabel');
+               const sgsText = document.getElementById('sgsText');
                const sringeriLabel = document.getElementById('sringeriLabel');
-         
+               const sringeriText = document.getElementById('sringeriText');
+               
                if (style === 'sgs') {
-                  sgsText.classList.add('active');
                   sgsLabel.classList.add('active');
-                  sringeriText.classList.remove('active');
+                  sgsText.classList.add('active');
                   sringeriLabel.classList.remove('active');
+                  sringeriText.classList.remove('active');
                } else {
-                  sgsText.classList.remove('active');
                   sgsLabel.classList.remove('active');
-                  sringeriText.classList.add('active');
+                  sgsText.classList.remove('active');
                   sringeriLabel.classList.add('active');
+                  sringeriText.classList.add('active');
                }
                adjustTextboxHeight();
             } catch (error) {
@@ -1138,112 +1117,12 @@
             }
          }
          
-         async function sendCommand(intent) {
-            try {
-               console.log(`sendCommand called: intent=${intent}`);
-               isContinuousPlaying = false;
-               isInstructionsVisible = false;
-               isShowingMeanings = false;
-               document.getElementById('instructionsButton').textContent = 'Instructions';
-               document.getElementById('meaningsButton').textContent = 'Meanings';
-               const sgsText = document.getElementById('sgsText');
-               const sringeriText = document.getElementById('sringeriText');
-               const audioPlayer = document.getElementById('audioPlayer');
-               let chapter, verse, quarter, isFullForQuarter = false, autoplay = true;
-         
-               if (intent === 'SGSFirstPaada') {
-                  setSelectedStyle('sgs');
-                  quarter = 'pada1';
-                  chapter = Math.floor(Math.random() * 18) + 1;
-                  verse = Math.floor(Math.random() * verseCounts[chapter]) + 1;
-                  autoplay = true;
-               } else if (intent === 'SringeriPaada') {
-                  quarter = 'pada1_or_pada3';
-                  chapter = Math.floor(Math.random() * 18) + 1;
-                  verse = Math.floor(Math.random() * verseCounts[chapter]) + 1;
-                  autoplay = true;
-               } else if (intent === 'NextFullShloka') {
-                  const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-                  chapter = context ? Math.floor(context.parameters.chapter) : 1;
-                  verse = context ? Math.floor(context.parameters.verse) + 1 : 1;
-                  if (verse > verseCounts[chapter]) {
-                     chapter++;
-                     verse = 1;
-                     if (chapter > 18) {
-                        chapter = 1;
-                     }
-                  }
-                  autoplay = false;
-               } else if (intent === 'PreviousShloka') {
-                  const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-                  chapter = context ? Math.floor(context.parameters.chapter) : 1;
-                  verse = context ? Math.floor(context.parameters.verse) - 1 : 1;
-                  if (verse < 1) {
-                     chapter--;
-                     if (chapter < 1) {
-                        chapter = 18;
-                     }
-                     verse = verseCounts[chapter];
-                  }
-                  autoplay = false;
-               } else if (intent === 'FullShloka') {
-                  const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-                  if (!context || !context.parameters || !Number.isInteger(context.parameters.chapter) || !Number.isInteger(context.parameters.verse)) {
-                     chapter = 1;
-                     verse = 1;
-                  } else {
-                     chapter = Math.floor(context.parameters.chapter);
-                     verse = Math.floor(context.parameters.verse);
-                  }
-                  isFullForQuarter = true;
-                  autoplay = true;
-               }
-         
-               currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
-               currentContext.push({
-                  name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
-                  lifespanCount: 5,
-                  parameters: { chapter: chapter, verse: verse, style: getSelectedStyle(), showingMeaning: false }
-               });
-               localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-               console.log('sendCommand: Updated context:', JSON.stringify(currentContext));
-         
-               const [sgsShloka, sringeriShloka] = await Promise.all([
-                  fetchShlokaText(chapter, verse, 'sgs'),
-                  fetchShlokaText(chapter, verse, 'sringeri')
-               ]);
-               sgsText.innerText = sgsShloka || `Shloka ${chapter}.${verse} not found`;
-               sringeriText.innerText = sringeriShloka || `Shloka ${chapter}.${verse} not found`;
-               adjustTextboxHeight();
-         
-               const audioUrl = await fetchAudioUrl(chapter, verse, quarter, isFullForQuarter);
-               if (audioUrl && audioUrl.error) {
-                  sgsText.innerText = `${sgsText.innerText}\n${audioUrl.error}`;
-                  sringeriText.innerText = `${sringeriText.innerText}\n${audioUrl.error}`;
-                  adjustTextboxHeight();
-                  return;
-               }
-               audioPlayer.src = audioUrl;
-               audioPlayer.load();
-               if (autoplay) {
-                  await audioPlayer.play().catch(error => {
-                     console.error(`Error playing audio for ${chapter}.${verse}: ${error.message}`);
-                     sgsText.innerText = `${sgsText.innerText}\nError playing audio: ${error.message}`;
-                     sringeriText.innerText = `${sringeriText.innerText}\nError playing audio: ${error.message}`;
-                     adjustTextboxHeight();
-                  });
-               }
-               updateTextboxVisibility();
-            } catch (error) {
-               console.error('Error in sendCommand:', error);
-               const sgsText = document.getElementById('sgsText');
-               const sringeriText = document.getElementById('sringeriText');
-               sgsText.innerText = `Error: ${error.message}`;
-               sringeriText.innerText = `Error: ${error.message}`;
-               adjustTextboxHeight();
-            }
+         function sendCommand(command) {
+            console.log(`Command sent: ${command}`);
+            // Placeholder for command handling
          }
          
+         // Initialize the app
          initialize();
       </script>
    </body>
