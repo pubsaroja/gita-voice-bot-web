@@ -85,20 +85,16 @@
             background-size: cover;
          }
 
-         .button-groups {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            justify-content: center;
-            align-items: flex-start;
-            margin: 0 auto;
-            max-width: 600px;
-            border: 2px solid #357EC7;
-            border-radius: 5px;
-            padding: 10px;
-            width: 100%;
-         }
-
+.button-groups {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   gap: 10px;
+   max-width: 600px;
+   margin: 0 auto;
+   border: 2px solid #357EC7;
+   border-radius: 5px;
+   padding: 10px;
+}
          @media (max-width: 600px) {
             .button-groups {
                grid-template-columns: 1fr 1fr;
@@ -106,17 +102,23 @@
             }
          }
 
-         .button-group {
-            flex: 1;
-            min-width: 200px;
-            max-width: 280px;
-            width: 100%;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            justify-content: center;
-         }
+.button-group {
+   width: 100%;
+   text-align: center;
+   display: flex;
+   flex-direction: column;
+   gap: 10px;   /* smaller gap */
+   justify-content: center;
+}
+         /* Mobile view: stack in 1 column instead of 2 */
+@media (max-width: 600px) {
+   .button-groups {
+      grid-template-columns: 1fr; /* one column */
+   }
+   .button-group {
+      gap: 8px; /* tighter spacing */
+   }
+}
 button {
    background-color: #357EC7;
    color: white;
@@ -1273,6 +1275,7 @@ button:hover {
       </script>
    </body>
 </html>
+
 
 
 
