@@ -118,10 +118,10 @@
 button {
    background-color: #357EC7;
    color: white;
-   width: 100%;         /* fill grid column */
-   height: 70px;        /* all buttons same height */
+   width: 100%;          /* stretch to column width */
+   height: 70px;         /* equal height */
    border: none;
-   border-radius: 0;    /* sharp rectangular edges */
+   border-radius: 0 !important;  /* force sharp corners */
    cursor: pointer;
    font-family: 'Outfit', sans-serif;
    font-size: 1.2em;
@@ -1270,6 +1270,7 @@ button:hover {
       </script>
    </body>
 </html>
+
 
 
 
