@@ -37,11 +37,18 @@
             margin-top: 10px;
          }
 
+         .top-button-group {
+            max-width: 600px; /* Match button-groups width */
+            margin: 20px auto;
+            border: 2px solid #357EC7; /* Border to group top buttons */
+            border-radius: 5px;
+            padding: 10px;
+         }
+
          .top-buttons {
             display: flex;
             justify-content: center;
-            gap: 10px; /* Reduced gap for tighter spacing */
-            margin: 20px auto;
+            gap: 10px;
          }
 
          .top-buttons button {
@@ -84,21 +91,21 @@
 
          .button-groups {
             display: grid;
-            grid-template-columns: 1fr 1fr; /* Two columns */
-            gap: 10px; /* Space between buttons */
-            justify-content: center; /* Center the grid columns */
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            justify-content: center;
             align-items: flex-start;
             margin: 0 auto;
             max-width: 600px;
-            border: 2px solid #357EC7; /* Added border for button group */
+            border: 2px solid #357EC7;
             border-radius: 5px;
             padding: 10px;
          }
 
          @media (max-width: 600px) {
             .button-groups {
-               grid-template-columns: 1fr 1fr; /* Keeps two columns even on mobile */
-               justify-content: center; /* Maintain centering on mobile */
+               grid-template-columns: 1fr 1fr;
+               justify-content: center;
             }
          }
 
@@ -111,7 +118,7 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            justify-content: center; /* Center buttons within each group */
+            justify-content: center;
          }
 
          button {
@@ -125,7 +132,7 @@
             font-size: 1.6em;
             width: 100%;
             max-width: 250px;
-            margin: 0 auto; /* Center buttons horizontally */
+            margin: 0 auto;
          }
 
          button:hover {
@@ -360,11 +367,11 @@
             }
             .dropdown-container div {
                width: 100%;
-               max-width: 150px; /* Increased for better mobile usability */
+               max-width: 150px;
                justify-content: center;
             }
             .dropdown-container select {
-               max-width: 150px; /* Match div max-width */
+               max-width: 150px;
             }
             .verse-grid {
                grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
@@ -377,7 +384,7 @@
             justify-content: center;
             gap: 15px;
             margin: 20px auto;
-            max-width: 600px; /* Match button-groups max-width */
+            max-width: 600px;
          }
 
          .player-container button {
@@ -407,9 +414,11 @@
    <body>
       <h1>Bhagavad Gita Bot</h1>
       <p>Listen, understand and memorize Bhagavad Gita shlokas <br>in Telugu with SGS and Sringeri styles</p>
-      <div class="top-buttons">
-         <button onclick="sendCommand('SGSFirstPaada')">SGS<br>(1st Paada)</button>
-         <button onclick="sendCommand('SringeriPaada')">Sringeri<br>(1st or 3rd Paada)</button>
+      <div class="top-button-group">
+         <div class="top-buttons">
+            <button onclick="sendCommand('SGSFirstPaada')">SGS<br>(1st Paada)</button>
+            <button onclick="sendCommand('SringeriPaada')">Sringeri<br>(1st or 3rd Paada)</button>
+         </div>
       </div>
       <div class="player-container">
          <audio id="audioPlayer" controls></audio>
@@ -420,16 +429,6 @@
          <label for="sgs">SGS Style</label>
          <input type="radio" name="style" value="sringeri" id="sringeri" checked onchange="updateTextboxVisibility()">
          <label for="sringeri">Sringeri Style</label>
-      </div>
-      <div class="textbox-container">
-         <div>
-            <div id="sgsLabel" class="textbox-label">SGS Style Shloka</div>
-            <div id="sgsText" class="shloka-text">Your Shloka will appear here.</div>
-         </div>
-         <div>
-            <div id="sringeriLabel" class="textbox-label active">Sringeri Style Shloka</div>
-            <div id="sringeriText" class="shloka-text active">Your Shloka will appear here.</div>
-         </div>
       </div>
       <div class="player-container">
          <div class="button-groups">
@@ -443,6 +442,16 @@
                <button onclick="sendCommand('PreviousShloka')">Previous Shloka</button>
                <button onclick="sendCommand('FullShloka')">Full Shloka</button>
             </div>
+         </div>
+      </div>
+      <div class="textbox-container">
+         <div>
+            <div id="sgsLabel" class="textbox-label">SGS Style Shloka</div>
+            <div id="sgsText" class="shloka-text">Your Shloka will appear here.</div>
+         </div>
+         <div>
+            <div id="sringeriLabel" class="textbox-label active">Sringeri Style Shloka</div>
+            <div id="sringeriText" class="shloka-text active">Your Shloka will appear here.</div>
          </div>
       </div>
       <div class="dropdown-container">
@@ -790,7 +799,7 @@
          
                   currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
                   currentContext.push({
-                     name: `plans/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                     name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
                      lifespanCount: 5,
                      parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: getSelectedStyle(), showingMeaning: false }
                   });
@@ -897,7 +906,7 @@
                const sringeriText = document.getElementById('sringeriText');
                currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
                currentContext.push({
-                  name: `plans/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                  name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
                   lifespanCount: 5,
                   parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: getSelectedStyle(), showingMeaning: false }
                });
@@ -961,7 +970,7 @@
                   }
                   currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
                   currentContext.push({
-                     name: `plans/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                     name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
                      lifespanCount: 5,
                      parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: getSelectedStyle(), showingMeaning: false }
                   });
@@ -1061,7 +1070,7 @@
                const sringeriText = document.getElementById('sringeriText');
                currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
                currentContext.push({
-                  name: `plans/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                  name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
                   lifespanCount: 5,
                   parameters: { chapter: chapter, verse: verse, style: getSelectedStyle(), showingMeaning: false }
                });
@@ -1219,7 +1228,7 @@
          
                currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
                currentContext.push({
-                  name: `plans/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                  name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
                   lifespanCount: 5,
                   parameters: { chapter: chapter, verse: verse, style: getSelectedStyle(), showingMeaning: false }
                });
