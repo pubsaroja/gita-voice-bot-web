@@ -51,36 +51,31 @@
             gap: 10px;
          }
 
-         .top-buttons button {
-            width: 150px;
-            height: 150px;
-            border-radius: 25%;
-            border: none;
-            background-color: #357EC7;
-            background-image: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-         }
+.top-buttons button {
+   width: 150px;
+   height: 150px;
+   border-radius: 25%;
+   border: none;
+   background-color: #357EC7;
+   color: white;
+   font-size: 20px;
+   cursor: pointer;
+   transition: background 0.3s ease;
+   background-repeat: no-repeat;
+   background-position: center;
+   background-size: cover;
+}
+@media (hover: hover) {
+   .top-buttons button:hover {
+      background-image: url('chakra.png');
+   }
+}
 
-         @media (hover: hover) {
-            .top-buttons button:hover {
-               background-image: url('chakra.png');
-               background-repeat: no-repeat;
-               background-position: center;
-               background-size: cover;
-            }
-         }
-
-         @media (hover: none) {
-            .top-buttons button:active {
-               background-image: url('chakra.png');
-               background-repeat: no-repeat;
-               background-position: center;
-               background-size: cover;
-            }
-         }
+@media (hover: none) {
+   .top-buttons button:active {
+      background-image: url('chakra.png');
+   }
+}
 
          .top-buttons button:hover {
             background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/chakra.png');
@@ -1276,3 +1271,4 @@
       </script>
    </body>
 </html>
+
