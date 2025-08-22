@@ -11,404 +11,57 @@
       <link rel="canonical" href="https://pubsaroja.github.io/bhagavad-gita-bot/">
       <link rel="preload" href="https://fonts.googleapis.com/css2?family=Ramabhadra&display=swap" as="style" onload="this.rel='stylesheet'">
       <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300&display=swap" as="style" onload="this.rel='stylesheet'">
-      <style>
-         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-         }
-
-         body {
-            font-family: 'Outfit', sans-serif;
-            font-size: 16px;
-            text-align: center;
-            margin: 20px;
-            background-color: #f0f0f0;
-         }
-
-         h1 {
-            color: #2c3e50;
-            font-size: 1.5em;
-         }
-
-         h2 {
-            color: #34495e;
-            font-size: 1em;
-            margin-top: 10px;
-         }
-
-         .top-button-group {
-            max-width: 600px; /* Match button-groups width */
-            margin: 0 auto;
-            width: 100%;
-            border: 2px solid #357EC7; /* Border to group top buttons */
-            border-radius: 5px;
-            padding: 10px;
-         }
-
-         .top-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-         }
-
-.top-buttons button {
-   width: 150px;
-   height: 150px;
-   border-radius: 25%;
-   border: none;
-   background-color: #357EC7;
-   color: white;
-   font-size: 20px;
-   cursor: pointer;
-   transition: background 0.3s ease;
-   background-repeat: no-repeat;
-   background-position: center;
-   background-size: cover;
-}
-@media (hover: hover) {
-   .top-buttons button:hover {
-      background-image: url('chakra.png');
-   }
+<style>
+button:hover,
+.player-container button:hover {
+background-color: #285a9e;
+color: white;
 }
 
-@media (hover: none) {
-   .top-buttons button:active {
-      background-image: url('chakra.png');
-   }
-}
 
-         .top-buttons button:hover {
-            background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/chakra.png');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: cover;
-         }
-
-.button-groups {
-   display: grid;
-   grid-template-columns: 1fr 1fr;
-   gap: 10px;
-   max-width: 600px;
-   margin: 0 auto;
-   border: 2px solid #357EC7;
-   border-radius: 5px;
-   padding: 10px;
-}
-         @media (max-width: 600px) {
-            .button-groups {
-               grid-template-columns: 1fr 1fr;
-               justify-content: center;
-            }
-         }
-
-.button-group {
-   width: 100%;
-   text-align: center;
-   display: flex;
-   flex-direction: column;
-   gap: 10px;   /* smaller gap */
-   justify-content: center;
-}
-         /* Mobile view: stack in 1 column instead of 2 */
+/* ✅ Mobile: stack buttons in one column */
 @media (max-width: 600px) {
-   .button-groups {
-      grid-template-columns: 1fr; /* one column */
-   }
-   .button-group {
-      gap: 8px; /* tighter spacing */
-   }
+.button-groups {
+grid-template-columns: 1fr;
 }
-button {
-   background-color: #357EC7;
-   color: white;
-   width: 100%;          /* stretch to column width */
-   height: 70px;         /* equal height */
-   border: none;
-   border-radius: 0 !important;  /* force sharp corners */
-   cursor: pointer;
-   font-family: 'Outfit', sans-serif;
-   font-size: 1.2em;
-   margin: 0 auto;
-   display: block;
-   text-align: center;
+.button-group {
+gap: 8px;
 }
-button:hover {
-   background-color: #285a9e;
-   color: white;
 }
 
-         select {
-            padding: 10px;
-            margin: 5px;
-            font-size: 1em;
-            border-radius: 5px;
-            width: 100%;
-            max-width: 250px;
-         }
 
-         label, select {
-            display: block;
-            font-family: 'Outfit', sans-serif;
-            font-size: 1em;
-         }
+.shloka-text {
+margin-top: 10px;
+font-size: 1.5em;
+color: #333;
+white-space: pre-wrap;
+max-width: 600px;
+margin-left: auto;
+margin-right: auto;
+line-height: 1.5;
+min-height: 3em;
+overflow-y: auto;
+padding: 10px;
+border: 2px solid #357EC7;
+border-radius: 5px;
+display: none;
+justify-content: center;
+align-items: center;
+text-align: center;
+font-family: 'Ramabhadra', sans-serif;
+}
 
-         .dropdown-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            max-width: 600px;
-            border: 2px solid #357EC7;
-            border-radius: 5px;
-            padding: 10px;
-            box-sizing: border-box;
-            margin: 0 auto;
-         }
 
-         .dropdown-container label {
-            font-weight: bold;
-            margin-right: 5px;
-            font-size: 1em;
-         }
+.shloka-text.active {
+display: flex;
+}
 
-         .dropdown-container div {
-            display: flex;
-            align-items: center;
-         }
 
-         .dropdown-container select {
-            width: 100%;
-            max-width: 250px;
-            box-sizing: border-box;
-         }
-
-         .shloka-text {
-            margin-top: 10px;
-            font-size: 1.5em;
-            color: #333;
-            white-space: pre-wrap;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            line-height: 1.5;
-            min-height: 3em;
-            overflow-y: auto;
-            padding: 10px;
-            border: 2px solid #357EC7;
-            border-radius: 5px;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            font-family: 'Ramabhadra', sans-serif;
-         }
-
-         .shloka-text.active {
-            display: flex;
-         }
-
-         .shloka-text.active.multiline {
-            display: block;
-            text-align: left;
-         }
-
-         #audioPlayer {
-            margin: 10px auto;
-            display: block;
-         }
-
-         .radio-group {
-            margin: 10px 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-         }
-
-         .radio-group label {
-            margin: 0 10px;
-         }
-
-         .textbox-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            margin: 10px auto;
-         }
-
-         .textbox-container > div {
-            width: 100%;
-            max-width: 500px;
-         }
-
-         .textbox-label {
-            font-weight: bold;
-            margin-bottom: 5px;
-            display: none;
-         }
-
-         .textbox-label.active {
-            display: block;
-         }
-
-         .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-         }
-
-         .modal-content {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            max-width: 80%;
-            max-height: 80%;
-            overflow-y: auto;
-            border: 2px solid #357EC7;
-         }
-
-         .chapter-select {
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 5px;
-            width: 100%;
-         }
-
-         .verse-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-            gap: 10px;
-            padding: 10px;
-         }
-
-         .verse-button {
-            background-color: #f9f9f9;
-            border: 1px solid #357EC7;
-            border-radius: 5px;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-            font-size: 0.9em;
-         }
-
-         .verse-button:hover {
-            background-color: #e0e0e0;
-         }
-
-         .close-button {
-            background-color: #ff4444;
-            color: white;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            float: right;
-         }
-
-         .close-button:hover {
-            background-color: #cc0000;
-         }
-
-         .credits {
-            font-size: 0.9em;
-            color: #000;
-            margin-top: 10px;
-         }
-
-         @media (max-width: 400px) {
-            .top-buttons {
-               flex-direction: row;
-               gap: 5px;
-            }
-            .button-groups {
-               grid-template-columns: 1fr 1fr;
-               gap: 10px;
-               justify-content: center;
-               align-items: flex-start;
-               margin: 0 auto;
-               max-width: 600px;
-            }
-            .button-group {
-               flex: 1;
-               min-width: 200px;
-               max-width: 280px;
-               width: 100%;
-               text-align: center;
-               display: flex;
-               flex-direction: column;
-               gap: 20px;
-               justify-content: center;
-            }
-            button {
-               padding: 6px 12px;
-               font-size: 1.2em;
-               width: 100%;
-               max-width: 250px;
-               margin: 0 auto;
-            }
-            .dropdown-container {
-               flex-direction: column;
-               align-items: center;
-               gap: 8px;
-               max-width: 100%;
-               padding: 8px;
-            }
-            .dropdown-container div {
-               width: 100%;
-               max-width: 150px;
-               justify-content: center;
-            }
-            .dropdown-container select {
-               max-width: 150px;
-            }
-            .verse-grid {
-               grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-            }
-         }
-
-         .player-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin: 0 auto;
-            max-width: 600px;
-            width: 100%;
-         }
-
-         .player-container button {
-            width: 150px;
-            height: 40px;
-            border: none;
-            border-radius: 25px;
-            background-color: #357EC7;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-            flex-shrink: 0;
-         }
-
-         .player-container button:hover {
-            background-color: #1e40af;
-         }
-
-         #audioPlayer {
-            width: 350px;
-            height: 40px;
-            flex-shrink: 0;
-         }
-      </style>
+.shloka-text.active.multiline {
+display: block;
+text-align: left;
+}
+</style>
    </head>
    <body>
       <h1>Bhagavad Gita Bot</h1>
@@ -1275,6 +928,7 @@ button:hover {
       </script>
    </body>
 </html>
+
 
 
 
