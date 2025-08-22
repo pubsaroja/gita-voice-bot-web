@@ -83,20 +83,26 @@
          }
 
          .button-groups {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two columns */
+            gap: 10px; /* Space between buttons */
             justify-content: center;
             align-items: flex-start;
-            gap: 10px;
-            flex-wrap: wrap;
             margin: 0 auto;
             max-width: 600px;
+         }
+
+         @media (max-width: 600px) {
+            .button-groups {
+               grid-template-columns: 1fr 1fr; /* Keeps two columns even on mobile */
+            }
          }
 
          .button-group {
             flex: 1;
             min-width: 200px;
             max-width: 280px;
-            width: 50%;
+            width: 100%;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -314,11 +320,10 @@
                gap: 5px;
             }
             .button-groups {
-               flex-direction: row;
+               grid-template-columns: 1fr 1fr;
                gap: 10px;
                justify-content: center;
                align-items: flex-start;
-               flex-wrap: wrap;
                margin: 0 auto;
                max-width: 600px;
             }
@@ -326,7 +331,7 @@
                flex: 1;
                min-width: 200px;
                max-width: 280px;
-               width: 50%;
+               width: 100%;
                text-align: center;
                display: flex;
                flex-direction: column;
