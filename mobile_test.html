@@ -37,40 +37,41 @@
             margin-top: 10px;
          }
 
-   .top-button-group {
-      max-width: 600px; /* Match button-groups width */
-      margin: 20px auto;
-      border: 2px solid #357EC7; /* Border to group top buttons */
-      border-radius: 5px;
-      padding: 10px;
-   }
+         .top-button-group {
+            max-width: 600px; /* Match button-groups width */
+            margin: 20px auto;
+            border: 2px solid #357EC7; /* Border to group top buttons */
+            border-radius: 5px;
+            padding: 10px;
+         }
 
-   .top-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-   }
+         .top-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+         }
 
-   .top-buttons button {
-      width: 150px;
-      height: 150px;
-      border-radius: 25%;
-      border: none;
-      background-color: #357EC7;
-      color: white;
-      font-size: 20px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: cover;
-   }
-    /* Desktop hover */
-   @media (hover: hover) {
-      .top-buttons button:hover {
-         background-image: url('chakra.png');
-      }
-   }
+         .top-buttons button {
+            width: 150px;
+            height: 150px;
+            border-radius: 25%;
+            border: none;
+            background-color: #357EC7;
+            background-image: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+         }
+
+         @media (hover: hover) {
+            .top-buttons button:hover {
+               background-image: url('chakra.png');
+               background-repeat: no-repeat;
+               background-position: center;
+               background-size: cover;
+            }
+         }
 
          @media (hover: none) {
             .top-buttons button:active {
@@ -412,6 +413,7 @@
    </head>
    <body>
       <h1>Bhagavad Gita Bot</h1>
+/*Fully functional code dt 22 Sept 2025.  Only last six buttons are to be reshaped */
       <p>Listen, understand and memorize Bhagavad Gita shlokas <br>in Telugu with SGS and Sringeri styles</p>
       <div class="top-button-group">
          <div class="top-buttons">
@@ -1269,20 +1271,8 @@
                adjustTextboxHeight();
             }
          }
-   // ✅ Fix for mobile: show image only while pressed
-   document.querySelectorAll('.top-buttons button').forEach(btn => {
-      btn.addEventListener('touchstart', () => {
-         btn.style.backgroundImage = "url('chakra.png')";
-      });
-      btn.addEventListener('touchend', () => {
-         btn.style.backgroundImage = "none";
-      });
-   });         
+         
          initialize();
       </script>
    </body>
 </html>
-
-
-
-
