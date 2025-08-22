@@ -118,21 +118,21 @@
 button {
    background-color: #357EC7;
    color: white;
-   padding: 12px 30px;   /* more padding = rectangular shape */
+   padding: 12px 24px;   /* rectangular shape */
    border: none;
-   border-radius: 8px;   /* keep slightly rounded corners */
+   border-radius: 0;     /* sharp corners */
    cursor: pointer;
    font-family: 'Outfit', sans-serif;
-   font-size: 1.6em;
+   font-size: 1.2em;
    max-width: 250px;
    margin: 0 auto;
-   display: block;       /* ensures centering works with margin:auto */
+   display: block;       /* centers the button */
+   text-align: center;
 }
-
-         button:hover {
-            background-color: #ffffff;
-            color: transparent;
-         }
+button:hover {
+   background-color: #285a9e; /* darker blue on hover */
+   color: white;
+}
 
          select {
             padding: 10px;
@@ -1270,5 +1270,6 @@ button {
       </script>
    </body>
 </html>
+
 
 
