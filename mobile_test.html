@@ -242,7 +242,14 @@
     <button onclick="sendCommand('SGSFirstPaada')">SGS<br>(1st Paada)</button>
     <button onclick="sendCommand('SringeriPaada')">Sringeri<br>(1st or 3rd Paada)</button>
   </div>
-
+  <!-- Radio options -->
+  <div class="radio-group">
+    <label>Full Shloka Style:</label>
+    <input type="radio" name="style" value="sgs" id="sgs" onchange="updateTextboxVisibility()">
+    <label for="sgs">SGS Style</label>
+    <input type="radio" name="style" value="sringeri" id="sringeri" checked onchange="updateTextboxVisibility()">
+    <label for="sringeri">Sringeri Style</label>
+  </div>
     <audio id="audioPlayer" controls></audio>
 
     <div class="player-container">
@@ -253,14 +260,7 @@
 
  </div>
 
-  <!-- Radio options -->
-  <div class="radio-group">
-    <label>Full Shloka Style:</label>
-    <input type="radio" name="style" value="sgs" id="sgs" onchange="updateTextboxVisibility()">
-    <label for="sgs">SGS Style</label>
-    <input type="radio" name="style" value="sringeri" id="sringeri" checked onchange="updateTextboxVisibility()">
-    <label for="sringeri">Sringeri Style</label>
-  </div>
+
 
   <!-- Textboxes -->
   <div class="textbox-container">
@@ -1111,6 +1111,7 @@
     </script>
 </body>
 </html>
+
 
 
 
