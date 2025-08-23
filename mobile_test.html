@@ -4,219 +4,242 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bhagavad Gita Bot</title>
-<style>
-  body {
-    font-family: 'Outfit', sans-serif;
-    text-align: center;
-    margin: 20px;
-    background-color: #FFFFFF;
-  }
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+      text-align: center;
+      margin: 20px;
+      background-color: #FFFFFF;
+    }
+    h1 {
+      color: #2c3e50;
+      font-size: 1.5em;
+    }
+    p {
+      margin-bottom: 15px;
+    }
 
-  h1 {
-    color: #2c3e50;
-    font-size: 1.5em;
-  }
+    /* ==== UNIVERSAL BUTTON STYLING ==== */
+    button {
+      flex: 1;
+      min-width: 120px;
+      padding: 12px;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 8px;
+      background-color: #357EC7;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #1e40af;
+    }
 
-  p {
-    margin-bottom: 15px;
-  }
-
-  /* ==== UNIVERSAL BUTTON STYLING ==== */
-  button {
-    flex: 1;
-    min-width: 120px;
-    padding: 12px;
-    font-size: 1.1em;
-    border: none;
-    border-radius: 8px;
-    background-color: #357EC7;
-    color: white;
-    cursor: pointer;
-    transition: background 0.3s ease;
-  }
-
-  button:hover {
-    background-color: #1e40af;
-  }
-
-  /* ==== FLEX GROUPS ==== */
-  .top-buttons,
-  .player-container {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin: 10px auto;
-    width: 100%;
-    max-width: 600px;   /* ✅ Keep desktop box centered */
-  }
-
-  /* ==== AUDIO PLAYER ==== */
-  #audioPlayer {
-    flex: 1;
-    min-width: 120px;
-    max-width: 300px;
-    height: 35px;
-  }
-
-  /* ==== SHLOKA TEXT ==== */
-  .textbox-label {
-    font-weight: bold;
-    margin-top: 15px;
-    font-size: 1.1em;
-    display: none;
-  }
-  .textbox-label.active { display: block; }
-
-  .shloka-text {
-    margin-top: 5px;
-    font-size: 1.5em;
-    color: #333;
-    white-space: pre-wrap;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.5;
-    min-height: 3em;
-    overflow-y: auto;
-    padding: 10px;
-    border: 2px solid #357EC7;
-    border-radius: 5px;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    font-family: 'Ramabhadra', sans-serif;
-  }
-  .shloka-text.active { display: flex; }
-  .shloka-text.active.multiline { display: block; text-align: left; }
-
-  /* ==== RADIO GROUP ==== */
-  .radio-group {
-    margin: 10px 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-  }
-
-  /* ==== DROPDOWN CONTAINERS ==== */
-  .dropdown-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    max-width: 600px;
-    border: 2px solid #357EC7;   /* ✅ Restored box */
-    border-radius: 5px;
-    padding: 10px;
-    box-sizing: border-box;
-    margin: 10px auto;
-  }
-
-  .dropdown-container label {
-    font-weight: bold;
-    margin-right: 5px;
-    font-size: 1em;
-  }
-
-  .dropdown-container div {
-    display: flex;
-    align-items: center;
-  }
-
-  select {
-    padding: 10px;
-    margin: 5px;
-    font-size: 1em;
-    border-radius: 5px;
-    width: 100%;
-    max-width: 150px;
-  }
-
-  /* ==== MODALS ==== */
-  .modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-
-  .modal-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    max-width: 80%;
-    max-height: 80%;
-    overflow-y: auto;
-    border: 2px solid #357EC7;
-  }
-
-  .close-button {
-    background-color: #ff4444;
-    color: white;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    float: right;
-  }
-
-  .close-button:hover {
-    background-color: #cc0000;
-  }
-
-  /* ==== VERSE GRID ==== */
-  .verse-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-    gap: 10px;
-    padding: 10px;
-  }
-
-  .verse-button {
-    background-color: #f9f9f9;
-    border: 1px solid #357EC7;
-    border-radius: 5px;
-    padding: 10px;
-    text-align: center;
-    cursor: pointer;
-    font-size: 0.9em;
-  }
-
-  .verse-button:hover {
-    background-color: #e0e0e0;
-  }
-
-  /* ==== MOBILE ==== */
-  @media (max-width: 600px) {
+    /* ==== FLEX GROUPS ==== */
     .top-buttons,
-    .player-container,
-    .dropdown-container {
-      flex-direction: row;
-      width: calc(100% - 20px);  /* ✅ Small gaps on mobile */
+    .player-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px auto;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    /* ==== AUDIO PLAYER ==== */
+    #audioPlayer {
+      flex: 1;
+      min-width: 120px;
+      max-width: 300px;
+      height: 35px;
+    }
+
+    /* ==== SHLOKA TEXT ==== */
+    .textbox-container {
+      margin: 20px auto;
+      max-width: 600px;
+    }
+    .textbox-label {
+      font-weight: bold;
+      margin-top: 10px;
+      color: #2c3e50;
+      display: none;
+    }
+    .textbox-label.active {
+      display: block;
+    }
+    .shloka-text {
+      margin-top: 5px;
+      font-size: 1.5em;
+      color: #333;
+      white-space: pre-wrap;
+      max-width: 600px;
       margin-left: auto;
       margin-right: auto;
-      gap: 5px;
+      line-height: 1.5;
+      min-height: 3em;
+      overflow-y: auto;
+      padding: 10px;
+      border: 2px solid #357EC7;
+      border-radius: 5px;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-family: 'Ramabhadra', sans-serif;
+    }
+    .shloka-text.active { display: flex; }
+    .shloka-text.active.multiline { display: block; text-align: left; }
+
+    /* ==== RADIO GROUP ==== */
+    .radio-group {
+      margin: 10px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
     }
 
-    button {
+    /* ==== DROPDOWN CONTAINERS ==== */
+    .dropdown-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 600px;
+      border: 2px solid #357EC7;
+      border-radius: 5px;
+      padding: 10px;
+      box-sizing: border-box;
+      margin: 10px auto;
+    }
+    .dropdown-container label {
+      font-weight: bold;
+      margin-right: 5px;
       font-size: 1em;
     }
-  }
+    .dropdown-container div {
+      display: flex;
+      align-items: center;
+    }
+    select {
+      padding: 10px;
+      margin: 5px;
+      font-size: 1em;
+      border-radius: 5px;
+      width: 100%;
+      max-width: 150px;
+    }
 
-  .credits {
-    font-size: 0.9em;
-    color: #666;
-    margin-top: 10px;
-  }
-</style>
+    /* ==== ICON BUTTONS ==== */
+    .icon-btn {
+      background: #357EC7;
+      border: none;
+      border-radius: 50%;
+      padding: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 45px;
+      height: 45px;
+      flex-shrink: 0;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    .icon-btn svg {
+      width: 24px;
+      height: 24px;
+    }
+    .icon-btn:hover {
+      background: #1e40af;
+      transform: scale(1.1);
+    }
+
+    /* ==== MODALS ==== */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      max-width: 80%;
+      max-height: 80%;
+      overflow-y: auto;
+      border: 2px solid #357EC7;
+    }
+    .close-button {
+      background-color: #ff4444;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      float: right;
+    }
+    .close-button:hover { background-color: #cc0000; }
+
+    /* ==== VERSE GRID ==== */
+    .verse-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+      gap: 10px;
+      padding: 10px;
+    }
+    .verse-button {
+      background-color: #f9f9f9;
+      border: 1px solid #357EC7;
+      border-radius: 5px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    .verse-button:hover { background-color: #e0e0e0; }
+
+    /* ==== MOBILE ==== */
+    @media (max-width: 600px) {
+      .top-buttons,
+      .player-container,
+      .dropdown-container {
+        flex-direction: row;
+        width: 100%;
+        padding: 0 10px;   /* ✅ spacing on both sides */
+        box-sizing: border-box;
+        margin: 0 auto 10px auto;
+        gap: 5px;
+      }
+      button {
+        font-size: 1em;
+      }
+      .icon-btn {
+        width: 40px;
+        height: 40px;
+        padding: 6px;
+      }
+      .icon-btn svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .credits {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 10px;
+    }
+  </style>
 
 </head>
 <body>
@@ -1132,6 +1155,7 @@
     </script>
 </body>
 </html>
+
 
 
 
