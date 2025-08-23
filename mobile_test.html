@@ -33,7 +33,7 @@
       margin: 20px auto;
     }
     .top-buttons button {
-      width: 150px;
+      width: 100px;
       height: 100px;
       border-radius: 25%;
       border: none;
@@ -299,11 +299,25 @@
       </svg>
     </button>
   </div>
-
+<!-- Previous Button -->
+<button class="icon-btn" onclick="sendCommand('PreviousShloka')">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+    <path d="M15.41 7.41 14 6 8 12l6 6 1.41-1.41L10.83 12z"/>
+  </svg>
+  <span>Previous</span>
+</button>
   <!-- Full Shloka button (text-only rectangle) -->
   <div class="player-container">
     <button class="rect-btn" onclick="sendCommand('FullShloka')">Full Shloka</button>
   </div>
+<!-- Next Button -->
+<button class="icon-btn" onclick="sendCommand('NextShloka')">
+  <span>Next</span>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+    <path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+  </svg>
+</button>
+
 
   <!-- Radio options -->
   <div class="radio-group">
@@ -1163,6 +1177,7 @@
     </script>
 </body>
 </html>
+
 
 
 
