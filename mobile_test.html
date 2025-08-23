@@ -20,7 +20,7 @@
     background-color: #FFFFFF;
   }
   h1 {
-    color: blue;
+    color: #2c3e50;
     font-size: 1.5em;
   }
   p {
@@ -45,6 +45,10 @@
   }
 
   /* ==== FLEX GROUPS ==== */
+  .top-buttons-wrapper {
+    padding: 0 10px; /* margin for mobile edges */
+    box-sizing: border-box;
+  }
   .top-buttons,
   .player-container {
     display: flex;
@@ -204,23 +208,28 @@
   .verse-button:hover { background-color: #e0e0e0; }
 
   /* ==== LAST 6 BUTTONS (GRID FIX) ==== */
+  .button-groups-wrapper {
+    padding: 0 10px;   /* gap on both sides */
+    box-sizing: border-box;
+  }
+
   .button-groups {
     display: grid;
     grid-template-columns: repeat(3, 1fr); /* 3 equal columns */
     gap: 10px;
     margin: 10px auto;
     max-width: 600px;
-    justify-items: center; /* center align buttons */
+    justify-items: center;
   }
 
   .button-group {
     width: 100%;
-    display: contents; /* let grid handle placement */
+    display: contents;
   }
 
   .button-group button {
     width: 100%;
-    max-width: 180px; /* keeps them neat on large screens */
+    max-width: 180px;
   }
 
   /* ==== MOBILE ==== */
@@ -245,17 +254,13 @@
     }
 
     .button-groups {
-      grid-template-columns: 1fr; /* one group per row */
-      padding: 0 8px; /* small gap at edges */
-      box-sizing: border-box;
+      grid-template-columns: 1fr;
     }
-
     .button-group {
       display: flex;
       justify-content: space-between;
       width: 100%;
     }
-
     .button-group button {
       flex: 1;
       margin: 0 2px;
@@ -265,7 +270,7 @@
 
   .credits {
     font-size: 0.9em;
-    color: black;
+    color: #666;
     margin-top: 10px;
   }
 </style>
@@ -1153,6 +1158,7 @@
     </script>
 </body>
 </html>
+
 
 
 
