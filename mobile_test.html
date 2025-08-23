@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bhagavad Gita Bot</title>
-
   <meta name="description" content="Explore Bhagavad Gita shlokas in Telugu with SGS and Sringeri styles, featuring audio recitations and meanings.">
   <meta name="keywords" content="Bhagavad Gita, SGS, Sringeri, Telugu shlokas, audio recitation, spiritual app">
   <meta name="author" content="Dr. P. Udayabhaskar">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://pubsaroja.github.io/bhagavad-gita-bot/">
-
   <link href="https://fonts.googleapis.com/css2?family=Ramabhadra&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300&display=swap" rel="stylesheet">
 
@@ -21,63 +19,51 @@
       margin: 20px;
       background-color: #FFFFFF;
     }
-
-    h1 { color: #2c3e50; font-size: 1.5em; }
-    h2 { color: #34495e; font-size: 1em; margin-top: 10px; }
-
-    /* ===== Top circle buttons (unchanged) ===== */
-    .top-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin: 20px auto;
+    h1 {
+      color: #2c3e50;
+      font-size: 1.5em;
     }
-    .top-buttons button {
-      width: 100px;
-      height: 100px;
-      border-radius: 25%;
+    p {
+      margin-bottom: 15px;
+    }
+
+    /* ==== UNIVERSAL BUTTON STYLING ==== */
+    button {
+      flex: 1;
+      min-width: 120px;
+      padding: 12px;
+      font-size: 1.1em;
       border: none;
+      border-radius: 8px;
       background-color: #357EC7;
       color: white;
-      font-size: 20px;
       cursor: pointer;
       transition: background 0.3s ease;
     }
-    .top-buttons button:hover { background-color: #1e40af; }
-
-    /* ===== Dropdowns box (unchanged) ===== */
-    select {
-      padding: 10px;
-      margin: 5px;
-      font-size: 1em;
-      border-radius: 5px;
-      width: 100%;
-      max-width: 150px;
+    button:hover {
+      background-color: #1e40af;
     }
-    .dropdown-container {
+
+    /* ==== FLEX GROUPS ==== */
+    .top-buttons,
+    .player-container {
       display: flex;
-      flex-wrap: wrap;
       justify-content: center;
       gap: 10px;
+      margin: 10px auto;
       width: 100%;
       max-width: 600px;
-      border: 2px solid #357EC7;
-      border-radius: 5px;
-      padding: 10px;
-      box-sizing: border-box;
-      margin: 10px auto;
-    }
-    .dropdown-container label {
-      font-weight: bold;
-      margin-right: 5px;
-      font-size: 1em;
-    }
-    .dropdown-container div {
-      display: flex;
-      align-items: center;
     }
 
-    /* ===== Shloka text areas (unchanged) ===== */
+    /* ==== AUDIO PLAYER ==== */
+    #audioPlayer {
+      flex: 1;
+      min-width: 120px;
+      max-width: 300px;
+      height: 35px;
+    }
+
+    /* ==== SHLOKA TEXT ==== */
     .shloka-text {
       margin-top: 10px;
       font-size: 1.5em;
@@ -101,71 +87,7 @@
     .shloka-text.active { display: flex; }
     .shloka-text.active.multiline { display: block; text-align: left; }
 
-    /* ===== Audio + Nav area ===== */
-    .player-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin: 20px auto;
-      max-width: 600px;
-      flex-wrap: wrap; /* allow wrap on very small screens */
-    }
-
-    /* audio element sizing */
-    #audioPlayer {
-      margin: 10px auto;
-      display: block;
-      flex: 1;
-      min-width: 120px;   /* ensure visible on small screens */
-      max-width: 300px;   /* desktop limit */
-      height: 35px;
-    }
-
-    /* Circular SVG icon buttons for Previous / Next ONLY */
-.icon-btn {
-  background: #357EC7;
-  border: none;
-  border-radius: 25px; /* rounded rectangle now */
-  padding: 8px 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px; /* spacing between text and icon */
-  font-size: 14px;
-  color: white;
-  transition: background 0.3s ease, transform 0.2s ease;
-}
-
-.icon-btn svg {
-  width: 20px;
-  height: 20px;
-}
-
-.icon-btn:hover {
-  background: #1e40af;
-  transform: scale(1.05);
-}
-
-
-    /* Text-only rectangular buttons: equal sizes, slightly rounded */
-    .rect-btn {
-      background-color: #357EC7;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 10px 16px;
-      font-size: 1em;
-      cursor: pointer;
-      transition: background 0.3s ease;
-      width: 160px;      /* equal width */
-      height: 44px;      /* equal height */
-      line-height: 1;    /* crisp vertical alignment */
-      flex-shrink: 0;
-    }
-    .rect-btn:hover { background-color: #1e40af; }
-
-    /* ===== Radio group (unchanged) ===== */
+    /* ==== RADIO GROUP ==== */
     .radio-group {
       margin: 10px 0;
       display: flex;
@@ -173,27 +95,74 @@
       align-items: center;
       gap: 10px;
     }
-    .radio-group label { margin: 0 10px; }
 
-    /* ===== Textbox container (unchanged) ===== */
-    .textbox-container {
+    /* ==== DROPDOWN CONTAINERS ==== */
+    .dropdown-container {
       display: flex;
-      flex-direction: column;
-      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 10px;
+      width: 100%;
+      max-width: 600px;
+      border: 2px solid #357EC7;
+      border-radius: 5px;
+      padding: 10px;
+      box-sizing: border-box;
+      margin: 10px auto;
     }
-    .textbox-container > div { width: 100%; max-width: 600px; }
-    .textbox-label { font-weight: bold; margin-bottom: 5px; display: none; }
-    .textbox-label.active { display: block; }
+    .dropdown-container label {
+      font-weight: bold;
+      margin-right: 5px;
+      font-size: 1em;
+    }
+    .dropdown-container div {
+      display: flex;
+      align-items: center;
+    }
+    select {
+      padding: 10px;
+      margin: 5px;
+      font-size: 1em;
+      border-radius: 5px;
+      width: 100%;
+      max-width: 150px;
+    }
 
-    /* ===== Modal & verse grid (unchanged) ===== */
+    /* ==== ICON BUTTONS ==== */
+    .icon-btn {
+      background: #357EC7;
+      border: none;
+      border-radius: 50%;
+      padding: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 45px;
+      height: 45px;
+      flex-shrink: 0;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    .icon-btn svg {
+      width: 24px;
+      height: 24px;
+    }
+    .icon-btn:hover {
+      background: #1e40af;
+      transform: scale(1.1);
+    }
+
+    /* ==== MODALS ==== */
     .modal {
       display: none;
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background-color: rgba(0, 0, 0, 0.5);
-      justify-content: center; align-items: center;
+      justify-content: center;
+      align-items: center;
       z-index: 1000;
     }
     .modal-content {
@@ -205,14 +174,18 @@
       overflow-y: auto;
       border: 2px solid #357EC7;
     }
-    .chapter-select {
-      margin-bottom: 10px;
-      padding: 10px;
-      font-size: 1em;
-      border-radius: 5px;
-      width: 100%;
-      max-width: 200px;
+    .close-button {
+      background-color: #ff4444;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      float: right;
     }
+    .close-button:hover { background-color: #cc0000; }
+
+    /* ==== VERSE GRID ==== */
     .verse-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
@@ -229,52 +202,33 @@
       font-size: 0.9em;
     }
     .verse-button:hover { background-color: #e0e0e0; }
-    .close-button {
-      background-color: #ff4444;
-      color: white;
-      padding: 5px 10px;
-      border: none;
-      border-radius: 25px;
-      cursor: pointer;
-      float: right;
-    }
-    .close-button:hover { background-color: #cc0000; }
 
-    /* ===== Credits ===== */
-    .credits { font-size: 0.9em; color: #666; margin-top: 10px; }
-
-    /* ===== Mobile tweaks (scoped, no global button overrides) ===== */
+    /* ==== MOBILE ==== */
     @media (max-width: 600px) {
-      .top-buttons { flex-direction: row; gap: 5px; }
-      .top-buttons button {
-        width: 100px; height: 100px; font-size: 18px;
-      }
-
-      .dropdown-container {
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-        max-width: 100%;
-        padding: 8px;
-      }
-      .dropdown-container div {
+      .top-buttons,
+      .player-container {
+        flex-direction: row;
         width: 100%;
-        max-width: 200px;
-        justify-content: center;
+        gap: 5px;
       }
-      .verse-grid { grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); }
-
-      .player-container { gap: 6px; }
-      .icon-btn { width: 40px; height: 40px; padding: 6px; }
-      .icon-btn svg { width: 20px; height: 20px; }
-      #audioPlayer { width: 100%; min-width: 100px; height: 30px; }
-
-      .rect-btn {
-        width: 120px;  /* slightly narrower on mobile */
-        height: 42px;
-        font-size: 0.95em;
-        padding: 8px 12px;
+      button {
+        font-size: 1em;
       }
+      .icon-btn {
+        width: 40px;
+        height: 40px;
+        padding: 6px;
+      }
+      .icon-btn svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .credits {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -373,12 +327,6 @@
     </div>
   </div>
 
-  <!-- Text-only rectangular buttons (equal size) -->
-  <div class="player-container">
-    <button class="rect-btn" id="meaningsButton" onclick="handleMeanings()">Meanings</button>
-    <button class="rect-btn" onclick="showVerseTable()">Select Shloka</button>
-    <button class="rect-btn" id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
-  </div>
 
   <!-- Verse Table Modal -->
   <div id="verseTableModal" class="modal">
@@ -409,6 +357,12 @@
 
       <div id="verseTableContent" class="verse-grid"></div>
     </div>
+  </div>
+  <!-- Text-only rectangular buttons (equal size) -->
+  <div class="player-container">
+    <button class="rect-btn" id="meaningsButton" onclick="handleMeanings()">Meanings</button>
+    <button class="rect-btn" onclick="showVerseTable()">Select Shloka</button>
+    <button class="rect-btn" id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
   </div>
 
   <!-- Credits -->
@@ -1157,6 +1111,7 @@
     </script>
 </body>
 </html>
+
 
 
 
