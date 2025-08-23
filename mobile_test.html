@@ -24,7 +24,7 @@
             font-size: 1.5em;
          }
 
-         /* ✅ Make all groups same width, responsive */
+         /* ✅ Groups same width, responsive */
          .top-button-group,
          .button-groups,
          .dropdown-container,
@@ -38,6 +38,7 @@
             padding: 10px;
          }
 
+         /* 🎛 Top buttons */
          .top-buttons {
             display: flex;
             justify-content: center;
@@ -54,16 +55,16 @@
             font-size: 20px;
             cursor: pointer;
             transition: background 0.3s ease;
+         }
+
+         .top-buttons button:hover {
+            background-image: url('chakra.png');
             background-repeat: no-repeat;
             background-position: center;
             background-size: cover;
          }
 
-         .top-buttons button:hover {
-            background-image: url('chakra.png');
-         }
-
-         /* ✅ Unified button-groups grid */
+         /* 🎛 Normal buttons */
          .button-groups {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -72,7 +73,6 @@
 
          .button-group {
             width: 100%;
-            text-align: center;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -87,7 +87,6 @@
             background-color: #357EC7;
             color: white;
             font-size: 1.2em;
-            font-family: 'Outfit', sans-serif;
             cursor: pointer;
             text-align: center;
          }
@@ -98,13 +97,13 @@
             color: white;
          }
 
-         /* ✅ Mobile adjustments */
+         /* ✅ MOBILE ONLY (fix sizes) */
          @media (max-width: 600px) {
             .button-groups {
-               grid-template-columns: 1fr; /* single column */
+               grid-template-columns: 1fr; /* stack one column */
             }
             .button-group {
-               gap: 12px; /* slightly bigger gap for touch */
+               gap: 12px;
             }
             .top-button-group,
             .button-groups,
@@ -116,16 +115,17 @@
             }
             button,
             .player-container button {
-               height: 85px;        /* taller buttons for touch */
-               font-size: 1.4em;    /* larger text */
+               height: 85px;     /* taller buttons */
+               font-size: 1.3em; /* bigger text */
             }
             .top-buttons button {
-               width: 180px;
-               height: 180px;
-               font-size: 1.3em;
+               width: 160px;
+               height: 160px;
+               font-size: 1.2em;
             }
          }
 
+         /* 🎛 Shloka box */
          .shloka-text {
             margin-top: 10px;
             font-size: 1.5em;
@@ -150,7 +150,7 @@
             text-align: left;
          }
       </style>
-</head>
+   </head>
 <body>
 <!-- ====== PAGE ====== -->
 <h1>Bhagavad Gita Bot</h1>
@@ -320,6 +320,7 @@
 
 </body>
 </html>
+
 
 
 
