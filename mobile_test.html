@@ -4,269 +4,96 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bhagavad Gita Bot</title>
-  <meta name="description" content="Explore Bhagavad Gita shlokas in Telugu with SGS and Sringeri styles, featuring audio recitations and meanings.">
-  <meta name="keywords" content="Bhagavad Gita, SGS, Sringeri, Telugu shlokas, audio recitation, spiritual app">
-  <meta name="author" content="Dr. P. Udayabhaskar">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://pubsaroja.github.io/bhagavad-gita-bot/">
-  <link href="https://fonts.googleapis.com/css2?family=Ramabhadra&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300&display=swap" rel="stylesheet">
-
-<style>
-  body {
-    font-family: 'Outfit', sans-serif;
-    text-align: center;
-    margin: 20px;
-    background-color: #FFFFFF;
-  }
-  h1 {
-    color: #2c3e50;
-    font-size: 1.5em;
-  }
-  p {
-    margin-bottom: 15px;
-  }
-
-  /* ==== UNIVERSAL BUTTON STYLING ==== */
-  button {
-    flex: 1;
-    min-width: 120px;
-    padding: 12px;
-    font-size: 1.1em;
-    border: none;
-    border-radius: 8px;
-    background-color: #357EC7;
-    color: white;
-    cursor: pointer;
-    transition: background 0.3s ease;
-  }
-  button:hover {
-    background-color: #1e40af;
-  }
-
-  /* ==== FLEX GROUPS ==== */
-  .top-buttons,
-  .player-container {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin: 10px auto;
-    width: 100%;
-    max-width: 600px;
-  }
-
-  /* ==== WRAPPERS ==== */
-  .top-buttons-wrapper,
-  .button-groups-wrapper {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    box-sizing: border-box;
-  }
-
-  /* ==== AUDIO PLAYER ==== */
-  #audioPlayer {
-    flex: 1;
-    min-width: 120px;
-    max-width: 300px;
-    height: 35px;
-  }
-
-  /* ==== SHLOKA TEXT ==== */
-  .shloka-text {
-    margin-top: 10px;
-    font-size: 1.5em;
-    color: #333;
-    white-space: pre-wrap;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.5;
-    min-height: 3em;
-    overflow-y: auto;
-    padding: 10px;
-    border: 2px solid #357EC7;
-    border-radius: 5px;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    font-family: 'Ramabhadra', sans-serif;
-  }
-  .shloka-text.active { display: flex; }
-  .shloka-text.active.multiline { display: block; text-align: left; }
-
-  /* ==== RADIO GROUP ==== */
-  .radio-group {
-    margin: 10px 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-  }
-
-  /* ==== DROPDOWN CONTAINERS ==== */
-  .dropdown-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    max-width: 600px;
-    border: 2px solid #357EC7;
-    border-radius: 5px;
-    padding: 10px;
-    box-sizing: border-box;
-    margin: 10px auto;
-  }
-  .dropdown-container label {
-    font-weight: bold;
-    margin-right: 5px;
-    font-size: 1em;
-  }
-  .dropdown-container div {
-    display: flex;
-    align-items: center;
-  }
-  select {
-    padding: 10px;
-    margin: 5px;
-    font-size: 1em;
-    border-radius: 5px;
-    width: 100%;
-    max-width: 150px;
-  }
-
-  /* ==== ICON BUTTONS ==== */
-  .icon-btn {
-    background: #357EC7;
-    border: none;
-    border-radius: 50%;
-    padding: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 45px;
-    height: 45px;
-    flex-shrink: 0;
-    transition: background 0.3s ease, transform 0.2s ease;
-  }
-  .icon-btn svg {
-    width: 24px;
-    height: 24px;
-  }
-  .icon-btn:hover {
-    background: #1e40af;
-    transform: scale(1.1);
-  }
-
-  /* ==== MODALS ==== */
-  .modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  .modal-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    max-width: 80%;
-    max-height: 80%;
-    overflow-y: auto;
-    border: 2px solid #357EC7;
-  }
-  .close-button {
-    background-color: #ff4444;
-    color: white;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    float: right;
-  }
-  .close-button:hover { background-color: #cc0000; }
-
-  /* ==== VERSE GRID ==== */
-  .verse-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-    gap: 10px;
-    padding: 10px;
-  }
-  .verse-button {
-    background-color: #f9f9f9;
-    border: 1px solid #357EC7;
-    border-radius: 5px;
-    padding: 10px;
-    text-align: center;
-    cursor: pointer;
-    font-size: 0.9em;
-  }
-  .verse-button:hover { background-color: #e0e0e0; }
-
-  /* ==== MOBILE FIX ==== */
-  @media (max-width: 600px) {
-    .top-buttons-wrapper,
-    .button-groups-wrapper {
-      padding: 0 10px;   /* add side gap */
-      box-sizing: border-box;
+  <style>
+    /* General reset */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      text-align: center;
     }
 
-    .top-buttons,
-    .button-groups {
-      width: auto;       /* prevent full width stretch */
-      max-width: 100%;
+    h1 {
+      margin-top: 10px;
     }
 
-    .button-groups {
-      grid-template-columns: 1fr; /* stack button groups */
+    /* Top circular buttons */
+    .top-buttons-wrapper {
+      padding: 0 10px;
     }
-
-    .button-group {
+    .top-buttons {
       display: flex;
-      justify-content: space-between;
-      width: 100%;
+      gap: 10px;
     }
-
-    .button-group button {
+    .top-buttons button {
       flex: 1;
-      margin: 0 2px;
-      max-width: none;
+      padding: 15px;
+      border-radius: 50%;
+      border: none;
+      background: #4CAF50;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
     }
 
-    button {
-      font-size: 1em;
+    /* Rectangular buttons */
+    .button-groups-wrapper {
+      padding: 0 10px;
+    }
+    .player-container {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .rect-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: #007BFF;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 6px;
     }
 
-    .icon-btn {
-      width: 40px;
-      height: 40px;
-      padding: 6px;
+    /* Textbox styles */
+    .textbox-container {
+      margin: 15px 10px;
+      text-align: left;
     }
-    .icon-btn svg {
-      width: 20px;
-      height: 20px;
+    .textbox-label,
+    .shloka-text {
+      display: none;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-top: 5px;
     }
-  }
+    .textbox-label.active,
+    .shloka-text.active {
+      display: block;
+    }
 
-  .credits {
-    font-size: 0.9em;
-    color: #666;
-    margin-top: 10px;
-  }
-</style>
+    /* Dropdown container */
+    .dropdown-container {
+      margin: 15px 10px;
+      text-align: left;
+    }
 
+    select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
 
+    /* Mobile adjustments */
+    @media (max-width: 600px) {
+      .top-buttons,
+      .player-container {
+        flex-direction: row;
+      }
+    }
+  </style>
 </head>
-
 <body>
   <h1>Bhagavad Gita Bot</h1>
   <p style="color: black;">Listen, understand and memorize Bhagavad Gita shlokas</p>
@@ -378,7 +205,6 @@
   <div id="verseTableModal" class="modal">
     <div class="modal-content">
       <button class="close-button" onclick="closeVerseTable()">Close</button>
-
       <select id="chapterTableSelect" class="chapter-select" onchange="updateVerseGrid()">
         <option value="" selected disabled>-- Select Chapter --</option>
         <option value="1">Chapter 1 (47 verses)</option>
@@ -400,7 +226,6 @@
         <option value="17">Chapter 17 (28 verses)</option>
         <option value="18">Chapter 18 (78 verses)</option>
       </select>
-
       <div id="verseTableContent" class="verse-grid"></div>
     </div>
   </div>
@@ -419,6 +244,32 @@
 
   
  <script>
+       function getSelectedStyle() {
+      return document.querySelector('input[name="style"]:checked').value;
+    }
+
+    function updateTextboxVisibility() {
+      const style = getSelectedStyle();
+      const sgsText = document.getElementById('sgsText');
+      const sringeriText = document.getElementById('sringeriText');
+      const sgsLabel = document.getElementById('sgsLabel');
+      const sringeriLabel = document.getElementById('sringeriLabel');
+
+      if (style === 'sgs') {
+        sgsText.classList.add('active');
+        sgsLabel.classList.add('active');
+        sringeriText.classList.remove('active');
+        sringeriLabel.classList.remove('active');
+      } else {
+        sgsText.classList.remove('active');
+        sgsLabel.classList.remove('active');
+        sringeriText.classList.add('active');
+        sringeriLabel.classList.add('active');
+      }
+    }
+
+
+   
         console.log('Script loaded at', new Date('2025-08-17T10:44:00+05:30').toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
 
         const baseUrl = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main';
@@ -1150,10 +1001,13 @@
         }
 
    initialize();   // your existing call
-   updateTextboxVisibility();  // ✅ force correct label on page load
+
+       // Initialize correct textbox visibility on page load
+    window.addEventListener('DOMContentLoaded', updateTextboxVisibility);
     </script>
 </body>
 </html>
+
 
 
 
