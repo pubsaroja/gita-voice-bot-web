@@ -258,17 +258,20 @@
          .player-container button:hover {
          background-color: #1e40af;
          }
-         #audioPlayer {
-    	 flex: 1;          /* Let audio expand to fill available space */
-    	 max-width: 300px; /* Limit max size */
-    	 /* Mobile version */
+	#audioPlayer {
+    	flex: 1;         /* Let audio expand to fill available space */ 
+    	max-width: 300px; /* Limit max size */
+    	height: 35px;     /* Default desktop size */
+	}
+
+	/* Mobile version */
 	@media (max-width: 600px) {
-    	#audioPlayer{
-        width: 150px;   /* Smaller fixed width */
+    	#audioPlayer {
+        width: 150px;    /* Smaller fixed width */
         max-width: 100%; /* Ensure it never overflows */
-        height: 30px;   /* Adjust height if needed */
-    	}height: 35px;     /* Adjust player height */
-        }
+        height: 30px;    /* Adjust height if needed */
+    	}
+	}
       </style>
    </head>
    <body>
