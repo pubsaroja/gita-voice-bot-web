@@ -27,14 +27,13 @@ font-size: 1.5em;
 }
 
 
-/* ✅ Make all groups same width, responsive */
 .top-button-group,
 .button-groups,
 .dropdown-container,
 .player-container,
 .shloka-text {
-max-width: 600px; /* desktop limit */
-width: 95%; /* mobile stretches */
+max-width: 600px;
+width: 95%;
 margin: 20px auto;
 border: 2px solid #357EC7;
 border-radius: 5px;
@@ -70,9 +69,11 @@ background-image: url('chakra.png');
 }
 
 
-/* ✅ Unified button-groups grid */
 .button-groups {
 display: grid;
+grid-template-columns: repeat(2, 1fr);
+gap: 10px;
+}
 </style>
 
 </head>
@@ -957,5 +958,6 @@ display: grid;
     </script>
 </body>
 </html>
+
 
 
