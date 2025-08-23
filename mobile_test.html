@@ -235,43 +235,56 @@
          grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
          }
          }
-         .player-container {
-         display: flex;
-         align-items: center;
-         justify-content: center;
-         gap: 15px;
-         margin: 20px auto;
-         max-width: 600px;
-         }
-         .player-container button {
-         width: 150px;
-         height: 40px;
-         border: none;
-         border-radius: 25px;
-         background-color: #357EC7;
-         color: white;
-         font-size: 16px;
-         cursor: pointer;
-         transition: background 0.3s ease;
-         flex-shrink: 0;
-         }
-         .player-container button:hover {
-         background-color: #1e40af;
-         }
-	#audioPlayer {
-    	flex: 1;         /* Let audio expand to fill available space */ 
-    	max-width: 300px; /* Limit max size */
-    	height: 35px;     /* Default desktop size */
-	}
+.player-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px auto;
+    max-width: 600px;
+}
 
-	/* Mobile version */
-	@media (max-width: 600px) {
-    	#audioPlayer {
-        width: 150px;    /* Smaller fixed width */
-        max-width: 100%; /* Ensure it never overflows */
-        height: 30px;    /* Adjust height if needed */
-    	}
-	}
+.player-container button {
+    width: 100px;   /* smaller so they fit on mobile */
+    height: 40px;
+    border: none;
+    border-radius: 25px;
+    background-color: #357EC7;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    flex-shrink: 0; /* buttons never shrink */
+}
+
+.player-container button:hover {
+    background-color: #1e40af;
+}
+#audioPlayer {
+    flex: 1;          /* take remaining space */
+    min-width: 120px; /* ensure visible even on small screens */
+    max-width: 300px; /* desktop limit */
+    height: 35px;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .player-container {
+        gap: 5px;
+    }
+
+    .player-container button {
+        width: 80px;
+        font-size: 12px;
+    }
+
+    #audioPlayer {
+        width: 100%;  /* fill space between buttons */
+        min-width: 100px;
+        height: 30px;
+    }
+}
+
       </style>
    </head>
    <body>
