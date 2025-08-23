@@ -1107,13 +1107,16 @@
             }
         }
 
-        initialize();
-         document.addEventListener("DOMContentLoaded", function () {
-        updateTextboxVisibility();  // Ensure default label & textbox match selected radio
-      });
+   initialize();   // your existing function
+
+   // ✅ Then call updateTextboxVisibility
+   document.addEventListener("DOMContentLoaded", function () {
+     updateTextboxVisibility();
+   });
     </script>
 </body>
 </html>
+
 
 
 
