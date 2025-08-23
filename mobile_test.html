@@ -284,6 +284,44 @@
         height: 30px;
     }
 }
+.icon-btn {
+    background: #357EC7;   /* match your theme */
+    border: none;
+    border-radius: 50%;    /* circular buttons */
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    flex-shrink: 0;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.icon-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+.icon-btn:hover {
+    background: #1e40af;
+    transform: scale(1.1);
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+    .icon-btn {
+        width: 40px;
+        height: 40px;
+        padding: 6px;
+    }
+
+    .icon-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+}
 
       </style>
    </head>
