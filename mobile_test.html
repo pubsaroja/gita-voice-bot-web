@@ -1107,15 +1107,12 @@
             }
         }
 
-   initialize();   // your existing function
-
-   // ✅ Then call updateTextboxVisibility
-   document.addEventListener("DOMContentLoaded", function () {
-     updateTextboxVisibility();
-   });
+   initialize();   // your existing call
+   updateTextboxVisibility();  // ✅ force correct label on page load
     </script>
 </body>
 </html>
+
 
 
 
