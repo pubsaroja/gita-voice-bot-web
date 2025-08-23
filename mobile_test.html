@@ -123,22 +123,30 @@
     }
 
     /* Circular SVG icon buttons for Previous / Next ONLY */
-    .icon-btn {
-      background: #357EC7;
-      border: none;
-      border-radius: 50%;
-      padding: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 45px;
-      height: 45px;
-      flex-shrink: 0;
-      transition: background 0.3s ease, transform 0.2s ease;
-    }
-    .icon-btn svg { width: 24px; height: 24px; }
-    .icon-btn:hover { background: #1e40af; transform: scale(1.1); }
+.icon-btn {
+  background: #357EC7;
+  border: none;
+  border-radius: 25px; /* rounded rectangle now */
+  padding: 8px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px; /* spacing between text and icon */
+  font-size: 14px;
+  color: white;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.icon-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.icon-btn:hover {
+  background: #1e40af;
+  transform: scale(1.05);
+}
+
 
     /* Text-only rectangular buttons: equal sizes, slightly rounded */
     .rect-btn {
@@ -1177,6 +1185,7 @@
     </script>
 </body>
 </html>
+
 
 
 
