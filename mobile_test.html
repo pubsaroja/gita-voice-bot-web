@@ -1,326 +1,315 @@
 <!DOCTYPE html>
 <html lang="en">
-   <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Bhagavad Gita Bot</title>
-      <style>
-         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-         }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bhagavad Gita Bot</title>
 
-         body {
-            font-family: 'Outfit', sans-serif;
-            font-size: 16px;
-            text-align: center;
-            margin: 20px;
-            background-color: #f0f0f0;
-         }
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+      text-align: center;
+      margin: 20px;
+      background-color: #FFFFFF;
+    }
+    h1 {
+      color: #2c3e50;
+      font-size: 1.5em;
+    }
+    p {
+      margin-bottom: 15px;
+    }
 
-         h1 {
-            color: #2c3e50;
-            font-size: 1.5em;
-         }
+    /* ==== UNIVERSAL BUTTON STYLING ==== */
+    button {
+      flex: 1;
+      min-width: 120px;
+      padding: 12px;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 8px;
+      background-color: #357EC7;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #1e40af;
+    }
 
-         /* ✅ Groups same width, responsive */
-         .top-button-group,
-         .button-groups,
-         .dropdown-container,
-         .player-container,
-         .shloka-text {
-            max-width: 600px;   /* desktop limit */
-            width: 95%;         /* mobile stretches */
-            margin: 20px auto;
-            border: 2px solid #357EC7;
-            border-radius: 5px;
-            padding: 10px;
-         }
+    /* ==== FLEX GROUPS ==== */
+    .top-buttons,
+    .player-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+    }
 
-         /* 🎛 Top buttons */
-         .top-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-         }
+    /* ==== WRAPPER WITH BORDER ==== */
+    .button-group {
+      border: 2px solid #357EC7;
+      border-radius: 8px;
+      padding: 8px;
+      margin: 10px auto;
+      width: 100%;
+      max-width: 600px;
+      box-sizing: border-box;
+    }
 
-         .top-buttons button {
-            width: 150px;
-            height: 150px;
-            border-radius: 25%;
-            border: none;
-            background-color: #357EC7;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-         }
+    /* ==== AUDIO PLAYER ==== */
+    #audioPlayer {
+      flex: 1;
+      min-width: 120px;
+      max-width: 300px;
+      height: 35px;
+    }
 
-         .top-buttons button:hover {
-            background-image: url('chakra.png');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: cover;
-         }
+    /* ==== SHLOKA TEXT ==== */
+    .shloka-text {
+      margin-top: 10px;
+      font-size: 1.5em;
+      color: #333;
+      white-space: pre-wrap;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.5;
+      min-height: 3em;
+      overflow-y: auto;
+      padding: 10px;
+      border: 2px solid #357EC7;
+      border-radius: 5px;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-family: 'Ramabhadra', sans-serif;
+    }
+    .shloka-text.active { display: flex; }
+    .shloka-text.active.multiline { display: block; text-align: left; }
 
-         /* 🎛 Normal buttons */
-         .button-groups {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-         }
+    /* ==== LABEL ABOVE TEXTBOX ==== */
+    .textbox-label {
+      font-weight: bold;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      font-size: 1.2em;
+      color: #357EC7;
+      display: none;
+    }
+    .textbox-label.active { display: block; }
 
-         .button-group {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-         }
+    /* ==== RADIO GROUP ==== */
+    .radio-group {
+      margin: 10px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
 
-         button,
-         .player-container button {
-            width: 100%;
-            height: 70px;
-            border: none;
-            border-radius: 0 !important;
-            background-color: #357EC7;
-            color: white;
-            font-size: 1.2em;
-            cursor: pointer;
-            text-align: center;
-         }
+    /* ==== DROPDOWN CONTAINERS ==== */
+    .dropdown-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 600px;
+      border: 2px solid #357EC7;
+      border-radius: 5px;
+      padding: 10px;
+      box-sizing: border-box;
+      margin: 10px auto;
+    }
+    .dropdown-container label {
+      font-weight: bold;
+      margin-right: 5px;
+      font-size: 1em;
+    }
+    .dropdown-container div {
+      display: flex;
+      align-items: center;
+    }
+    select {
+      padding: 10px;
+      margin: 5px;
+      font-size: 1em;
+      border-radius: 5px;
+      width: 100%;
+      max-width: 150px;
+    }
 
-         button:hover,
-         .player-container button:hover {
-            background-color: #285a9e;
-            color: white;
-         }
+    /* ==== MOBILE ==== */
+    @media (max-width: 600px) {
+      .top-buttons,
+      .player-container {
+        flex-direction: row;
+        width: 100%;
+        gap: 5px;
+      }
+      button {
+        font-size: 1em;
+      }
+    }
 
-         /* ✅ MOBILE ONLY (fix sizes) */
-         @media (max-width: 600px) {
-            .button-groups {
-               grid-template-columns: 1fr; /* stack one column */
-            }
-            .button-group {
-               gap: 12px;
-            }
-            .top-button-group,
-            .button-groups,
-            .dropdown-container,
-            .player-container,
-            .shloka-text {
-               width: 100%;
-               margin: 10px auto;
-            }
-            button,
-            .player-container button {
-               height: 85px;     /* taller buttons */
-               font-size: 1.3em; /* bigger text */
-            }
-            .top-buttons button {
-               width: 160px;
-               height: 160px;
-               font-size: 1.2em;
-            }
-         }
-
-         /* 🎛 Shloka box */
-         .shloka-text {
-            margin-top: 10px;
-            font-size: 1.5em;
-            color: #333;
-            white-space: pre-wrap;
-            line-height: 1.5;
-            min-height: 3em;
-            overflow-y: auto;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            font-family: 'Ramabhadra', sans-serif;
-         }
-
-         .shloka-text.active {
-            display: flex;
-         }
-
-         .shloka-text.active.multiline {
-            display: block;
-            text-align: left;
-         }
-      </style>
-   </head>
+    /* ==== CREDITS ==== */
+    .credits {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 10px;
+    }
+  </style>
+</head>
 <body>
-<!-- ====== PAGE ====== -->
-<h1>Bhagavad Gita Bot</h1>
-<p style="color:black;">Listen, understand and memorize Bhagavad Gita shlokas</p>
+  <h1>Bhagavad Gita Bot</h1>
+  <p style="color: black;">Listen, understand and memorize Bhagavad Gita shlokas</p>
 
-<!-- Top buttons (unchanged IDs/handlers) -->
-<div class="button-group">
-  <div class="top-buttons">
-    <button onclick="sendCommand('SGSFirstPaada')">SGS<br>(1st Paada)</button>
-    <button onclick="sendCommand('SringeriPaada')">Sringeri<br>(1st or 3rd Paada)</button>
-  </div>
-</div>
-
-<!-- Radio (no border box) -->
-<div class="radio-group">
-  <label>Shloka Style:</label>
-  <input type="radio" name="style" value="sgs" id="sgs" onchange="updateTextboxVisibility()">
-  <label for="sgs">SGS</label>
-  <input type="radio" name="style" value="sringeri" id="sringeri" checked onchange="updateTextboxVisibility()">
-  <label for="sringeri">Sringeri</label>
-</div>
-
-<!-- AUDIO TRANSPORT: Prev | <audio> | Next -->
-<div class="button-group">
-  <div class="controls-bar">
-    <button class="icon-btn" onclick="sendCommand('PreviousShloka')" aria-label="Previous">
-      <!-- left arrow -->
-      <svg viewBox="0 0 24 24"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-    </button>
-
-    <audio id="audioPlayer" controls></audio>
-
-    <button class="icon-btn" onclick="sendCommand('NextFullShloka')" aria-label="Next">
-      <!-- right arrow -->
-      <svg viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-    </button>
-  </div>
-</div>
-
-<!-- 3 text buttons in one row -->
-<div class="button-group">
-  <div class="action-bar">
-    <button class="rect-btn" onclick="sendCommand('PreviousShloka')">Previous</button>
-    <button class="rect-btn" onclick="sendCommand('FullShloka')">Full Shloka</button>
-    <button class="rect-btn" onclick="sendCommand('NextFullShloka')">Next</button>
-  </div>
-</div>
-
-<!-- Textboxes (labels + boxes; IDs unchanged) -->
-<div>
-  <div id="sgsLabel" class="textbox-label">SGS Style Shloka</div>
-  <div id="sgsText" class="shloka-text">Your Shloka will appear here.</div>
-
-  <div id="sringeriLabel" class="textbox-label">Sringeri Style Shloka</div>
-  <div id="sringeriText" class="shloka-text">Your Shloka will appear here.</div>
-</div>
-
-<!-- Meanings / Select Shloka (modal) / Instructions -->
-<div class="button-group">
-  <div class="action-bar">
-    <button class="rect-btn" id="meaningsButton" onclick="handleMeanings()">Meanings</button>
-    <button class="rect-btn" onclick="showVerseTable()">Select Shloka</button>
-    <button class="rect-btn" id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
-  </div>
-</div>
-
-<!-- Dropdowns (boxed as before) -->
-<div class="dropdown-container">
-  <div>
-    <label for="chapterSelect">Select Random Shloka from Chapter:</label>
-    <select id="chapterSelect" onchange="handleChapterSelect(this)">
-      <option value="" selected disabled>-- Select Chapter --</option>
-      <option value="1">1. అర్జునవిషాదయోగః</option>
-      <option value="2">2. సాఙ్ఖ్యయోగః</option>
-      <option value="3">3. కర్మయోగః</option>
-      <option value="4">4. జ్ఞానయోగః</option>
-      <option value="5">5. కర్మసన్న్యాసయోగః</option>
-      <option value="6">6. ఆత్మసంయమయోగః</option>
-      <option value="7">7. జ్ఞానవిజ్ఞానయోగః</option>
-      <option value="8">8. అక్షరపరబ్రహ్మయోగః</option>
-      <option value="9">9. రాజవిద్యారాజగుహ్యయోగః</option>
-      <option value="10">10. విభూతియోగః</option>
-      <option value="11">11. విశ్వరూపసన్దర్శనయోగః</option>
-      <option value="12">12. భక్తియోగః</option>
-      <option value="13">13. క్షేత్రక్షేత్రజ్ఞవిభాగయోగః</option>
-      <option value="14">14. గుణత్రయవిభాగయోగః</option>
-      <option value="15">15. పురుషోత్తమప్రాప్తియోగః</option>
-      <option value="16">16. దైవాసురసమ్పద్విభాగయోగః</option>
-      <option value="17">17. శ్రద్ధాత్రయవిభాగయోగః</option>
-      <option value="18">18. మోక్షసన్న్యాసయోగః</option>
-    </select>
+  <!-- Top circular buttons -->
+  <div class="button-group">
+    <div class="top-buttons">
+      <button onclick="sendCommand('SGSFirstPaada')">SGS<br>(1st Paada)</button>
+      <button onclick="sendCommand('SringeriPaada')">Sringeri<br>(1st or 3rd Paada)</button>
+    </div>
   </div>
 
-  <div>
-    <label for="continuousPlaySelect">Continuous Play:</label>
-    <select id="continuousPlaySelect" onchange="handleContinuousPlay(this)">
-      <option value="" selected disabled>-- Select Chapter --</option>
-      <option value="1">1. అర్జునవిషాదయోగః</option>
-      <option value="2">2. సాఙ్ఖ్యయోగః</option>
-      <option value="3">3. కర్మయోగః</option>
-      <option value="4">4. జ్ఞానయోగః</option>
-      <option value="5">5. కర్మసన్న్యాసయోగః</option>
-      <option value="6">6. ఆత్మసంయమయోగః</option>
-      <option value="7">7. జ్ఞానవిజ్ఞానయోగః</option>
-      <option value="8">8. అక్షరపరబ్రహ్మయోగః</option>
-      <option value="9">9. రాజవిద్యారాజగుహ్యయోగః</option>
-      <option value="10">10. విభూతియోగః</option>
-      <option value="11">11. విశ్వరూపసన్దర్శనయోగః</option>
-      <option value="12">12. భక్తియోగః</option>
-      <option value="13">13. క్షేత్రక్షేత్రజ్ఞవిభాగయోగః</option>
-      <option value="14">14. గుణత్రయవిభాగయోగః</option>
-      <option value="15">15. పురుషోత్తమప్రాప్తియోగః</option>
-      <option value="16">16. దైవాసురసమ్పద్విభాగయోగః</option>
-      <option value="17">17. శ్రద్ధాత్రయవిభాగయోగః</option>
-      <option value="18">18. మోక్షసన్న్యాసయోగః</option>
-    </select>
+  <!-- Radio options -->
+  <div class="radio-group">
+    <label>Shloka Style:</label>
+    <input type="radio" name="style" value="sgs" id="sgs" onchange="updateTextboxVisibility()">
+    <label for="sgs">SGS</label>
+    <input type="radio" name="style" value="sringeri" id="sringeri" checked onchange="updateTextboxVisibility()">
+    <label for="sringeri">Sringeri</label>
   </div>
-</div>
 
-<!-- Verse Table Modal (unchanged IDs) -->
-<div id="verseTableModal" class="modal">
-  <div class="modal-content">
-    <button class="close-button" onclick="closeVerseTable()">Close</button>
+  <audio id="audioPlayer" controls></audio>
 
-    <select id="chapterTableSelect" class="chapter-select" onchange="updateVerseGrid()">
-      <option value="" selected disabled>-- Select Chapter --</option>
-      <option value="1">Chapter 1 (47 verses)</option>
-      <option value="2">Chapter 2 (72 verses)</option>
-      <option value="3">Chapter 3 (43 verses)</option>
-      <option value="4">Chapter 4 (42 verses)</option>
-      <option value="5">Chapter 5 (29 verses)</option>
-      <option value="6">Chapter 6 (47 verses)</option>
-      <option value="7">Chapter 7 (30 verses)</option>
-      <option value="8">Chapter 8 (28 verses)</option>
-      <option value="9">Chapter 9 (34 verses)</option>
-      <option value="10">Chapter 10 (42 verses)</option>
-      <option value="11">Chapter 11 (55 verses)</option>
-      <option value="12">Chapter 12 (20 verses)</option>
-      <option value="13">Chapter 13 (34 verses)</option>
-      <option value="14">Chapter 14 (27 verses)</option>
-      <option value="15">Chapter 15 (20 verses)</option>
-      <option value="16">Chapter 16 (24 verses)</option>
-      <option value="17">Chapter 17 (28 verses)</option>
-      <option value="18">Chapter 18 (78 verses)</option>
-    </select>
-
-    <div id="verseTableContent" class="verse-grid"></div>
+  <!-- First player controls -->
+  <div class="button-group">
+    <div class="player-container">
+      <button class="rect-btn" onclick="sendCommand('PreviousShloka')">Previous</button>
+      <button class="rect-btn" onclick="sendCommand('FullShloka')">Full Shloka</button>
+      <button class="rect-btn" onclick="sendCommand('NextFullShloka')">Next</button>
+    </div>
   </div>
-</div>
 
-<!-- Credits -->
-<div class="credits">
-  SGS Audio:<br>
-  Pujya Sri Datta Vijayanand Teertha Swamiji<br>
-  Sringeri Audio courtesy:<br>
-  Smt Mathangi Kailasnath<br>
-  Developed by<br>
-  Dr. P. Udayabhaskar
-</div>
+  <!-- Textboxes -->
+  <div class="textbox-container">
+    <div>
+      <div id="sgsLabel" class="textbox-label">SGS Style Shloka</div>
+      <div id="sgsText" class="shloka-text">Your Shloka will appear here.</div>
+    </div>
+    <div>
+      <div id="sringeriLabel" class="textbox-label">Sringeri Style Shloka</div>
+      <div id="sringeriText" class="shloka-text">Your Shloka will appear here.</div>
+    </div>
+  </div>
 
-<!-- Keep your existing JS. Ensure this one line fires once: -->
-<script>
-  window.addEventListener('DOMContentLoaded', () => {
-    if (typeof updateTextboxVisibility === 'function') updateTextboxVisibility();
-  });
-</script>
+  <!-- Second player controls -->
+  <div class="button-group">
+    <div class="player-container">
+      <button class="rect-btn" id="meaningsButton" onclick="handleMeanings()">Meanings</button>
+      <button class="rect-btn" onclick="showVerseTable()">Select Shloka</button>
+      <button class="rect-btn" id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
+    </div>
+  </div>
 
+  <!-- Dropdowns -->
+  <div class="dropdown-container">
+    <div>
+      <label for="chapterSelect">Select Random Shloka from Chapter:</label>
+      <select id="chapterSelect" onchange="handleChapterSelect(this)">
+        <option value="" selected disabled>-- Select Chapter --</option>
+        <option value="1">1. అర్జునవిషాదయోగః</option>
+        <option value="2">2. సాఙ్ఖ్యయోగః</option>
+        <option value="3">3. కర్మయోగః</option>
+        <option value="4">4. జ్ఞానయోగః</option>
+        <option value="5">5. కర్మసన్న్యాసయోగః</option>
+        <option value="6">6. ఆత్మసంయమయోగః</option>
+        <option value="7">7. జ్ఞానవిజ్ఞానయోగః</option>
+        <option value="8">8. అక్షరపరబ్రహ్మయోగః</option>
+        <option value="9">9. రాజవిద్యారాజగుహ్యయోగః</option>
+        <option value="10">10. విభూతియోగః</option>
+        <option value="11">11. విశ్వరూపసన్దర్శనయోగః</option>
+        <option value="12">12. భక్తియోగః</option>
+        <option value="13">13. క్షేత్రక్షేత్రజ్ఞవిభాగయోగః</option>
+        <option value="14">14. గుణత్రయవిభాగయోగః</option>
+        <option value="15">15. పురుషోత్తమప్రాప్తియోగః</option>
+        <option value="16">16. దైవాసురసమ్పద్విభాగయోగః</option>
+        <option value="17">17. శ్రద్ధాత్రయవిభాగయోగః</option>
+        <option value="18">18. మోక్షసన్న్యాసయోగః</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="continuousPlaySelect">Continuous Play:</label>
+      <select id="continuousPlaySelect" onchange="handleContinuousPlay(this)">
+        <option value="" selected disabled>-- Select Chapter --</option>
+        <option value="1">1. అర్జునవిషాదయోగః</option>
+        <option value="2">2. సాఙ్ఖ్యయోగః</option>
+        <option value="3">3. కర్మయోగః</option>
+        <option value="4">4. జ్ఞానయోగః</option>
+        <option value="5">5. కర్మసన్న్యాసయోగః</option>
+        <option value="6">6. ఆత్మసంయమయోగః</option>
+        <option value="7">7. జ్ఞానవిజ్ఞానయోగః</option>
+        <option value="8">8. అక్షరపరబ్రహ్మయోగః</option>
+        <option value="9">9. రాజవిద్యారాజగుహ్యయోగః</option>
+        <option value="10">10. విభూతియోగః</option>
+        <option value="11">11. విశ్వరూపసన్దర్శనయోగః</option>
+        <option value="12">12. భక్తియోగః</option>
+        <option value="13">13. క్షేత్రక్షేత్రజ్ఞవిభాగయోగః</option>
+        <option value="14">14. గుణత్రయవిభాగయోగః</option>
+        <option value="15">15. పురుషోత్తమప్రాప్తియోగః</option>
+        <option value="16">16. దైవాసురసమ్పద్విభాగయోగః</option>
+        <option value="17">17. శ్రద్ధాత్రయవిభాగయోగః</option>
+        <option value="18">18. మోక్షసన్న్యాసయోగః</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Verse Table Modal -->
+  <div id="verseTableModal" class="modal">
+    <div class="modal-content">
+      <button class="close-button" onclick="closeVerseTable()">Close</button>
+      <select id="chapterTableSelect" class="chapter-select" onchange="updateVerseGrid()">
+        <option value="" selected disabled>-- Select Chapter --</option>
+        <option value="1">Chapter 1 (47 verses)</option>
+        <option value="2">Chapter 2 (72 verses)</option>
+        <option value="3">Chapter 3 (43 verses)</option>
+        <option value="4">Chapter 4 (42 verses)</option>
+        <option value="5">Chapter 5 (29 verses)</option>
+        <option value="6">Chapter 6 (47 verses)</option>
+        <option value="7">Chapter 7 (30 verses)</option>
+        <option value="8">Chapter 8 (28 verses)</option>
+        <option value="9">Chapter 9 (34 verses)</option>
+        <option value="10">Chapter 10 (42 verses)</option>
+        <option value="11">Chapter 11 (55 verses)</option>
+        <option value="12">Chapter 12 (20 verses)</option>
+        <option value="13">Chapter 13 (34 verses)</option>
+        <option value="14">Chapter 14 (27 verses)</option>
+        <option value="15">Chapter 15 (20 verses)</option>
+        <option value="16">Chapter 16 (24 verses)</option>
+        <option value="17">Chapter 17 (28 verses)</option>
+        <option value="18">Chapter 18 (78 verses)</option>
+      </select>
+      <div id="verseTableContent" class="verse-grid"></div>
+    </div>
+  </div>
+
+  <!-- Credits -->
+  <div class="credits">
+    SGS Audio:<br>
+    Pujya Sri Datta Vijayanand Teertha Swamiji<br>
+    Sringeri Audio courtesy:<br>
+    Smt Mathangi Kailasnath<br>
+    Developed by<br>
+    Dr. P. Udayabhaskar
+  </div>
+
+  <script>
+    // Initialize correct textbox visibility on page load
+    window.addEventListener('DOMContentLoaded', updateTextboxVisibility);
+  </script>
 </body>
 </html>
-
-
-
-
