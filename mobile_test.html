@@ -180,8 +180,119 @@
   </div>
 
   <!-- Rest of your dropdowns, radios, verse modal, credits etc. remain as in your code -->
-</body>
-</html>
+
+  <!-- Radio Options -->
+  <div class="radio-group">
+    <label>Full Shloka Style:</label>
+    <input type="radio" name="style" value="sgs" id="sgs" onchange="updateTextboxVisibility()">
+    <label for="sgs">SGS Style</label>
+    <input type="radio" name="style" value="sringeri" id="sringeri" checked onchange="updateTextboxVisibility()">
+    <label for="sringeri">Sringeri Style</label>
+  </div>
+
+  <!-- Shloka Text -->
+  <div class="textbox-container">
+    <div>
+      <div id="sgsLabel" class="textbox-label">SGS Style Shloka</div>
+      <div id="sgsText" class="shloka-text">Your Shloka will appear here.</div>
+    </div>
+    <div>
+      <div id="sringeriLabel" class="textbox-label active">Sringeri Style Shloka</div>
+      <div id="sringeriText" class="shloka-text active">Your Shloka will appear here.</div>
+    </div>
+  </div>
+
+  <!-- Dropdowns -->
+  <div class="dropdown-container">
+    <div>
+      <label for="chapterSelect">Select Random Shloka from Chapter:</label>
+      <select id="chapterSelect" onchange="handleChapterSelect(this)">
+        <option value="" selected disabled>-- Select Chapter --</option>
+        <option value="1">1. అర్జునవిషాదయోగః</option>
+        <option value="2">2. సాఙ్ఖ్యయోగః</option>
+        <option value="3">3. కర్మయోగః</option>
+        <option value="4">4. జ్ఞానయోగః</option>
+        <option value="5">5. కర్మసన్న్యాసయోగః</option>
+        <option value="6">6. ఆత్మసంయమయోగః</option>
+        <option value="7">7. జ్ఞానవిజ్ఞానయోగః</option>
+        <option value="8">8. అక్షరపరబ్రహ్మయోగః</option>
+        <option value="9">9. రాజవిద్యారాజగుహ్యయోగః</option>
+        <option value="10">10. విభూతియోగః</option>
+        <option value="11">11. విశ్వరూపసన్దర్శనయోగః</option>
+        <option value="12">12. భక్తియోగః</option>
+        <option value="13">13. క్షేత్రక్షేత్రజ్ఞవిభాగయోగః</option>
+        <option value="14">14. గుణత్రయవిభాగయోగః</option>
+        <option value="15">15. పురుషోత్తమప్రాప్తియోగః</option>
+        <option value="16">16. దైవాసురసమ్పద్విభాగయోగః</option>
+        <option value="17">17. శ్రద్ధాత్రయవిభాగయోగః</option>
+        <option value="18">18. మోక్షసన్న్యాసయోగః</option>
+      </select>
+    </div>
+    <div>
+      <label for="continuousPlaySelect">Continuous Play:</label>
+      <select id="continuousPlaySelect" onchange="handleContinuousPlay(this)">
+        <option value="" selected disabled>-- Select Chapter --</option>
+        <option value="1">1. అర్జునవిషాదయోగః</option>
+        <option value="2">2. సాఙ్ఖ్యయోగః</option>
+        <option value="3">3. కర్మయోగః</option>
+        <option value="4">4. జ్ఞానయోగః</option>
+        <option value="5">5. కర్మసన్న్యాసయోగః</option>
+        <option value="6">6. ఆత్మసంయమయోగః</option>
+        <option value="7">7. జ్ఞానవిజ్ఞానయోగః</option>
+        <option value="8">8. అక్షరపరబ్రహ్మయోగః</option>
+        <option value="9">9. రాజవిద్యారాజగుహ్యయోగః</option>
+        <option value="10">10. విభూతియోగః</option>
+        <option value="11">11. విశ్వరూపసన్దర్శనయోగః</option>
+        <option value="12">12. భక్తియోగః</option>
+        <option value="13">13. క్షేత్రక్షేత్రజ్ఞవిభాగయోగః</option>
+        <option value="14">14. గుణత్రయవిభాగయోగః</option>
+        <option value="15">15. పురుషోత్తమప్రాప్తియోగః</option>
+        <option value="16">16. దైవాసురసమ్పద్విభాగయోగః</option>
+        <option value="17">17. శ్రద్ధాత్రయవిభాగయోగః</option>
+        <option value="18">18. మోక్షసన్న్యాసయోగః</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Verse Table Modal -->
+  <div id="verseTableModal" class="modal">
+    <div class="modal-content">
+      <button class="close-button" onclick="closeVerseTable()">Close</button>
+      <select id="chapterTableSelect" class="chapter-select" onchange="updateVerseGrid()">
+        <option value="" selected disabled>-- Select Chapter --</option>
+        <option value="1">Chapter 1 (47 verses)</option>
+        <option value="2">Chapter 2 (72 verses)</option>
+        <option value="3">Chapter 3 (43 verses)</option>
+        <option value="4">Chapter 4 (42 verses)</option>
+        <option value="5">Chapter 5 (29 verses)</option>
+        <option value="6">Chapter 6 (47 verses)</option>
+        <option value="7">Chapter 7 (30 verses)</option>
+        <option value="8">Chapter 8 (28 verses)</option>
+        <option value="9">Chapter 9 (34 verses)</option>
+        <option value="10">Chapter 10 (42 verses)</option>
+        <option value="11">Chapter 11 (55 verses)</option>
+        <option value="12">Chapter 12 (20 verses)</option>
+        <option value="13">Chapter 13 (34 verses)</option>
+        <option value="14">Chapter 14 (27 verses)</option>
+        <option value="15">Chapter 15 (20 verses)</option>
+        <option value="16">Chapter 16 (24 verses)</option>
+        <option value="17">Chapter 17 (28 verses)</option>
+        <option value="18">Chapter 18 (78 verses)</option>
+      </select>
+      <div id="verseTableContent" class="verse-grid"></div>
+    </div>
+  </div>
+
+  <!-- Credits -->
+  <div class="credits">
+    SGS Audio:<br>
+    Pujya Sri Datta Vijayanand Teertha Swamiji<br>
+    Sringeri Audio courtesy:<br>
+    Smt Mathangi Kailasnath<br>
+    Developed by<br>
+    Dr. P. Udayabhaskar
+  </div>
+
 
 
       <script>
@@ -919,4 +1030,5 @@
       </script>
    </body>
 </html>
+
 
