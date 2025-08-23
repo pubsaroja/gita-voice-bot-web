@@ -273,7 +273,12 @@
       <div id="sringeriText" class="shloka-text active">Your Shloka will appear here.</div>
     </div>
   </div>
-
+  <!-- Text-only rectangular buttons (equal size) -->
+  <div class="player-container">
+    <button class="rect-btn" id="meaningsButton" onclick="handleMeanings()">Meanings</button>
+    <button class="rect-btn" onclick="showVerseTable()">Select Shloka</button>
+    <button class="rect-btn" id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
+  </div>
   <!-- Dropdowns -->
   <div class="dropdown-container">
     <div>
@@ -358,12 +363,7 @@
       <div id="verseTableContent" class="verse-grid"></div>
     </div>
   </div>
-  <!-- Text-only rectangular buttons (equal size) -->
-  <div class="player-container">
-    <button class="rect-btn" id="meaningsButton" onclick="handleMeanings()">Meanings</button>
-    <button class="rect-btn" onclick="showVerseTable()">Select Shloka</button>
-    <button class="rect-btn" id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
-  </div>
+
 
   <!-- Credits -->
   <div class="credits">
@@ -1111,6 +1111,7 @@
     </script>
 </body>
 </html>
+
 
 
 
