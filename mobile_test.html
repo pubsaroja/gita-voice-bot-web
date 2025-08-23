@@ -45,10 +45,6 @@
   }
 
   /* ==== FLEX GROUPS ==== */
-  .top-buttons-wrapper {
-    padding: 0 10px; /* margin for mobile edges */
-    box-sizing: border-box;
-  }
   .top-buttons,
   .player-container {
     display: flex;
@@ -57,6 +53,15 @@
     margin: 10px auto;
     width: 100%;
     max-width: 600px;
+  }
+
+  /* ==== WRAPPERS ==== */
+  .top-buttons-wrapper,
+  .button-groups-wrapper {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    box-sizing: border-box;
   }
 
   /* ==== AUDIO PLAYER ==== */
@@ -207,42 +212,40 @@
   }
   .verse-button:hover { background-color: #e0e0e0; }
 
-  /* ==== LAST 6 BUTTONS (GRID FIX) ==== */
-  .button-groups-wrapper {
-    padding: 0 10px;   /* gap on both sides */
-    box-sizing: border-box;
-  }
-
-  .button-groups {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 equal columns */
-    gap: 10px;
-    margin: 10px auto;
-    max-width: 600px;
-    justify-items: center;
-  }
-
-  .button-group {
-    width: 100%;
-    display: contents;
-  }
-
-  .button-group button {
-    width: 100%;
-    max-width: 180px;
-  }
-
-  /* ==== MOBILE ==== */
+  /* ==== MOBILE FIX ==== */
   @media (max-width: 600px) {
-    .top-buttons,
-    .player-container {
-      flex-direction: row;
-      width: 100%;
-      gap: 5px;
+    .top-buttons-wrapper,
+    .button-groups-wrapper {
+      padding: 0 10px;   /* add side gap */
+      box-sizing: border-box;
     }
+
+    .top-buttons,
+    .button-groups {
+      width: auto;       /* prevent full width stretch */
+      max-width: 100%;
+    }
+
+    .button-groups {
+      grid-template-columns: 1fr; /* stack button groups */
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .button-group button {
+      flex: 1;
+      margin: 0 2px;
+      max-width: none;
+    }
+
     button {
       font-size: 1em;
     }
+
     .icon-btn {
       width: 40px;
       height: 40px;
@@ -251,20 +254,6 @@
     .icon-btn svg {
       width: 20px;
       height: 20px;
-    }
-
-    .button-groups {
-      grid-template-columns: 1fr;
-    }
-    .button-group {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-    }
-    .button-group button {
-      flex: 1;
-      margin: 0 2px;
-      max-width: none;
     }
   }
 
@@ -283,10 +272,13 @@
   <p style="color: black;">Listen, understand and memorize Bhagavad Gita shlokas</p>
 
   <!-- Top circular buttons -->
-  <div class="top-buttons">
-    <button onclick="sendCommand('SGSFirstPaada')">SGS<br>(1st Paada)</button>
-    <button onclick="sendCommand('SringeriPaada')">Sringeri<br>(1st or 3rd Paada)</button>
+  <div class="top-buttons-wrapper">
+    <div class="top-buttons">
+      <button onclick="sendCommand('SGSFirstPaada')">SGS<br>(1st Paada)</button>
+      <button onclick="sendCommand('SringeriPaada')">Sringeri<br>(1st or 3rd Paada)</button>
+    </div>
   </div>
+
   <!-- Radio options -->
   <div class="radio-group">
     <label>Shloka Style:</label>
@@ -295,36 +287,40 @@
     <input type="radio" name="style" value="sringeri" id="sringeri" checked onchange="updateTextboxVisibility()">
     <label for="sringeri">Sringeri</label>
   </div>
-    <audio id="audioPlayer" controls></audio>
 
+  <!-- Audio Player -->
+  <audio id="audioPlayer" controls></audio>
+
+  <!-- First three rectangular buttons -->
+  <div class="button-groups-wrapper">
     <div class="player-container">
       <button class="rect-btn" onclick="sendCommand('PreviousShloka')">Previous</button>
-    <button class="rect-btn" onclick="sendCommand('FullShloka')">Full Shloka</button>
+      <button class="rect-btn" onclick="sendCommand('FullShloka')">Full Shloka</button>
       <button class="rect-btn" onclick="sendCommand('NextFullShloka')">Next</button>
+    </div>
   </div>
-
- </div>
-
-
 
   <!-- Textboxes -->
-<div class="textbox-container">
-  <div>
-    <div id="sgsLabel" class="textbox-label">SGS Style Shloka</div>
-    <div id="sgsText" class="shloka-text">Your Shloka will appear here.</div>
+  <div class="textbox-container">
+    <div>
+      <div id="sgsLabel" class="textbox-label">SGS Style Shloka</div>
+      <div id="sgsText" class="shloka-text">Your Shloka will appear here.</div>
+    </div>
+    <div>
+      <div id="sringeriLabel" class="textbox-label">Sringeri Style Shloka</div>
+      <div id="sringeriText" class="shloka-text">Your Shloka will appear here.</div>
+    </div>
   </div>
-  <div>
-    <div id="sringeriLabel" class="textbox-label">Sringeri Style Shloka</div>
-    <div id="sringeriText" class="shloka-text">Your Shloka will appear here.</div>
-  </div>
-</div>
 
-  <!-- Text-only rectangular buttons (equal size) -->
-  <div class="player-container">
-    <button class="rect-btn" id="meaningsButton" onclick="handleMeanings()">Meanings</button>
-    <button class="rect-btn" onclick="showVerseTable()">Select Shloka</button>
-    <button class="rect-btn" id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
+  <!-- Second three rectangular buttons -->
+  <div class="button-groups-wrapper">
+    <div class="player-container">
+      <button class="rect-btn" id="meaningsButton" onclick="handleMeanings()">Meanings</button>
+      <button class="rect-btn" onclick="showVerseTable()">Select Shloka</button>
+      <button class="rect-btn" id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
+    </div>
   </div>
+
   <!-- Dropdowns -->
   <div class="dropdown-container">
     <div>
@@ -378,7 +374,6 @@
     </div>
   </div>
 
-
   <!-- Verse Table Modal -->
   <div id="verseTableModal" class="modal">
     <div class="modal-content">
@@ -410,7 +405,6 @@
     </div>
   </div>
 
-
   <!-- Credits -->
   <div class="credits">
     SGS Audio:<br>
@@ -420,6 +414,8 @@
     Developed by<br>
     Dr. P. Udayabhaskar
   </div>
+</body>
+
 
   
  <script>
@@ -1158,6 +1154,7 @@
     </script>
 </body>
 </html>
+
 
 
 
