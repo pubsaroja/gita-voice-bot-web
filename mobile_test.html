@@ -1108,9 +1108,13 @@
         }
 
         initialize();
+         document.addEventListener("DOMContentLoaded", function () {
+        updateTextboxVisibility();  // Ensure default label & textbox match selected radio
+      });
     </script>
 </body>
 </html>
+
 
 
 
