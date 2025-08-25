@@ -64,24 +64,26 @@
          background-size: cover;
          background-image: none;
          }
-         /* SGS Button Hover */
-         .top-buttons button.sgs-button:hover {
-         background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/sankhu.png');
-         background-color: transparent !important;
-         color: transparent !important;
-         }
-         /* Sringeri Button Hover */
-         .top-buttons button.sringeri-button:hover {
-         background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/chakra.png');
-         background-color: transparent !important;
-         color: transparent !important;
-         }
-         /* After click or after audio ends */
-         .top-buttons button.clicked {
-         background-color: #357EC7 !important;
-         color: white !important;
-         background-image: none !important;  /* ensure image is removed */
-         }
+/* SGS Button Hover */
+.top-buttons button.sgs-button:hover {
+  background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/sankhu.png');
+  background-color: transparent !important;
+  color: transparent !important;
+}
+
+/* Sringeri Button Hover */
+.top-buttons button.sringeri-button:hover {
+  background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/chakra.png');
+  background-color: transparent !important;
+  color: transparent !important;
+}
+
+/* Reset state after audio or click */
+.top-buttons button.reset {
+  background-color: #357EC7 !important;
+  color: white !important;
+  background-image: none !important; /* removes image */
+}
          /* == BUTTON GROUPS CONTAINER == */
          .button-groups {
          display: flex;
@@ -1213,20 +1215,21 @@
          });
          });
          document.addEventListener("DOMContentLoaded", function () {
-         const audio = document.getElementById("audioPlayer");
-         const topButtons = document.querySelectorAll(".top-buttons button");
-         
-         if (audio) {
-         audio.addEventListener("ended", function () {
-         // When audio ends, restore all top buttons
+   const audio = document.getElementById("audioPlayer");
+   const topButtons = document.querySelectorAll(".top-buttons button");
+
+   if (audio) {
+      audio.addEventListener("ended", function () {
+         // Reset all top buttons after audio ends
          topButtons.forEach(btn => {
-            btn.classList.add("clicked");  // applies blue + text
+            btn.classList.add("reset");
          });
-         });
-         }
-         });
+      });
+   }
+});
       initialize();
       </script>
    </body>
 </html>
+
 
