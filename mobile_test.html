@@ -33,67 +33,55 @@
          font-size: 1em;
          margin-top: 10px;
          }
-         /* == TOP BUTTONS == */
-         .top-buttons {
-         display: flex;
-         justify-content: center;
-         gap: 15px;
-         max-width: 600px;
-         margin: 20px auto;
-         width: 100%;
-         box-sizing: border-box;
-         align-items: flex-start;
-         }
-         .top-buttons button {
-         display: flex;
-         flex-direction: column;
-         justify-content: center;
-         align-items: center;
-         width: 150px;
-         height: 150px;
-         border-radius: 10px;
-         border: none;
-         background-color: #357EC7;
-         color: white;
-         font-size: 20px;
-         cursor: pointer;
-         font-family: 'Outfit', sans-serif;
-         transition: background 0.3s ease, color 0.3s ease;
-         background-repeat: no-repeat;
-         background-position: center;
-         background-size: cover;
-         background-image: none;
-         }
-/* SGS Button Hover */
-.top-buttons button.sgs-button:hover {
+/* === TOP BUTTONS CONTAINER === */
+.top-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* === COMMON BUTTON STYLE === */
+.top-buttons button {
+  width: 150px;
+  height: 150px;
+  border-radius: 25%;
+  border: none;
+  background-color: #357EC7;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+/* === SGS Button Hover/Active === */
+.top-buttons button.sgs-button:hover,
+.top-buttons button.sgs-button:active {
   background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/sankhu.png');
   background-color: transparent !important;
   color: transparent !important;
 }
 
-/* Sringeri Button Hover */
-.top-buttons button.sringeri-button:hover {
+/* === Sringeri Button Hover/Active === */
+.top-buttons button.sringeri-button:hover,
+.top-buttons button.sringeri-button:active {
   background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/chakra.png');
   background-color: transparent !important;
   color: transparent !important;
 }
 
-/* Reset state after audio or click */
-.top-buttons button.reset {
-  background-color: #357EC7 !important;
-  color: white !important;
-  background-image: none !important; /* removes image */
-}
-/* After audio or manual reset */
+/* === Reset State (after audio or JS reset) === */
 .top-buttons button.reset,
+.top-buttons button.reset:hover,
 .top-buttons button.reset:active,
-.top-buttons button.reset:focus,
-.top-buttons button.reset:hover {
+.top-buttons button.reset:focus {
   background-color: #357EC7 !important;
   color: white !important;
   background-image: none !important;
 }
-     
+
          /* == BUTTON GROUPS CONTAINER == */
          .button-groups {
          display: flex;
@@ -1224,28 +1212,35 @@
          button.classList.toggle('clicked');
          });
          });
+<script>
 document.addEventListener("DOMContentLoaded", function () {
    const audio = document.getElementById("audioPlayer");
    const topButtons = document.querySelectorAll(".top-buttons button");
 
    if (audio) {
+      // When audio starts, ensure buttons reset first (so they don't stay transparent)
+      audio.addEventListener("play", function () {
+         topButtons.forEach(btn => {
+            btn.classList.add("reset");
+         });
+      });
+
+      // When audio ends, reset again
       audio.addEventListener("ended", function () {
          topButtons.forEach(btn => {
-            // remove then re-add reset to force reflow
-            btn.classList.remove("reset");
-            void btn.offsetWidth; // trigger reflow hack
             btn.classList.add("reset");
-
-            // blur removes lingering focus/active state
-            btn.blur();
-          });
+            btn.blur(); // drop active/focus state on mobile
+         });
       });
    }
 });
+</script>
+
       initialize();
       </script>
    </body>
 </html>
+
 
 
 
