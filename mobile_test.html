@@ -84,6 +84,15 @@
   color: white !important;
   background-image: none !important; /* removes image */
 }
+/* Forcefully override mobile active state */
+.top-buttons button.reset,
+.top-buttons button.reset:active,
+.top-buttons button.reset:focus {
+  background-color: #357EC7 !important;
+  color: white !important;
+  background-image: none !important;
+}
+         
          /* == BUTTON GROUPS CONTAINER == */
          .button-groups {
          display: flex;
@@ -1214,15 +1223,15 @@
          button.classList.toggle('clicked');
          });
          });
-         document.addEventListener("DOMContentLoaded", function () {
+ document.addEventListener("DOMContentLoaded", function () {
    const audio = document.getElementById("audioPlayer");
    const topButtons = document.querySelectorAll(".top-buttons button");
 
    if (audio) {
       audio.addEventListener("ended", function () {
-         // Reset all top buttons after audio ends
          topButtons.forEach(btn => {
             btn.classList.add("reset");
+            btn.blur(); // 👈 removes focus/active state on mobile
          });
       });
    }
@@ -1231,5 +1240,6 @@
       </script>
    </body>
 </html>
+
 
 
