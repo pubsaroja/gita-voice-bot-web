@@ -84,15 +84,16 @@
   color: white !important;
   background-image: none !important; /* removes image */
 }
-/* Forcefully override mobile active state */
+/* After audio or manual reset */
 .top-buttons button.reset,
 .top-buttons button.reset:active,
-.top-buttons button.reset:focus {
+.top-buttons button.reset:focus,
+.top-buttons button.reset:hover {
   background-color: #357EC7 !important;
   color: white !important;
   background-image: none !important;
 }
-         
+     
          /* == BUTTON GROUPS CONTAINER == */
          .button-groups {
          display: flex;
@@ -1223,16 +1224,21 @@
          button.classList.toggle('clicked');
          });
          });
- document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
    const audio = document.getElementById("audioPlayer");
    const topButtons = document.querySelectorAll(".top-buttons button");
 
    if (audio) {
       audio.addEventListener("ended", function () {
          topButtons.forEach(btn => {
+            // remove then re-add reset to force reflow
+            btn.classList.remove("reset");
+            void btn.offsetWidth; // trigger reflow hack
             btn.classList.add("reset");
-            btn.blur(); // 👈 removes focus/active state on mobile
-         });
+
+            // blur removes lingering focus/active state
+            btn.blur();
+          });
       });
    }
 });
@@ -1240,6 +1246,7 @@
       </script>
    </body>
 </html>
+
 
 
 
