@@ -1208,27 +1208,54 @@
          });
          });
          
-         document.addEventListener("DOMContentLoaded", function () {
-         const audio = document.getElementById("audioPlayer");
-         const sgsBtn = document.querySelector(".top-buttons .sgs-button");
-         const sringeriBtn = document.querySelector(".top-buttons .sringeri-button");
-         
-         if (audio) {
-         audio.addEventListener("ended", function () {
-         // Reset both buttons when audio ends
-         [sgsBtn, sringeriBtn].forEach(btn => {
-            if (btn) {
-              btn.classList.remove("reset");  // clear old state
-              void btn.offsetWidth;           // force browser reflow
-              btn.classList.add("reset");     // reapply reset
-              btn.blur();                     // drop mobile active state
-            }
-         });
-         });
+document.addEventListener("DOMContentLoaded", function () {
+   const audio = document.getElementById("audioPlayer");
+   const sgsBtn = document.querySelector(".top-buttons .sgs-button");
+   const sringeriBtn = document.querySelector(".top-buttons .sringeri-button");
+
+   let activeBtn = null; // Track which button was clicked
+
+   function resetButtons() {
+      [sgsBtn, sringeriBtn].forEach(btn => {
+         if (btn) {
+            btn.classList.remove("sgs-playing", "sringeri-playing", "reset");
+            btn.classList.add("reset");
          }
-         });
-         
-         
+      });
+   }
+
+   if (sgsBtn) {
+      sgsBtn.addEventListener("click", function () {
+         activeBtn = sgsBtn;
+      });
+   }
+
+   if (sringeriBtn) {
+      sringeriBtn.addEventListener("click", function () {
+         activeBtn = sringeriBtn;
+      });
+   }
+
+   if (audio) {
+      // When audio starts
+      audio.addEventListener("play", function () {
+         resetButtons(); // Clear old states first
+         if (activeBtn === sgsBtn) {
+            sgsBtn.classList.remove("reset");
+            sgsBtn.classList.add("sgs-playing");
+         } else if (activeBtn === sringeriBtn) {
+            sringeriBtn.classList.remove("reset");
+            sringeriBtn.classList.add("sringeri-playing");
+         }
+      });
+
+      // When audio ends
+      audio.addEventListener("ended", function () {
+         resetButtons();
+         activeBtn = null; // clear after playback ends
+      });
+   }
+});
          initialize();
       </script>
    </body>
