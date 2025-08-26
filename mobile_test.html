@@ -72,15 +72,16 @@
   color: transparent !important;
 }
 
-/* === Reset State (after audio or JS reset) === */
+/* === Reset State (after audio ends) === */
 .top-buttons button.reset,
 .top-buttons button.reset:hover,
 .top-buttons button.reset:active,
 .top-buttons button.reset:focus {
-  background-color: #357EC7 !important;
-  color: white !important;
-  background-image: none !important;
+  background: #357EC7 !important;   /* solid blue */
+  color: white !important;          /* visible text */
+  background-image: none !important;/* force remove picture */
 }
+
 
          /* == BUTTON GROUPS CONTAINER == */
          .button-groups {
@@ -1215,21 +1216,19 @@
 
 document.addEventListener("DOMContentLoaded", function () {
    const audio = document.getElementById("audioPlayer");
-   const topButtons = document.querySelectorAll(".top-buttons button");
+   const sgsBtn = document.querySelector(".top-buttons .sgs-button");
+   const sringeriBtn = document.querySelector(".top-buttons .sringeri-button");
 
    if (audio) {
-      // When audio starts, ensure buttons reset first (so they don't stay transparent)
-      audio.addEventListener("play", function () {
-         topButtons.forEach(btn => {
-            btn.classList.add("reset");
-         });
-      });
-
-      // When audio ends, reset again
       audio.addEventListener("ended", function () {
-         topButtons.forEach(btn => {
-            btn.classList.add("reset");
-            btn.blur(); // drop active/focus state on mobile
+         // Reset both buttons when audio ends
+         [sgsBtn, sringeriBtn].forEach(btn => {
+            if (btn) {
+              btn.classList.remove("reset");  // clear old state
+              void btn.offsetWidth;           // force browser reflow
+              btn.classList.add("reset");     // reapply reset
+              btn.blur();                     // drop mobile active state
+            }
          });
       });
    }
@@ -1240,3 +1239,4 @@ document.addEventListener("DOMContentLoaded", function () {
       </script>
    </body>
 </html>
+
