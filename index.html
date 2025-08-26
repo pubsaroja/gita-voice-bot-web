@@ -12,8 +12,7 @@
       <link href="https://fonts.googleapis.com/css2?family=Ramabhadra&display=swap" rel="stylesheet">
       <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300&display=swap" rel="stylesheet">
       <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu&display=swap" rel="stylesheet">
-
-	<style>
+      <style>
          /* Global box-sizing for consistent sizing */
          *, *::before, *::after {
          box-sizing: border-box;
@@ -34,60 +33,50 @@
          font-size: 1em;
          margin-top: 10px;
          }
-         /* == TOP BUTTONS == */
-.top-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  max-width: 600px;
-  margin: 20px auto;
-  width: 100%;
-  box-sizing: border-box;
-  align-items: flex-start;
-}
-
-.top-buttons button {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 150px;
-  height: 150px;
-  border-radius: 10px;
-  border: none;
-  background-color: #357EC7;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
-  font-family: 'Outfit', sans-serif;
-  transition: background 0.3s ease, color 0.3s ease;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
-  background-image: none;
-}
-
-/* SGS Button Hover */
-.top-buttons button.sgs-button:hover {
-  background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/sankhu.png');
-  background-color: transparent !important;
-  color: transparent !important;
-}
-
-/* Sringeri Button Hover */
-.top-buttons button.sringeri-button:hover {
-  background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/chakra.png');
-  background-color: transparent !important;
-  color: transparent !important;
-}
-
-/* After click, show color + text and hide background image */
-.top-buttons button.clicked {
-  /*background-image: none !important;*/
-  background-color: #357EC7 !important;
-  color: white !important;
-}
-
+         /* === TOP BUTTONS CONTAINER === */
+         .top-buttons {
+         display: flex;
+         justify-content: center;
+         gap: 10px;
+         }
+         /* === COMMON BUTTON STYLE === */
+         .top-buttons button {
+         width: 150px;
+         height: 150px;
+         border-radius: 25%;
+         border: none;
+         background-color: #357EC7;
+         color: white;
+         font-size: 20px;
+         cursor: pointer;
+         transition: background 0.3s ease;
+         background-repeat: no-repeat;
+         background-position: center;
+         background-size: cover;
+         }
+         /* === SGS Button Hover/Active === */
+         .top-buttons button.sgs-button:hover,
+         .top-buttons button.sgs-button:active {
+         background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/sankhu.png');
+         background-color: transparent !important;
+         color: transparent !important;
+         }
+         /* === Sringeri Button Hover/Active === */
+         .top-buttons button.sringeri-button:hover,
+         .top-buttons button.sringeri-button:active {
+         background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/chakra.png');
+         background-color: transparent !important;
+         color: transparent !important;
+         }
+         /* === Reset State (after audio ends) === */
+         .top-buttons button.reset,
+         .top-buttons button.reset:hover,
+         .top-buttons button.reset:active,
+         .top-buttons button.reset:focus {
+         background: #357EC7 !important;   /* solid blue */
+         color: white !important;          /* visible text */
+         background-image: none !important;/* force remove picture */
+         }
          /* == BUTTON GROUPS CONTAINER == */
          .button-groups {
          display: flex;
@@ -363,10 +352,9 @@
       <h1>Srimad Bhagavad Gita</h1>
       <p>Listen, understand and memorize Bhagavad Gita shlokas</p>
       <div class="top-buttons">
-  <button class="sgs-button" onclick="sendCommand('SGSFirstPaada')">SGS<br>(1st Paada)</button>
-  <button class="sringeri-button" onclick="sendCommand('SringeriPaada')">Sringeri<br>(1st or 3rd Paada)</button>
-</div>
-
+         <button class="sgs-button" onclick="sendCommand('SGSFirstPaada')">SGS<br>(1st Paada)</button>
+         <button class="sringeri-button" onclick="sendCommand('SringeriPaada')">Sringeri<br>(1st or 3rd Paada)</button>
+      </div>
       <audio id="audioPlayer" controls></audio>
       <div class="radio-group">
          <label>Style:</label>
@@ -1219,6 +1207,27 @@
          button.classList.toggle('clicked');
          });
          });
+         
+         document.addEventListener("DOMContentLoaded", function () {
+         const audio = document.getElementById("audioPlayer");
+         const sgsBtn = document.querySelector(".top-buttons .sgs-button");
+         const sringeriBtn = document.querySelector(".top-buttons .sringeri-button");
+         
+         if (audio) {
+         audio.addEventListener("ended", function () {
+         // Reset both buttons when audio ends
+         [sgsBtn, sringeriBtn].forEach(btn => {
+            if (btn) {
+              btn.classList.remove("reset");  // clear old state
+              void btn.offsetWidth;           // force browser reflow
+              btn.classList.add("reset");     // reapply reset
+              btn.blur();                     // drop mobile active state
+            }
+         });
+         });
+         }
+         });
+         
          
          initialize();
       </script>
