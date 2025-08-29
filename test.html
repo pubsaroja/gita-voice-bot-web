@@ -688,8 +688,8 @@
                  }
                  const data = await response.json();
                  const key = `${chapter}.${verse}`;
-                 if (data[key] && data[key].అర్థము) {
-                     return `${chapter}.${verse} Meaning:\n${data[key].అర్థము}`;
+                 if (data[key] && data[key].ప్రతిపదార్థం) {
+                     return `${chapter}.${verse} ప్రతిపదార్థం:\n${data[key].ప్రతిపదార్థం}`;
                  } else {
                      return `Meaning for ${chapter}.${verse} not found`;
                  }
