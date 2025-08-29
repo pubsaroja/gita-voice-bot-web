@@ -688,8 +688,18 @@
                  }
                  const data = await response.json();
                  const key = `${chapter}.${verse}`;
-                 if (data[key] && data[key].ప్రతిపదార్థం) {
-                     return `${chapter}.${verse} ప్రతిపదార్థం:\n${data[key].ప్రతిపదార్థం}`;
+                 if (data[key]) {
+                     let meaningText = `${chapter}.${verse} Meaning:\n\nప్రతిపదార్థం (Word-to-Word Meaning):\n`;
+                     const wordToWord = data[key]["ప్రతిపదార్థం"];
+                     if (wordToWord) {
+                         for (const [word, meaning] of Object.entries(wordToWord)) {
+                             meaningText += `${word}: ${meaning}\n`;
+                         }
+                     } else {
+                         meaningText += 'Word-to-word meaning not available\n';
+                     }
+                     meaningText += `\nఅర్థము (Overall Meaning):\n${data[key].అర్థము || 'Overall meaning not available'}`;
+                     return meaningText;
                  } else {
                      return `Meaning for ${chapter}.${verse} not found`;
                  }
