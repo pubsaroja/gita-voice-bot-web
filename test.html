@@ -438,6 +438,11 @@
          </div>
       </div>
       </div>
+      <div>
+    Search for word (Telugu or English):
+    <input type="text" id="searchInput" placeholder="Enter word to search">
+    <button id="searchBtn">Search</button>
+</div>
       <div class="credits">
          SGS Audio:<br>
          Pujya Sri Datta Vijayanand Teertha Swamiji<br>
@@ -470,12 +475,10 @@
             <option value="17">Chapter 17 (28 verses)</option>
             <option value="18">Chapter 18 (78 verses)</option>
          </select>
-         <div id="verseTableContent" class="verse-grid"></div>
-            <input type="text" id="searchInput" placeholder="Enter word to search">
-            <button id="searchBtn">Search</button>
+
       </div>
 
-      <script src="https://unpkg.com/@indic-transliteration/sanscript@1.2.11/dist/browser/sanscript.js"></script>
+    
          <script>
          
          console.log('Script loaded at', new Date('2025-08-17T12:18:00+05:30').toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
@@ -1272,74 +1275,78 @@ document.addEventListener("DOMContentLoaded", function () {
    }
 });
 
-            var sringeriShlokas = new Map();
+
+         initialize();
+      </script>
+         <script src="https://unpkg.com/@indic-transliteration/sanscript@1.2.11/dist/browser/sanscript.js"></script>
+<script>
+var sringeriShlokas = new Map();
 var englishShlokas = new Map();
 
 async function loadFiles() {
-  try {
-    const sringeriResponse = await fetch('Sringeri.txt');
-    const sringeriText = await sringeriResponse.text();
-    sringeriText.split('\n').forEach(line => {
-      line = line.trim();
-      if (line) {
-        const [key, ...textParts] = line.split(' ');
-        sringeriShlokas.set(key, textParts.join(' '));
-      }
-    });
+    try {
+        const sringeriResponse = await fetch('Sringeri.txt');
+        const sringeriText = await sringeriResponse.text();
+        sringeriText.split('\n').forEach(line => {
+            line = line.trim();
+            if (line) {
+                const [key, ...textParts] = line.split(' ');
+                sringeriShlokas.set(key, textParts.join(' '));
+            }
+        });
 
-    const englishResponse = await fetch('BG English with Uvacha.txt');
-    const englishText = await englishResponse.text();
-    englishText.split('\n').forEach(line => {
-      line = line.trim();
-      if (line) {
-        const [key, ...textParts] = line.split(' ');
-        englishShlokas.set(key, textParts.join(' '));
-      }
-    });
-  } catch (error) {
-    console.error('Error loading files:', error);
-  }
+        const englishResponse = await fetch('BG English with Uvacha.txt');
+        const englishText = await englishResponse.text();
+        englishText.split('\n').forEach(line => {
+            line = line.trim();
+            if (line) {
+                const [key, ...textParts] = line.split(' ');
+                englishShlokas.set(key, textParts.join(' '));
+            }
+        });
+    } catch (error) {
+        console.error('Error loading files:', error);
+    }
 }
 
 function searchShloka() {
-  const input = document.getElementById('searchInput').value.trim();
-  if (!input) return;
+    const input = document.getElementById('searchInput').value.trim();
+    if (!input) return;
 
-  const isTelugu = /[\u0C00-\u0C7F]/.test(input);
-  let results = [];
+    const isTelugu = /[\u0C00-\u0C7F]/.test(input);
+    let results = [];
 
-  if (isTelugu) {
-    for (let [key, text] of sringeriShlokas) {
-      if (text.includes(input)) {
-        const escapedInput = input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const highlighted = text.replace(new RegExp(escapedInput, 'gi'), '<span style="background-color: yellow;">$&</span>');
-        results.push(`${key} ${highlighted}`);
-      }
-    }
-  } else {
-    const teluguWord = Sanscript.t(input.toLowerCase(), 'itrans', 'telugu');
-    for (let [key, text] of englishShlokas) {
-      if (text.toLowerCase().includes(input.toLowerCase())) {
-        let sringeriText = sringeriShlokas.get(key);
-        if (sringeriText && teluguWord) {
-          const escapedTelugu = teluguWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const highlighted = sringeriText.replace(new RegExp(escapedTelugu, 'gi'), '<span style="background-color: yellow;">$&</span>');
-          results.push(`${key} ${highlighted}`);
+    if (isTelugu) {
+        for (let [key, text] of sringeriShlokas) {
+            if (text.includes(input)) {
+                const escapedInput = input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const highlighted = text.replace(new RegExp(escapedInput, 'gi'), '<span style="background-color: yellow;">$&</span>');
+                results.push(`${key} ${highlighted}`);
+            }
         }
-      }
+    } else {
+        const teluguWord = Sanscript.t(input.toLowerCase(), 'itrans', 'telugu');
+        for (let [key, text] of englishShlokas) {
+            if (text.toLowerCase().includes(input.toLowerCase())) {
+                let sringeriText = sringeriShlokas.get(key);
+                if (sringeriText) {
+                    const escapedTelugu = teluguWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const highlighted = sringeriText.replace(new RegExp(escapedTelugu, 'gi'), '<span style="background-color: yellow;">$&</span>');
+                    results.push(`${key} ${highlighted}`);
+                }
+            }
+        }
     }
-  }
 
-  const displayText = results.join('<br><br>');
-  document.getElementById('sgsShloka').innerHTML = displayText || 'No results found.';
-  document.getElementById('sringeriShloka').innerHTML = displayText || 'No results found.';
+    const displayText = results.join('<br><br>');
+    document.getElementById('sgsShloka').innerHTML = displayText || 'No results found.';
+    document.getElementById('sringeriShloka').innerHTML = displayText || 'No results found.';
 }
 
 window.onload = async function() {
-  await loadFiles();
-  document.getElementById('searchBtn').addEventListener('click', searchShloka);
+    await loadFiles();
+    document.getElementById('searchBtn').addEventListener('click', searchShloka);
 };
-         initialize();
-      </script>
+</script>
    </body>
 </html>
