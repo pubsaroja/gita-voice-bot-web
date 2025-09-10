@@ -438,12 +438,11 @@
          </div>
       </div>
       </div>
-     
-    <div>
-        <h3>Search for word (Telugu or English):</h3>
-        <input type="text" id="searchInput" placeholder="Enter word to search">
-        <button id="searchBtn">Search</button>
-    </div>
+      <div>
+         <h3>Search for word (Telugu or English):</h3>
+         <input type="text" id="searchInput" placeholder="Enter word to search">
+         <button id="searchBtn">Search</button>
+      </div>
       <div class="credits">
          SGS Audio:<br>
          Pujya Sri Datta Vijayanand Teertha Swamiji<br>
@@ -478,8 +477,7 @@
          </select>
          <div id="verseTableContent" class="verse-grid"></div>
       </div>
-            <script src="https://unpkg.com/@indic-transliteration/sanscript@1.2.11/dist/browser/sanscript.js"></script>
-    <script>
+      <script src="https://unpkg.com/@indic-transliteration/sanscript@1.2.11/dist/browser/sanscript.js"></script>
       <script>
          console.log('Script loaded at', new Date('2025-08-17T12:18:00+05:30').toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
          
@@ -1226,37 +1224,37 @@
          });
          });
          
-document.addEventListener("DOMContentLoaded", function () {
-   const audio = document.getElementById("audioPlayer");
-   const sgsBtn = document.querySelector(".top-buttons .sgs-button");
-   const sringeriBtn = document.querySelector(".top-buttons .sringeri-button");
-
-   let activeBtn = null; // Track which button was clicked
-
-   function resetButtons() {
-      [sgsBtn, sringeriBtn].forEach(btn => {
+         document.addEventListener("DOMContentLoaded", function () {
+         const audio = document.getElementById("audioPlayer");
+         const sgsBtn = document.querySelector(".top-buttons .sgs-button");
+         const sringeriBtn = document.querySelector(".top-buttons .sringeri-button");
+         
+         let activeBtn = null; // Track which button was clicked
+         
+         function resetButtons() {
+         [sgsBtn, sringeriBtn].forEach(btn => {
          if (btn) {
             btn.classList.remove("sgs-playing", "sringeri-playing", "reset");
             btn.classList.add("reset");
          }
-      });
-   }
-
-   if (sgsBtn) {
-      sgsBtn.addEventListener("click", function () {
+         });
+         }
+         
+         if (sgsBtn) {
+         sgsBtn.addEventListener("click", function () {
          activeBtn = sgsBtn;
-      });
-   }
-
-   if (sringeriBtn) {
-      sringeriBtn.addEventListener("click", function () {
+         });
+         }
+         
+         if (sringeriBtn) {
+         sringeriBtn.addEventListener("click", function () {
          activeBtn = sringeriBtn;
-      });
-   }
-
-   if (audio) {
-      // When audio starts
-      audio.addEventListener("play", function () {
+         });
+         }
+         
+         if (audio) {
+         // When audio starts
+         audio.addEventListener("play", function () {
          resetButtons(); // Clear old states first
          if (activeBtn === sgsBtn) {
             sgsBtn.classList.remove("reset");
@@ -1265,25 +1263,27 @@ document.addEventListener("DOMContentLoaded", function () {
             sringeriBtn.classList.remove("reset");
             sringeriBtn.classList.add("sringeri-playing");
          }
-      });
-
-      // When audio ends
-      audio.addEventListener("ended", function () {
+         });
+         
+         // When audio ends
+         audio.addEventListener("ended", function () {
          resetButtons();
          activeBtn = null; // clear after playback ends
-      });
-   }
-});
-
-initialize();
-              // New search functionality
-        var sringeriShlokas = new Map();
-        var englishShlokas = new Map();
-
-        async function loadFiles() {
+         });
+         }
+         });
+         
+         // Map to store shlokas
+         var sringeriShlokas = new Map();
+         var englishShlokas = new Map();
+         
+         // Load text files
+         async function loadFiles() {
             try {
-                const sringeriResponse = await fetch('Sringeri.txt');
+                const sringeriResponse = await fetch('BG_Sringeri.txt');
+                if (!sringeriResponse.ok) throw new Error('Failed to load BG_Sringeri.txt');
                 const sringeriText = await sringeriResponse.text();
+                console.log('BG_Sringeri.txt loaded successfully');
                 sringeriText.split('\n').forEach(line => {
                     line = line.trim();
                     if (line) {
@@ -1291,9 +1291,11 @@ initialize();
                         sringeriShlokas.set(key, textParts.join(' '));
                     }
                 });
-
+         
                 const englishResponse = await fetch('BG English with Uvacha.txt');
+                if (!englishResponse.ok) throw new Error('Failed to load BG English with Uvacha.txt');
                 const englishText = await englishResponse.text();
+                console.log('BG English with Uvacha.txt loaded successfully');
                 englishText.split('\n').forEach(line => {
                     line = line.trim();
                     if (line) {
@@ -1303,17 +1305,28 @@ initialize();
                 });
             } catch (error) {
                 console.error('Error loading files:', error);
+                document.getElementById('sgsShloka').innerHTML = 'Error loading text files.';
+                document.getElementById('sringeriShloka').innerHTML = 'Error loading text files.';
             }
-        }
-
-        function searchShloka() {
+         }
+         
+         // Search function
+         function searchShloka() {
             const input = document.getElementById('searchInput').value.trim();
-            if (!input) return;
-
+            console.log('Search input:', input);
+            if (!input) {
+                console.log('No input provided');
+                document.getElementById('sgsShloka').innerHTML = 'Please enter a search term.';
+                document.getElementById('sringeriShloka').innerHTML = 'Please enter a search term.';
+                return;
+            }
+         
             const isTelugu = /[\u0C00-\u0C7F]/.test(input);
+            console.log('Is Telugu:', isTelugu);
             let results = [];
-
+         
             if (isTelugu) {
+                console.log('Searching in BG_Sringeri.txt');
                 for (let [key, text] of sringeriShlokas) {
                     if (text.includes(input)) {
                         const escapedInput = input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -1322,7 +1335,9 @@ initialize();
                     }
                 }
             } else {
+                console.log('Searching in BG English with Uvacha.txt');
                 const teluguWord = Sanscript.t(input.toLowerCase(), 'itrans', 'telugu');
+                console.log('Transliterated to Telugu:', teluguWord);
                 for (let [key, text] of englishShlokas) {
                     if (text.toLowerCase().includes(input.toLowerCase())) {
                         let sringeriText = sringeriShlokas.get(key);
@@ -1334,19 +1349,19 @@ initialize();
                     }
                 }
             }
-
+         
             const displayText = results.join('<br><br>');
+            console.log('Search results:', results);
             document.getElementById('sgsShloka').innerHTML = displayText || 'No results found.';
             document.getElementById('sringeriShloka').innerHTML = displayText || 'No results found.';
-        }
-
-        // Combine existing and new logic in window.onload
-        window.onload = async function() {
-            await loadFiles();
-            existingLogic(); // Call your existing logic
-            document.getElementById('searchBtn').addEventListener('click', searchShloka);
-        };
+         }
          
+         // Initialize on page load
+         window.onload = async function() {
+            await loadFiles();
+            document.getElementById('searchBtn').addEventListener('click', searchShloka);
+         };
+         initialize();
       </script>
    </body>
 </html>
