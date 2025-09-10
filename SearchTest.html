@@ -438,11 +438,11 @@
          </div>
       </div>
       </div>
-      <div>
-         <h3>Search for word (Telugu or English):</h3>
-         <input type="text" id="searchInput" placeholder="Enter word to search">
-         <button id="searchBtn">Search</button>
-      </div>
+<div>
+    <h3>Search for word (Telugu or English):</h3>
+    <input type="text" id="searchInput" placeholder="Enter word to search">
+    <button id="searchBtn">Search</button>
+</div>
       <div class="credits">
          SGS Audio:<br>
          Pujya Sri Datta Vijayanand Teertha Swamiji<br>
@@ -1273,94 +1273,94 @@
          }
          });
          
-         // Map to store shlokas
-         var sringeriShlokas = new Map();
-         var englishShlokas = new Map();
-         
-         // Load text files
-         async function loadFiles() {
-            try {
-                const sringeriResponse = await fetch('BG_Sringeri.txt');
-                if (!sringeriResponse.ok) throw new Error('Failed to load BG_Sringeri.txt');
-                const sringeriText = await sringeriResponse.text();
-                console.log('BG_Sringeri.txt loaded successfully');
-                sringeriText.split('\n').forEach(line => {
-                    line = line.trim();
-                    if (line) {
-                        const [key, ...textParts] = line.split(' ');
-                        sringeriShlokas.set(key, textParts.join(' '));
-                    }
-                });
-         
-                const englishResponse = await fetch('BG English with Uvacha.txt');
-                if (!englishResponse.ok) throw new Error('Failed to load BG English with Uvacha.txt');
-                const englishText = await englishResponse.text();
-                console.log('BG English with Uvacha.txt loaded successfully');
-                englishText.split('\n').forEach(line => {
-                    line = line.trim();
-                    if (line) {
-                        const [key, ...textParts] = line.split(' ');
-                        englishShlokas.set(key, textParts.join(' '));
-                    }
-                });
-            } catch (error) {
-                console.error('Error loading files:', error);
-                document.getElementById('sgsShloka').innerHTML = 'Error loading text files.';
-                document.getElementById('sringeriShloka').innerHTML = 'Error loading text files.';
+// Map to store shlokas
+    var sringeriShlokas = new Map();
+    var englishShlokas = new Map();
+
+    // Load text files
+    async function loadFiles() {
+        try {
+            const sringeriResponse = await fetch('Sringeri.txt');
+            if (!sringeriResponse.ok) throw new Error('Failed to load Sringeri.txt');
+            const sringeriText = await sringeriResponse.text();
+            console.log('Sringeri.txt loaded successfully');
+            sringeriText.split('\n').forEach(line => {
+                line = line.trim();
+                if (line) {
+                    const [key, ...textParts] = line.split(' ');
+                    sringeriShlokas.set(key, textParts.join(' '));
+                }
+            });
+
+            const englishResponse = await fetch('BG English with Uvacha.txt');
+            if (!englishResponse.ok) throw new Error('Failed to load BG English with Uvacha.txt');
+            const englishText = await englishResponse.text();
+            console.log('BG English with Uvacha.txt loaded successfully');
+            englishText.split('\n').forEach(line => {
+                line = line.trim();
+                if (line) {
+                    const [key, ...textParts] = line.split(' ');
+                    englishShlokas.set(key, textParts.join(' '));
+                }
+            });
+        } catch (error) {
+            console.error('Error loading files:', error);
+            document.getElementById('sgsText').innerHTML = 'Error loading text files. Check if Sringeri.txt and BG English with Uvacha.txt are in the same directory and accessible.';
+            document.getElementById('sringeriText').innerHTML = 'Error loading text files. Check if Sringeri.txt and BG English with Uvacha.txt are in the same directory and accessible.';
+        }
+    }
+
+    // Search function
+    function searchShloka() {
+        const input = document.getElementById('searchInput').value.trim();
+        console.log('Search input:', input);
+        if (!input) {
+            console.log('No input provided');
+            document.getElementById('sgsText').innerHTML = 'Please enter a search term.';
+            document.getElementById('sringeriText').innerHTML = 'Please enter a search term.';
+            return;
+        }
+
+        const isTelugu = /[\u0C00-\u0C7F]/.test(input);
+        console.log('Is Telugu:', isTelugu);
+        let results = [];
+
+        if (isTelugu) {
+            console.log('Searching in Sringeri.txt for Telugu word');
+            for (let [key, text] of sringeriShlokas) {
+                if (text.includes(input)) {
+                    const escapedInput = input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const highlighted = text.replace(new RegExp(escapedInput, 'gi'), '<span style="background-color: yellow;">$&</span>');
+                    results.push(`${key} ${highlighted}`);
+                }
             }
-         }
-         
-         // Search function
-         function searchShloka() {
-            const input = document.getElementById('searchInput').value.trim();
-            console.log('Search input:', input);
-            if (!input) {
-                console.log('No input provided');
-                document.getElementById('sgsShloka').innerHTML = 'Please enter a search term.';
-                document.getElementById('sringeriShloka').innerHTML = 'Please enter a search term.';
-                return;
-            }
-         
-            const isTelugu = /[\u0C00-\u0C7F]/.test(input);
-            console.log('Is Telugu:', isTelugu);
-            let results = [];
-         
-            if (isTelugu) {
-                console.log('Searching in BG_Sringeri.txt');
-                for (let [key, text] of sringeriShlokas) {
-                    if (text.includes(input)) {
-                        const escapedInput = input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                        const highlighted = text.replace(new RegExp(escapedInput, 'gi'), '<span style="background-color: yellow;">$&</span>');
+        } else {
+            console.log('Searching in BG English with Uvacha.txt for English word');
+            const teluguWord = Sanscript.t(input.toLowerCase(), 'itrans', 'telugu');
+            console.log('Transliterated to Telugu:', teluguWord);
+            for (let [key, text] of englishShlokas) {
+                if (text.toLowerCase().includes(input.toLowerCase())) {
+                    let sringeriText = sringeriShlokas.get(key);
+                    if (sringeriText) {
+                        const escapedTelugu = teluguWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        const highlighted = sringeriText.replace(new RegExp(escapedTelugu, 'gi'), '<span style="background-color: yellow;">$&</span>');
                         results.push(`${key} ${highlighted}`);
                     }
                 }
-            } else {
-                console.log('Searching in BG English with Uvacha.txt');
-                const teluguWord = Sanscript.t(input.toLowerCase(), 'itrans', 'telugu');
-                console.log('Transliterated to Telugu:', teluguWord);
-                for (let [key, text] of englishShlokas) {
-                    if (text.toLowerCase().includes(input.toLowerCase())) {
-                        let sringeriText = sringeriShlokas.get(key);
-                        if (sringeriText) {
-                            const escapedTelugu = teluguWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                            const highlighted = sringeriText.replace(new RegExp(escapedTelugu, 'gi'), '<span style="background-color: yellow;">$&</span>');
-                            results.push(`${key} ${highlighted}`);
-                        }
-                    }
-                }
             }
-         
-            const displayText = results.join('<br><br>');
-            console.log('Search results:', results);
-            document.getElementById('sgsShloka').innerHTML = displayText || 'No results found.';
-            document.getElementById('sringeriShloka').innerHTML = displayText || 'No results found.';
-         }
-         
-         // Initialize on page load
-         window.onload = async function() {
-            await loadFiles();
-            document.getElementById('searchBtn').addEventListener('click', searchShloka);
-         };
+        }
+
+        const displayText = results.join('<br><br>');
+        console.log('Search results:', results);
+        document.getElementById('sgsText').innerHTML = displayText || 'No results found. Check if the word exists in the text files or try a different spelling.';
+        document.getElementById('sringeriText').innerHTML = displayText || 'No results found. Check if the word exists in the text files or try a different spelling.';
+    }
+
+    // Initialize on page load
+    window.onload = async function() {
+        await loadFiles();
+        document.getElementById('searchBtn').addEventListener('click', searchShloka);
+    };
          initialize();
       </script>
    </body>
