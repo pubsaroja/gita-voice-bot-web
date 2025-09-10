@@ -1280,7 +1280,7 @@
     // Load text files
     async function loadFiles() {
         try {
-            const sringeriResponse = await fetch('Sringeri.txt');
+            const sringeriResponse = await fetch('BG_Sringeri.txt');
             if (!sringeriResponse.ok) throw new Error('Failed to load Sringeri.txt');
             const sringeriText = await sringeriResponse.text();
             console.log('Sringeri.txt loaded successfully');
