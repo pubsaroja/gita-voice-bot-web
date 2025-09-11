@@ -477,8 +477,32 @@
          </select>
          <div id="verseTableContent" class="verse-grid"></div>
       </div>
-<script src="https://cdn.jsdelivr.net/npm/@indic-transliteration/sanscript@1.2.11/dist/sanscript.min.js"></script>
 <script>
+    // Fallback for Sanscript loading
+    function loadSanscript() {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@indic-transliteration/sanscript@1.2.11/dist/sanscript.min.js';
+            script.onload = () => {
+                console.log('Sanscript loaded successfully');
+                resolve();
+            };
+            script.onerror = () => {
+                console.error('Failed to load Sanscript from jsDelivr, trying fallback');
+                script.src = 'https://unpkg.com/@indic-transliteration/sanscript@1.2.11/dist/sanscript.js';
+                script.onload = () => {
+                    console.log('Sanscript loaded from fallback (unpkg)');
+                    resolve();
+                };
+                script.onerror = () => {
+                    console.error('Failed to load Sanscript from fallback');
+                    reject(new Error('Sanscript library could not be loaded'));
+                };
+            };
+            document.head.appendChild(script);
+        });
+    }
+
     console.log('Script loaded at', new Date('2025-08-17T12:18:00+05:30').toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
     
     const baseUrl = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main';
@@ -566,8 +590,17 @@
                     results.push(`${key} ${highlighted}`);
                 }
             }
+            console.log('Telugu search results:', results);
         } else {
             console.log('Searching in BG English with Uvacha.txt for English word');
+            if (typeof Sanscript === 'undefined') {
+                console.error('Sanscript not loaded, cannot transliterate English input');
+                document.getElementById('sgsText').innerHTML = 'Error: Transliteration library not loaded. Please try a Telugu search or check your internet connection.';
+                document.getElementById('sringeriText').innerHTML = 'Error: Transliteration library not loaded. Please try a Telugu search or check your internet connection.';
+                adjustTextboxHeight();
+                updateTextboxVisibility();
+                return;
+            }
             const teluguWord = Sanscript.t(input.toLowerCase(), 'itrans', 'telugu');
             console.log('Transliterated to Telugu:', teluguWord);
             for (let [key, text] of englishShlokas) {
@@ -580,10 +613,10 @@
                     }
                 }
             }
+            console.log('English search results:', results);
         }
 
         const displayText = results.join('<br><br>');
-        console.log('Search results:', results);
         document.getElementById('sgsText').innerHTML = displayText || 'No results found. Check if the word exists in the text files or try a different spelling.';
         document.getElementById('sringeriText').innerHTML = displayText || 'No results found. Check if the word exists in the text files or try a different spelling.';
         adjustTextboxHeight();
@@ -1370,9 +1403,17 @@
 
     // Initialize on page load
     window.onload = async function() {
-        await loadFiles();
-        document.getElementById('searchBtn').addEventListener('click', searchShloka);
-        initialize();
+        try {
+            await loadSanscript();
+            await loadFiles();
+            document.getElementById('searchBtn').addEventListener('click', searchShloka);
+            initialize();
+        } catch (error) {
+            console.error('Initialization error in window.onload:', error);
+            document.getElementById('sgsText').innerHTML = 'Initialization error: ' + error.message;
+            document.getElementById('sringeriText').innerHTML = 'Initialization error: ' + error.message;
+            adjustTextboxHeight();
+        }
     };
 </script>
    </body>
