@@ -478,32 +478,53 @@
          <div id="verseTableContent" class="verse-grid"></div>
       </div>
 <script>
-    // Fallback for Sanscript loading
+    // Function to load Sanscript with multiple fallbacks
     function loadSanscript() {
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
+            // Primary CDN
             script.src = 'https://cdn.jsdelivr.net/npm/@indic-transliteration/sanscript@1.2.11/dist/sanscript.min.js';
             script.onload = () => {
-                console.log('Sanscript loaded successfully');
+                console.log('Sanscript loaded successfully from jsDelivr');
                 resolve();
             };
             script.onerror = () => {
-                console.error('Failed to load Sanscript from jsDelivr, trying fallback');
+                console.error('Failed to load Sanscript from jsDelivr, trying first fallback');
+                // First fallback (unpkg)
                 script.src = 'https://unpkg.com/@indic-transliteration/sanscript@1.2.11/dist/sanscript.js';
                 script.onload = () => {
-                    console.log('Sanscript loaded from fallback (unpkg)');
+                    console.log('Sanscript loaded from first fallback (unpkg)');
                     resolve();
                 };
                 script.onerror = () => {
-                    console.error('Failed to load Sanscript from fallback');
-                    reject(new Error('Sanscript library could not be loaded'));
+                    console.error('Failed to load Sanscript from unpkg, trying second fallback');
+                    // Second fallback (cdnjs)
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/sanscript/1.2.11/sanscript.min.js';
+                    script.onload = () => {
+                        console.log('Sanscript loaded from second fallback (cdnjs)');
+                        resolve();
+                    };
+                    script.onerror = () => {
+                        console.error('Failed to load Sanscript from all CDNs');
+                        // Optional: Local fallback (uncomment if you have sanscript.min.js locally)
+                        // script.src = 'sanscript.min.js';
+                        // script.onload = () => {
+                        //     console.log('Sanscript loaded from local fallback');
+                        //     resolve();
+                        // };
+                        // script.onerror = () => {
+                        //     console.error('Failed to load Sanscript from local fallback');
+                        //     reject(new Error('Sanscript library could not be loaded'));
+                        // };
+                        reject(new Error('Sanscript library could not be loaded from any source'));
+                    };
                 };
             };
             document.head.appendChild(script);
         });
     }
 
-    console.log('Script loaded at', new Date('2025-08-17T12:18:00+05:30').toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+    console.log('Script loaded at', new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
     
     const baseUrl = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main';
     const verseCounts = {
@@ -528,7 +549,7 @@
     async function loadFiles() {
         try {
             const sringeriResponse = await fetch(`${baseUrl}/BG_Sringeri.txt`);
-            if (!sringeriResponse.ok) throw new Error('Failed to load BG_Sringeri.txt');
+            if (!sringeriResponse.ok) throw new Error(`Failed to load BG_Sringeri.txt: HTTP ${sringeriResponse.status}`);
             const sringeriText = await sringeriResponse.text();
             console.log('BG_Sringeri.txt loaded successfully');
             sringeriText.split('\n').forEach(line => {
@@ -537,13 +558,15 @@
                     const parts = line.split(/\s+/);
                     const key = parts[0];
                     const text = parts.slice(1).join(' ');
-                    sringeriShlokas.set(key, text);
+                    if (key.match(/^\d+[.-]\d+$/)) { // Ensure key is in format "chapter.verse" or "chapter-verse"
+                        sringeriShlokas.set(key, text);
+                    }
                 }
             });
             console.log('Sringeri shlokas size:', sringeriShlokas.size);
 
             const englishResponse = await fetch(`${baseUrl}/BG English with Uvacha.txt`);
-            if (!englishResponse.ok) throw new Error('Failed to load BG English with Uvacha.txt');
+            if (!englishResponse.ok) throw new Error(`Failed to load BG English with Uvacha.txt: HTTP ${englishResponse.status}`);
             const englishText = await englishResponse.text();
             console.log('BG English with Uvacha.txt loaded successfully');
             englishText.split('\n').forEach(line => {
@@ -552,15 +575,18 @@
                     const parts = line.split(/\s+/);
                     const key = parts[0];
                     const text = parts.slice(1).join(' ');
-                    englishShlokas.set(key, text);
+                    if (key.match(/^\d+[.-]\d+$/)) { // Ensure key is in format "chapter.verse" or "chapter-verse"
+                        englishShlokas.set(key, text);
+                    }
                 }
             });
             console.log('English shlokas size:', englishShlokas.size);
         } catch (error) {
             console.error('Error loading files:', error);
-            document.getElementById('sgsText').innerHTML = 'Error loading text files. Check if BG_Sringeri.txt and BG English with Uvacha.txt are accessible at GitHub.';
-            document.getElementById('sringeriText').innerHTML = 'Error loading text files. Check if BG_Sringeri.txt and BG English with Uvacha.txt are accessible at GitHub.';
+            document.getElementById('sgsText').innerHTML = `Error loading text files: ${error.message}. Check if BG_Sringeri.txt and BG English with Uvacha.txt are accessible at GitHub.`;
+            document.getElementById('sringeriText').innerHTML = `Error loading text files: ${error.message}. Check if BG_Sringeri.txt and BG English with Uvacha.txt are accessible at GitHub.`;
             adjustTextboxHeight();
+            updateTextboxVisibility();
         }
     }
 
@@ -584,10 +610,11 @@
         if (isTelugu) {
             console.log('Searching in BG_Sringeri.txt for Telugu word');
             for (let [key, text] of sringeriShlokas) {
-                if (text.includes(input)) {
+                if (text.toLowerCase().includes(input.toLowerCase())) { // Case-insensitive search
                     const escapedInput = input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                     const highlighted = text.replace(new RegExp(escapedInput, 'gi'), '<span style="background-color: yellow;">$&</span>');
                     results.push(`${key} ${highlighted}`);
+                    console.log(`Found match for "${input}" in ${key}: ${text}`);
                 }
             }
             console.log('Telugu search results:', results);
@@ -605,11 +632,14 @@
             console.log('Transliterated to Telugu:', teluguWord);
             for (let [key, text] of englishShlokas) {
                 if (text.toLowerCase().includes(input.toLowerCase())) {
-                    let sringeriText = sringeriShlokas.get(key);
+                    let sringeriText = sringeriShlokas.get(key.replace('-', '.')); // Handle both "chapter.verse" and "chapter-verse"
                     if (sringeriText) {
                         const escapedTelugu = teluguWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                         const highlighted = sringeriText.replace(new RegExp(escapedTelugu, 'gi'), '<span style="background-color: yellow;">$&</span>');
                         results.push(`${key} ${highlighted}`);
+                        console.log(`Found match for "${input}" in ${key}: ${text}`);
+                    } else {
+                        console.log(`No Sringeri text found for key ${key}`);
                     }
                 }
             }
@@ -1381,9 +1411,8 @@
         }
         
         if (audio) {
-            // When audio starts
             audio.addEventListener("play", function () {
-                resetButtons(); // Clear old states first
+                resetButtons();
                 if (activeBtn === sgsBtn) {
                     sgsBtn.classList.remove("reset");
                     sgsBtn.classList.add("sgs-playing");
@@ -1393,10 +1422,9 @@
                 }
             });
             
-            // When audio ends
             audio.addEventListener("ended", function () {
                 resetButtons();
-                activeBtn = null; // clear after playback ends
+                activeBtn = null;
             });
         }
     });
@@ -1410,9 +1438,10 @@
             initialize();
         } catch (error) {
             console.error('Initialization error in window.onload:', error);
-            document.getElementById('sgsText').innerHTML = 'Initialization error: ' + error.message;
-            document.getElementById('sringeriText').innerHTML = 'Initialization error: ' + error.message;
+            document.getElementById('sgsText').innerHTML = `Initialization error: ${error.message}`;
+            document.getElementById('sringeriText').innerHTML = `Initialization error: ${error.message}`;
             adjustTextboxHeight();
+            updateTextboxVisibility();
         }
     };
 </script>
