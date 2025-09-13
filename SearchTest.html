@@ -478,172 +478,117 @@
          <div id="verseTableContent" class="verse-grid"></div>
       </div>
 <script>
-       // Global variables to hold text content
-    let sringeriContent = '';
-    let englishContent = '';
+ let sringeriContent = '';
+let englishContent = '';
 
-    // Load the text files containing shlokas
-    async function loadFiles() {
-      try {
-        const sringeriResponse = await fetch('BG_Sringeri.txt');
-        sringeriContent = await sringeriResponse.text();
-        console.log('BG_Sringeri.txt loaded successfully');
-        console.log('Sringeri shlokas size:', sringeriContent.split('\n').length);
+// Load both text files asynchronously
+async function loadFiles() {
+  try {
+    const sringeriResponse = await fetch('BG_Sringeri.txt');
+    if (!sringeriResponse.ok) throw new Error('Failed to load BG_Sringeri.txt');
+    sringeriContent = await sringeriResponse.text();
+    console.log('BG_Sringeri.txt loaded. Lines:', sringeriContent.split('\n').length);
 
-        const englishResponse = await fetch('BG English with Uvacha.txt');
-        englishContent = await englishResponse.text();
-        console.log('BG English with Uvacha.txt loaded successfully');
-        console.log('English shlokas size:', englishContent.split('\n').length);
-      } catch (error) {
-        console.error('Error loading files:', error);
-        alert('Failed to load text files. Please ensure they are accessible.');
+    const englishResponse = await fetch('BG English with Uvacha.txt');
+    if (!englishResponse.ok) throw new Error('Failed to load BG English with Uvacha.txt');
+    englishContent = await englishResponse.text();
+    console.log('BG English with Uvacha.txt loaded. Lines:', englishContent.split('\n').length);
+  } catch (error) {
+    console.error(error);
+    alert('Error loading required text files. See console.');
+  }
+}
+
+// Highlight matched search term in text (case-insensitive)
+function highlightTerm(text, term) {
+  if (!term) return text;
+  const regex = new RegExp(term, 'gi');
+  return text.replace(regex, (match) => `<mark>${match}</mark>`);
+}
+
+// Search function
+function performSearch() {
+  const inputElement = document.getElementById('search-input');
+  if (!inputElement) {
+    alert('Search input box not found!');
+    return;
+  }
+  const searchTerm = inputElement.value.trim();
+  if (!searchTerm) {
+    alert('Please enter a search word.');
+    return;
+  }
+
+  const sgsOutput = document.getElementById('sgsText');
+  const sringeriOutput = document.getElementById('sringeriText');
+
+  if (!sgsOutput || !sringeriOutput) {
+    alert('Output areas are missing in HTML!');
+    return;
+  }
+
+  // Detect if input contains Telugu characters (non-ASCII)
+  const isTelugu = /[^\x00-\x7F]/.test(searchTerm);
+
+  let sgsResults = [];
+  let sringeriResults = [];
+
+  if (isTelugu) {
+    // Search Telugu word directly in BG_Sringeri.txt content
+    const sringeriLines = sringeriContent.split('\n');
+    sringeriLines.forEach((line, idx) => {
+      if (line.includes(searchTerm)) {
+        const highlighted = highlightTerm(line, searchTerm);
+        sringeriResults.push(`Shloka ${idx + 1}: ${highlighted}`);
       }
-    }
-
-    // Function to highlight matching search term inside shlokas
-    function highlightTerm(text, term) {
-      if (!term) return text;
-      const regex = new RegExp(term, 'gi');
-      return text.replace(regex, match => `<mark>${match}</mark>`);
-    }
-
-    // Search function triggered by button or enter key
-    function performSearch() {
-      const searchInput = document.getElementById('search-input');
-      if (!searchInput) {
-        alert('Search input box not found!');
-        return;
-      }
-      const searchTerm = searchInput.value.trim();
-      if (!searchTerm) return;
-
-      // Elements for SGS Style and Sringeri Style Shloka outputs
-      const sgsElement = document.getElementById('sgsText');
-      const sringeriElement = document.getElementById('sringeriText');
-
-      // Fallback output if elements missing
-      function safeOutput(element, html) {
-        if (element) {
-          element.innerHTML = html;
-        } else {
-          console.warn("Output element missing, can't display results.");
+    });
+    sgsResults = [...sringeriResults]; // No separate SGS file, so mirror results
+  } else {
+    // For transliteration, search in English file for matching shloka numbers
+    const englishLines = englishContent.split('\n');
+    let matchedNumbers = [];
+    englishLines.forEach(line => {
+      if (line.toLowerCase().includes(searchTerm.toLowerCase())) {
+        // Assuming format "shlokaNum: text"
+        const num = line.split(':')[0].trim();
+        if (/^\d+$/.test(num)) {
+          matchedNumbers.push(num);
         }
-      }
-
-      // Detect Telugu (non-ASCII) or English/transliteration
-      const isTelugu = /[^\x00-\x7F]/.test(searchTerm);
-      let resultsSgs = [];
-      let resultsSringeri = [];
-
-      if (isTelugu) {
-        // Search directly in Sringeri text
-        const lines = sringeriContent.split('\n');
-        lines.forEach((line, idx) => {
-          if (line.includes(searchTerm)) {
-            const highlighted = highlightTerm(line, searchTerm);
-            resultsSringeri.push(`Shloka ${idx + 1}: ${highlighted}`);
-          }
-        });
-        // Show same results in SGS box or modify if needed
-        resultsSgs = [...resultsSringeri];
-      } else {
-        // Search transliteration in English file
-        const englishLines = englishContent.split('\n');
-        const matchingNumbers = [];
-        englishLines.forEach((line, idx) => {
-          if (line.toLowerCase().includes(searchTerm.toLowerCase())) {
-            // Assume "number: text" format
-            const shlokaNum = line.split(':')[0].trim();
-            if (shlokaNum && /^\d+$/.test(shlokaNum)) {
-              matchingNumbers.push(shlokaNum);
-            }
-          }
-        });
-
-        const sringeriLines = sringeriContent.split('\n');
-        matchingNumbers.forEach(num => {
-          const lineIdx = parseInt(num, 10) - 1;
-          if (sringeriLines[lineIdx]) {
-            const highlighted = highlightTerm(sringeriLines[lineIdx], searchTerm);
-            resultsSringeri.push(`Shloka ${num}: ${highlighted}`);
-          }
-        });
-
-        resultsSgs = matchingNumbers.length
-          ? [`Found in shloka(s): ${matchingNumbers.join(', ')}`]
-          : [];
-      }
-
-      // Output the search results
-      safeOutput(sgsElement, resultsSgs.length ? resultsSgs.join('<br><br>') : 'No matching shlokas found.');
-      safeOutput(sringeriElement, resultsSringeri.length ? resultsSringeri.join('<br><br>') : 'No matching shlokas found.');
-    }
-
-    // Initialize event listeners after DOM is ready
-    document.addEventListener('DOMContentLoaded', () => {
-      loadFiles();
-
-      const searchBtn = document.getElementById('search-button');
-      if (searchBtn) {
-        searchBtn.addEventListener('click', performSearch);
-      } else {
-        console.warn("Search button not found, can't attach search event!");
-      }
-
-      const inputBox = document.getElementById('search-input');
-      if (inputBox) {
-        inputBox.addEventListener('keypress', function(e) {
-          if (e.key === 'Enter') performSearch();
-        });
       }
     });
 
+    const sringeriLines = sringeriContent.split('\n');
+    matchedNumbers.forEach(num => {
+      const idx = parseInt(num, 10) - 1;
+      if (sringeriLines[idx]) {
+        const highlighted = highlightTerm(sringeriLines[idx], searchTerm);
+        sringeriResults.push(`Shloka ${num}: ${highlighted}`);
+      }
+    });
 
-    // Function to load Sanscript with multiple fallbacks
-    function loadSanscript() {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            // Primary CDN
-            script.src = 'https://cdn.jsdelivr.net/npm/@indic-transliteration/sanscript@1.2.11/dist/sanscript.min.js';
-            script.onload = () => {
-                console.log('Sanscript loaded successfully from jsDelivr');
-                resolve();
-            };
-            script.onerror = () => {
-                console.error('Failed to load Sanscript from jsDelivr, trying first fallback');
-                // First fallback (unpkg)
-                script.src = 'https://unpkg.com/@indic-transliteration/sanscript@1.2.11/dist/sanscript.js';
-                script.onload = () => {
-                    console.log('Sanscript loaded from first fallback (unpkg)');
-                    resolve();
-                };
-                script.onerror = () => {
-                    console.error('Failed to load Sanscript from unpkg, trying second fallback');
-                    // Second fallback (cdnjs)
-                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/sanscript/1.2.11/sanscript.min.js';
-                    script.onload = () => {
-                        console.log('Sanscript loaded from second fallback (cdnjs)');
-                        resolve();
-                    };
-                    script.onerror = () => {
-                        console.error('Failed to load Sanscript from all CDNs');
-                        // Optional: Local fallback (uncomment if you have sanscript.min.js locally)
-                        // script.src = 'sanscript.min.js';
-                        // script.onload = () => {
-                        //     console.log('Sanscript loaded from local fallback');
-                        //     resolve();
-                        // };
-                        // script.onerror = () => {
-                        //     console.error('Failed to load Sanscript from local fallback');
-                        //     reject(new Error('Sanscript library could not be loaded'));
-                        // };
-                        reject(new Error('Sanscript library could not be loaded from any source'));
-                    };
-                };
-            };
-            document.head.appendChild(script);
-        });
-    }
+    sgsResults = matchedNumbers.length
+      ? [`Found at shloka(s): ${matchedNumbers.join(', ')}`]
+      : [];
+  }
+
+  sgsOutput.innerHTML = sgsResults.length ? sgsResults.join('<br><br>') : 'No matching shlokas found.';
+  sringeriOutput.innerHTML = sringeriResults.length ? sringeriResults.join('<br><br>') : 'No matching shlokas found.';
+}
+
+// Attach listeners after page load
+document.addEventListener('DOMContentLoaded', () => {
+  loadFiles();
+
+  const searchBtn = document.getElementById('search-button');
+  if (searchBtn) searchBtn.addEventListener('click', performSearch);
+
+  const searchInput = document.getElementById('search-input');
+  if (searchInput) {
+    searchInput.addEventListener('keypress', e => {
+      if (e.key === 'Enter') performSearch();
+    });
+  }
+});
 
     console.log('Script loaded at', new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
     
