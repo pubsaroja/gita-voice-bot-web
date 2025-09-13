@@ -440,8 +440,8 @@
       </div>
 <div>
     <h3>Search for word (Telugu or English):</h3>
-    <input type="text" id="searchInput" placeholder="Enter word to search">
-    <button id="searchBtn">Search</button>
+    <input type="text" id="search-input" placeholder="Enter word to search">
+    <button id="search-button">Search</button>
 </div>
       <div class="credits">
          SGS Audio:<br>
@@ -504,7 +504,7 @@ function highlightTerm(text, term) {
 
 // Search logic
 function performSearch() {
-  const searchTerm = document.getElementById('searchInput').value.trim();
+  const searchTerm = document.getElementById('search-input').value.trim();
   if (!searchTerm) return;
 
   let results = [];
