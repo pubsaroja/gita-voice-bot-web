@@ -475,107 +475,105 @@
       <script>
 
 // Global variables holding text file contents
-  let sringeriContent = '';
-  let englishContent = '';
+let sringeriContent = '';
+let englishContent = '';
 
-  // Load text files asynchronously
-  async function loadFiles() {
-    try {
-      const sringeriResponse = await fetch('BG_Sringeri.txt');
-      if (!sringeriResponse.ok) throw new Error('Failed to load BG_Sringeri.txt');
-      sringeriContent = await sringeriResponse.text();
+// Load text files asynchronously from GitHub raw URLs
+async function loadFiles() {
+  try {
+    const sringeriResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt');
+    if (!sringeriResponse.ok) throw new Error('Failed to load BG_Sringeri.txt');
+    sringeriContent = await sringeriResponse.text();
 
-      const englishResponse = await fetch('BG English with Uvacha.txt');
-      if (!englishResponse.ok) throw new Error('Failed to load BG English with Uvacha.txt');
-      englishContent = await englishResponse.text();
+    const englishResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG Telugu with Uvacha2.txt');
+    if (!englishResponse.ok) throw new Error('Failed to load BG Telugu with Uvacha2.txt');
+    englishContent = await englishResponse.text();
 
-      console.log('Files loaded:', {
-        sringeriLines: sringeriContent.split('\n').length,
-        englishLines: englishContent.split('\n').length
-      });
-    } catch (err) {
-      alert(err.message);
-      console.error(err);
-    }
-  }
-
-  // Highlight matched words in output
-  function highlightTerm(text, term) {
-    if (!term) return text;
-    const regex = new RegExp(term, 'gi');
-    return text.replace(regex, m => `<mark>${m}</mark>`);
-  }
-
-  // Search function
-  function performSearch() {
-    const inputEl = document.getElementById('search-input');
-    const searchTerm = inputEl.value.trim();
-    if (!searchTerm) return alert('Please enter a search word');
-
-    const sgsOutput = document.getElementById('sgsText');
-    const sringeriOutput = document.getElementById('sringeriText');
-
-    if (!sgsOutput || !sringeriOutput) {
-      alert('Output display elements missing');
-      return;
-    }
-
-    const isTelugu = /[^\x00-\x7F]/.test(searchTerm);
-
-    let sgsResults = [];
-    let sringeriResults = [];
-
-    if (isTelugu) {
-      // Search Telugu directly in Sringeri content
-      const lines = sringeriContent.split('\n');
-      lines.forEach((line, idx) => {
-        if (line.includes(searchTerm)) {
-          const hl = highlightTerm(line, searchTerm);
-          sringeriResults.push(`Shloka ${idx + 1}: ${hl}`);
-        }
-      });
-      sgsResults = [...sringeriResults];
-    } else {
-      // Search transliteration in English file
-      const engLines = englishContent.split('\n');
-      const matchingNums = [];
-      engLines.forEach(line => {
-        if (line.toLowerCase().includes(searchTerm.toLowerCase())) {
-          const num = line.split(':')[0].trim();
-          if (/^\d+$/.test(num)) matchingNums.push(num);
-        }
-      });
-
-      const sringeriLines = sringeriContent.split('\n');
-      matchingNums.forEach(num => {
-        const idx = parseInt(num, 10) - 1;
-        if (sringeriLines[idx]) {
-          const hl = highlightTerm(sringeriLines[idx], searchTerm);
-          sringeriResults.push(`Shloka ${num}: ${hl}`);
-        }
-      });
-
-      sgsResults = matchingNums.length ? [`Found in shloka(s): ${matchingNums.join(', ')}`] : [];
-    }
-
-    sgsOutput.innerHTML = sgsResults.length ? sgsResults.join('<br><br>') : 'No matching shlokas found.';
-    sringeriOutput.innerHTML = sringeriResults.length ? sringeriResults.join('<br><br>') : 'No matching shlokas found.';
-  }
-
-  // Initialize event listeners
-  document.addEventListener('DOMContentLoaded', () => {
-    loadFiles();
-
-    const btn = document.getElementById('search-button');
-    if (btn) btn.addEventListener('click', performSearch);
-
-    const input = document.getElementById('search-input');
-    if (input) input.addEventListener('keypress', e => {
-      if (e.key === 'Enter') performSearch();
+    console.log('Files loaded:', {
+      sringeriLines: sringeriContent.split('\n').length,
+      englishLines: englishContent.split('\n').length
     });
+  } catch (err) {
+    alert(err.message);
+    console.error(err);
+  }
+}
+
+// Highlight matched words in output
+function highlightTerm(text, term) {
+  if (!term) return text;
+  const regex = new RegExp(term, 'gi');
+  return text.replace(regex, m => `<mark>${m}</mark>`);
+}
+
+// Search function
+function performSearch() {
+  const inputEl = document.getElementById('search-input');
+  const searchTerm = inputEl.value.trim();
+  if (!searchTerm) return alert('Please enter a search word');
+
+  const sgsOutput = document.getElementById('sgsText');
+  const sringeriOutput = document.getElementById('sringeriText');
+
+  if (!sgsOutput || !sringeriOutput) {
+    alert('Output display elements missing');
+    return;
+  }
+
+  const isTelugu = /[^\x00-\x7F]/.test(searchTerm);
+
+  let sgsResults = [];
+  let sringeriResults = [];
+
+  if (isTelugu) {
+    // Search Telugu directly in Sringeri content
+    const lines = sringeriContent.split('\n');
+    lines.forEach((line, idx) => {
+      if (line.includes(searchTerm)) {
+        const hl = highlightTerm(line, searchTerm);
+        sringeriResults.push(`Shloka ${idx + 1}: ${hl}`);
+      }
+    });
+    sgsResults = [...sringeriResults];
+  } else {
+    // Search transliteration in English file
+    const engLines = englishContent.split('\n');
+    const matchingNums = [];
+    engLines.forEach(line => {
+      if (line.toLowerCase().includes(searchTerm.toLowerCase())) {
+        const num = line.split(':')[0].trim();
+        if (/^\d+$/.test(num)) matchingNums.push(num);
+      }
+    });
+
+    const sringeriLines = sringeriContent.split('\n');
+    matchingNums.forEach(num => {
+      const idx = parseInt(num, 10) - 1;
+      if (sringeriLines[idx]) {
+        const hl = highlightTerm(sringeriLines[idx], searchTerm);
+        sringeriResults.push(`Shloka ${num}: ${hl}`);
+      }
+    });
+
+    sgsResults = matchingNums.length ? [`Found in shloka(s): ${matchingNums.join(', ')}`] : [];
+  }
+
+  sgsOutput.innerHTML = sgsResults.length ? sgsResults.join('<br><br>') : 'No matching shlokas found.';
+  sringeriOutput.innerHTML = sringeriResults.length ? sringeriResults.join('<br><br>') : 'No matching shlokas found.';
+}
+
+// Initialize event listeners
+document.addEventListener('DOMContentLoaded', () => {
+  loadFiles();
+
+  const btn = document.getElementById('search-button');
+  if (btn) btn.addEventListener('click', performSearch);
+
+  const input = document.getElementById('search-input');
+  if (input) input.addEventListener('keypress', e => {
+    if (e.key === 'Enter') performSearch();
   });
-
-
+});
 
 
 
