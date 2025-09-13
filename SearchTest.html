@@ -478,7 +478,7 @@
          <div id="verseTableContent" class="verse-grid"></div>
       </div>
 <script>
- // Global variables holding text file contents
+// Global variables holding text file contents
   let sringeriContent = '';
   let englishContent = '';
 
@@ -559,25 +559,7 @@
         }
       });
 
-      sgsResults = matchingNums.length ? [`Found in shloka(s): ${matchingNums.join(', ')}`] : [];
-    }
 
-    sgsOutput.innerHTML = sgsResults.length ? sgsResults.join('<br><br>') : 'No matching shlokas found.';
-    sringeriOutput.innerHTML = sringeriResults.length ? sringeriResults.join('<br><br>') : 'No matching shlokas found.';
-  }
-
-  // Initialize event listeners
-  document.addEventListener('DOMContentLoaded', () => {
-    loadFiles();
-
-    const btn = document.getElementById('search-button');
-    if (btn) btn.addEventListener('click', performSearch);
-
-    const input = document.getElementById('search-input');
-    if (input) input.addEventListener('keypress', e => {
-      if (e.key === 'Enter') performSearch();
-    });
-  });
 
     console.log('Script loaded at', new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
     
@@ -1484,21 +1466,7 @@
         }
     });
 
-    // Initialize on page load
-    window.onload = async function() {
-        try {
-            await loadSanscript();
-            await loadFiles();
-            document.getElementById('searchBtn').addEventListener('click', searchShloka);
-            initialize();
-        } catch (error) {
-            console.error('Initialization error in window.onload:', error);
-            document.getElementById('sgsText').innerHTML = `Initialization error: ${error.message}`;
-            document.getElementById('sringeriText').innerHTML = `Initialization error: ${error.message}`;
-            adjustTextboxHeight();
-            updateTextboxVisibility();
-        }
-    };
+
 </script>
    </body>
 </html>
