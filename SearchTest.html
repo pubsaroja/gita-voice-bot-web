@@ -616,6 +616,52 @@
       return;
     }
 
+    const isT// Global variables holding text file contents
+  let sringeriContent = '';
+  let englishContent = '';
+
+  // Load text files asynchronously from GitHub raw URLs
+  async function loadFiles() {
+    try {
+      const sringeriResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt');
+      if (!sringeriResponse.ok) throw new Error('Failed to load BG_Sringeri.txt');
+      sringeriContent = await sringeriResponse.text();
+
+      const englishResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG Telugu with Uvacha2.txt');
+      if (!englishResponse.ok) throw new Error('Failed to load BG Telugu with Uvacha2.txt');
+      englishContent = await englishResponse.text();
+
+      console.log('Files loaded:', {
+        sringeriLines: sringeriContent.split('\n').length,
+        englishLines: englishContent.split('\n').length
+      });
+    } catch (err) {
+      alert(err.message);
+      console.error(err);
+    }
+  }
+
+  // Highlight matched words in output without altering structure
+  function highlightTerm(text, term) {
+    if (!term) return text;
+    const regex = new RegExp(term, 'gi');
+    return text.replace(regex, m => `<mark>${m}</mark>`);
+  }
+
+  // Search function with case-insensitive matching
+  function performSearch() {
+    const inputEl = document.getElementById('search-input');
+    const searchTerm = inputEl.value.trim();
+    if (!searchTerm) return alert('Please enter a search word');
+
+    const sgsOutput = document.getElementById('sgsText');
+    const sringeriOutput = document.getElementById('sringeriText');
+
+    if (!sgsOutput || !sringeriOutput) {
+      alert('Output display elements missing');
+      return;
+    }
+
     const isTelugu = /[^\x00-\x7F]/.test(searchTerm);
 
     let sgsResults = [];
@@ -635,10 +681,13 @@
       // Search transliteration in English file (case-insensitive)
       const engLines = englishContent.split('\n');
       const matchingNums = [];
+      let currentNum = '';
       engLines.forEach(line => {
-        if (line.toLowerCase().includes(searchTerm.toLowerCase())) {
-          const num = line.split(':')[0].trim();
-          if (/^\d+\.\d+$/.test(num)) matchingNums.push(num); // Match "1.1" format
+        line = line.trim();
+        if (/^\d+\.\d+$/.test(line)) {
+          currentNum = line; // Update current shloka number
+        } else if (line.toLowerCase().includes(searchTerm.toLowerCase()) && currentNum) {
+          if (!matchingNums.includes(currentNum)) matchingNums.push(currentNum);
         }
       });
 
