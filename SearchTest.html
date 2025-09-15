@@ -575,31 +575,6 @@
     });
   }
 
-  // Verses per chapter in Bhagavad Gita
-  const versesPerChapter = [47, 72, 43, 42, 29, 47, 30, 28, 34, 42, 55, 20, 35, 27, 20, 24, 28, 78];
-
-  // Function to calculate line index for chapter and verse (0-based)
-  function calculateLineIndex(chapter, verse) {
-    let index = 0;
-    for (let i = 1; i < chapter; i++) {
-      index += versesPerChapter[i - 1];
-    }
-    index += verse - 1;
-    return index;
-  }
-
-  // Initialize event listeners
-  document.addEventListener('DOMContentLoaded', () => {
-    loadFiles();
-
-    const btn = document.getElementById('search-button');
-    if (btn) btn.addEventListener('click', performSearch);
-
-    const input = document.getElementById('search-input');
-    if (input) input.addEventListener('keypress', e => {
-      if (e.key === 'Enter') performSearch();
-    });
-  });
 
 
 
