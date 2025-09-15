@@ -382,6 +382,10 @@
          <button id="meaningsButton" onclick="handleMeanings()">Meanings</button>
          <button onclick="showVerseTable()">Selector</button>
          <button id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
+                 
+         <button id="groupButton" onclick="handleMeanings()">Grouped Shlokas</button>
+         <button onclick="showVerseTable()">Confusion Shlokas</button>
+         <button id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
       </div>
       <br>
       <div class="dropdown-container">
@@ -479,128 +483,152 @@
       </div>
       <script>
 // Global variables holding text file contents
-let sringeriContent = '';
-let englishContent = '';
+  let sringeriContent = '';
+  let englishContent = '';
 
-// Load the text files
-async function loadFiles() {
-  try {
-    const sringeriResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt');
-    sringeriContent = await sringeriResponse.text();
+  // Load text files asynchronously from GitHub raw URLs
+  async function loadFiles() {
+    try {
+      const sringeriResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt');
+      if (!sringeriResponse.ok) throw new Error('Failed to load BG_Sringeri.txt');
+      sringeriContent = await sringeriResponse.text();
 
-    const englishResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_English_single_line.txt');
-    englishContent = await englishResponse.text();
+      const englishResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG Telugu with Uvacha2.txt');
+      if (!englishResponse.ok) throw new Error('Failed to load BG Telugu with Uvacha2.txt');
+      englishContent = await englishResponse.text();
 
-    console.log('Files loaded.');
-  } catch (err) {
-    alert('Could not load files: ' + err.message);
-    console.error(err);
-  }
-}
-
-// Highlight matched word(s)
-function highlightTerm(text, term) {
-  if (!term) return text;
-  const regex = new RegExp(term, 'gi');
-  return text.replace(regex, m => `<mark>${m}</mark>`);
-}
-
-// Convert shloka number to line index (0-based)
-function calculateLineIndex(chapter, verse) {
-  const versesPerChapter = [47, 72, 43, 42, 29, 47, 30, 28, 34, 42, 55, 20, 35, 27, 20, 24, 28, 78];
-  let index = 0;
-  for (let i = 1; i < chapter; i++) index += versesPerChapter[i-1];
-  return index + verse - 1;
-}
-
-// Main search function
-function performSearch() {
-  const inputEl = document.getElementById('search-input');
-  const searchTerm = inputEl.value.trim();
-  if (!searchTerm) {
-    alert('Please enter a search word or number');
-    return;
-  }
-
-  const sgsOutput = document.getElementById('sgsText');
-  const sringeriOutput = document.getElementById('sringeriText');
-  if (!sgsOutput || !sringeriOutput) return;
-
-  const isTelugu = /[^\x00-\x7F]/.test(searchTerm);
-
-  let sgsResults = [];
-  let sringeriResults = [];
-
-  if (isTelugu) {
-    // Search Telugu in Sringeri file
-    const sringeriLines = sringeriContent.split('\n');
-    sringeriLines.forEach((line, idx) => {
-      if (line.includes(searchTerm)) {
-        const hl = highlightTerm(line, searchTerm);
-        sringeriResults.push(`Shloka ${idx + 1}: ${hl}`);
-      }
-    });
-    sgsResults = [...sringeriResults];
-  } else {
-    // Search English file for word or shloka number
-    const englishLines = englishContent.split('\n');
-    const sringeriLines = sringeriContent.split('\n');
-    const matchingNums = [];
-
-    englishLines.forEach((line, idx) => {
-      if (line.toLowerCase().includes(searchTerm.toLowerCase())) {
-        // Get shloka number from start of line (e.g., "1.1")
-        const numMatch = line.match(/^(\d+\.\d+)/);
-        const num = numMatch ? numMatch[1] : null;
-        if (num) matchingNums.push({num, idx});
-      }
-    });
-
-    matchingNums.forEach(({num, idx}) => {
-      // Calculate chapter, verse from number
-      const [chapter, verse] = num.split('.').map(Number);
-      const teluguIdx = calculateLineIndex(chapter, verse);
-      if (sringeriLines[teluguIdx]) {
-        // Highlight in Telugu shloka
-        sringeriResults.push(`Shloka ${num}: ${highlightTerm(sringeriLines[teluguIdx], searchTerm)}`);
-      }
-      // Highlight in English shloka
-      sgsResults.push(`Shloka ${num}: ${highlightTerm(englishLines[idx], searchTerm)}`);
-    });
-
-    // If search input is a number (e.g., "1.1"), allow direct number search too
-    if (/^\d+\.\d+$/.test(searchTerm) && !matchingNums.length) {
-      // Try to find line with that number in English file
-      englishLines.forEach((line, idx) => {
-        if (line.startsWith(searchTerm)) {
-          const [chapter, verse] = searchTerm.split('.').map(Number);
-          const teluguIdx = calculateLineIndex(chapter, verse);
-          if (sringeriLines[teluguIdx]) {
-            sringeriResults.push(`Shloka ${searchTerm}: ${highlightTerm(sringeriLines[teluguIdx], searchTerm)}`);
-          }
-          sgsResults.push(`Shloka ${searchTerm}: ${highlightTerm(line, searchTerm)}`);
-        }
+      console.log('Files loaded:', {
+        sringeriLines: sringeriContent.split('\n').length,
+        englishLines: englishContent.split('\n').length
       });
+    } catch (err) {
+      alert(err.message);
+      console.error(err);
     }
   }
 
-  sgsOutput.innerHTML = sgsResults.length ? sgsResults.join('<br><br>') : 'No matching shlokas found.';
-  sringeriOutput.innerHTML = sringeriResults.length ? sringeriResults.join('<br><br>') : 'No matching shlokas found.';
-  [sgsOutput, sringeriOutput].forEach(el => {
-    el.style.height = 'auto';
-    el.style.height = `${el.scrollHeight}px`;
-  });
-}
+  // Highlight matched words in output without altering structure
+  function highlightTerm(text, term) {
+    if (!term) return text;
+    const regex = new RegExp(term, 'gi');
+    return text.replace(regex, m => `<mark>${m}</mark>`);
+  }
 
-// Initialize event listeners and load files
-document.addEventListener('DOMContentLoaded', () => {
-  loadFiles();
-  document.getElementById('search-button').addEventListener('click', performSearch);
-  document.getElementById('search-input').addEventListener('keypress', e => {
-    if (e.key === 'Enter') performSearch();
-  });
-});
+  // Parse English file into shlokas with number and full text
+  function parseEnglishFile(text) {
+    const lines = text.split('\n');
+    const shlokas = [];
+    let currentShloka = null;
 
+    lines.forEach(line => {
+      line = line.trim();
+      const match = line.match(/^(\d+\.\d+)\t+(.*)$/);
+      if (match) {
+        if (currentShloka) shlokas.push(currentShloka);
+        currentShloka = { number: match[1], text: match[2] };
+      } else if (currentShloka && line) {
+        currentShloka.text += ' ' + line.trim();
+      }
+    });
+    if (currentShloka) shlokas.push(currentShloka);
+    return shlokas;
+  }
+
+  // Search function with case-insensitive matching
+  function performSearch() {
+    const inputEl = document.getElementById('search-input');
+    const searchTerm = inputEl.value.trim();
+    if (!searchTerm) return alert('Please enter a search word');
+
+    const sgsOutput = document.getElementById('sgsText');
+    const sringeriOutput = document.getElementById('sringeriText');
+
+    if (!sgsOutput || !sringeriOutput) {
+      alert('Output display elements missing');
+      return;
+    }
+
+    const isTelugu = /[^\x00-\x7F]/.test(searchTerm);
+
+    let sgsResults = [];
+    let sringeriResults = [];
+
+    if (isTelugu) {
+      // Search Telugu directly in Sringeri content
+      const lines = sringeriContent.split('\n');
+      lines.forEach((line, idx) => {
+        if (line.toLowerCase().includes(searchTerm.toLowerCase())) { // Case-insensitive for Telugu if needed
+          const hl = highlightTerm(line, searchTerm);
+          sringeriResults.push(`Shloka ${idx + 1}: ${hl}`);
+        }
+      });
+      sgsResults = [...sringeriResults];
+    } else {
+      // Parse English shlokas
+      const shlokas = parseEnglishFile(englishContent);
+      const matchingNums = [];
+
+      shlokas.forEach(shloka => {
+        if (shloka.text.toLowerCase().includes(searchTerm.toLowerCase())) {
+          matchingNums.push(shloka.number);
+        }
+      });
+
+      const sringeriLines = sringeriContent.split('\n');
+      matchingNums.forEach(num => {
+        const [chapter, verse] = num.split('.').map(Number);
+        const idx = calculateLineIndex(chapter, verse);
+        if (sringeriLines[idx]) {
+          const hl = highlightTerm(sringeriLines[idx], searchTerm);
+          sringeriResults.push(`Shloka ${num}: ${hl}`);
+        }
+      });
+
+      sgsResults = matchingNums.length ? [`Found in shloka(s): ${matchingNums.join(', ')}`] : [];
+    }
+
+    // Stack results vertically with line breaks, preserving original shloka structure
+    sgsOutput.innerHTML = sgsResults.length ? sgsResults.join('<br><br>') : 'No matching shlokas found.';
+    sringeriOutput.innerHTML = sringeriResults.length ? sringeriResults.join('<br><br>') : 'No matching shlokas found.';
+
+    // Auto-expand textboxes based on content
+    [sgsOutput, sringeriOutput].forEach(el => {
+      el.style.height = 'auto'; // Reset height
+      el.style.height = `${el.scrollHeight}px`; // Expand to fit content
+    });
+  }
+
+  // Verses per chapter in Bhagavad Gita
+  const versesPerChapter = [47, 72, 43, 42, 29, 47, 30, 28, 34, 42, 55, 20, 35, 27, 20, 24, 28, 78];
+
+  // Function to calculate line index for chapter and verse (0-based)
+  function calculateLineIndex(chapter, verse) {
+    let index = 0;
+    for (let i = 1; i < chapter; i++) {
+      index += versesPerChapter[i - 1];
+    }
+    index += verse - 1;
+    return index;
+  }
+
+  // Initialize event listeners
+  document.addEventListener('DOMContentLoaded', () => {
+    loadFiles();
+
+    const btn = document.getElementById('search-button');
+    if (btn) btn.addEventListener('click', performSearch);
+
+    const input = document.getElementById('search-input');
+    if (input) input.addEventListener('keypress', e => {
+      if (e.key === 'Enter') performSearch();
+    });
+  });
+
+
+
+
+
+         
   // Verses per chapter in Bhagavad Gita
   const versesPerChapter = [47, 72, 43, 42, 29, 47, 30, 28, 34, 42, 55, 20, 35, 27, 20, 24, 28, 78];
 
