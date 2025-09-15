@@ -493,8 +493,8 @@
       if (!sringeriResponse.ok) throw new Error('Failed to load BG_Sringeri.txt');
       sringeriContent = await sringeriResponse.text();
 
-      const englishResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG Telugu with Uvacha2.txt');
-      if (!englishResponse.ok) throw new Error('Failed to load BG Telugu with Uvacha2.txt');
+      const englishResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_English_single_line.txt');
+      if (!englishResponse.ok) throw new Error('Failed to load BG_English_single_line.txt');
       englishContent = await englishResponse.text();
 
       console.log('Files loaded:', {
@@ -512,26 +512,6 @@
     if (!term) return text;
     const regex = new RegExp(term, 'gi');
     return text.replace(regex, m => `<mark>${m}</mark>`);
-  }
-
-  // Parse English file into shlokas with number and full text
-  function parseEnglishFile(text) {
-    const lines = text.split('\n');
-    const shlokas = [];
-    let currentShloka = null;
-
-    lines.forEach(line => {
-      line = line.trim();
-      const match = line.match(/^(\d+\.\d+)\t+(.*)$/);
-      if (match) {
-        if (currentShloka) shlokas.push(currentShloka);
-        currentShloka = { number: match[1], text: match[2] };
-      } else if (currentShloka && line) {
-        currentShloka.text += ' ' + line.trim();
-      }
-    });
-    if (currentShloka) shlokas.push(currentShloka);
-    return shlokas;
   }
 
   // Search function with case-insensitive matching
@@ -564,13 +544,13 @@
       });
       sgsResults = [...sringeriResults];
     } else {
-      // Parse English shlokas
-      const shlokas = parseEnglishFile(englishContent);
+      // English search (single-line format)
+      const englishLines = englishContent.split('\n');
       const matchingNums = [];
-
-      shlokas.forEach(shloka => {
-        if (shloka.text.toLowerCase().includes(searchTerm.toLowerCase())) {
-          matchingNums.push(shloka.number);
+      englishLines.forEach(line => {
+        if (line.toLowerCase().includes(searchTerm.toLowerCase())) {
+          const num = line.split(' ')[0]; // Extract number like "1.1"
+          matchingNums.push(num);
         }
       });
 
