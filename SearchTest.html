@@ -556,14 +556,12 @@ async function performSearch() {
     if (shlokaNumberPattern.test(searchInput)) {
         let found = false;
         let fullShloka = [];
-        let isShlokaLine = false;
 
         for (let i = 0; i < sringeriLines.length; i++) {
             const line = sringeriLines[i].trim();
             const normalizedLineStart = line.split(/[\s\t]+/)[0];
             if (normalizedLineStart === searchInput) {
                 fullShloka.push(line);
-                isShlokaLine = true;
                 found = true;
                 // Collect subsequent lines until the next shloka number or empty line
                 for (let j = i + 1; j < sringeriLines.length; j++) {
@@ -588,8 +586,8 @@ async function performSearch() {
             console.log('Shloka not found:', searchInput); // Debug log
         }
     } else {
-        // Normalize search input for Telugu and English
-        const normalizedSearchInput = searchInput.replace(/\s+/g, ' ').trim();
+        // Normalize search input
+        const normalizedSearchInput = searchInput.replace(/\s+/g, ' ').trim().normalize('NFC');
 
         // Check if the input is Telugu (contains Telugu characters)
         const teluguPattern = /[\u0C00-\u0C7F]/;
@@ -600,15 +598,15 @@ async function performSearch() {
             let currentShlokaNumber = null;
 
             // Debug specific shlokas
-            const debugShlokas = ['5.7', '5.10'];
+            const debugShlokas = ['1.1', '5.7', '5.10'];
             const debugContent = [];
 
             for (let i = 0; i < sringeriLines.length; i++) {
                 const line = sringeriLines[i].trim();
-                const normalizedLine = line.replace(/\s+/g, ' ').trim();
+                const normalizedLine = line.replace(/\s+/g, ' ').trim().normalize('NFC');
                 if (line.match(shlokaNumberPattern)) {
                     if (currentShloka.length > 0) {
-                        const shlokaText = currentShloka.join(' ').replace(/\s+/g, ' ').trim();
+                        const shlokaText = currentShloka.join(' ').replace(/\s+/g, ' ').trim().normalize('NFC');
                         if (shlokaText.includes(normalizedSearchInput)) {
                             results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
                             console.log('Telugu match found for shloka:', currentShlokaNumber, currentShloka); // Debug log
@@ -622,7 +620,7 @@ async function performSearch() {
                 } else if (currentShloka.length > 0 && line) {
                     currentShloka.push(line);
                 } else if (currentShloka.length > 0) {
-                    const shlokaText = currentShloka.join(' ').replace(/\s+/g, ' ').trim();
+                    const shlokaText = currentShloka.join(' ').replace(/\s+/g, ' ').trim().normalize('NFC');
                     if (shlokaText.includes(normalizedSearchInput)) {
                         results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
                         console.log('Telugu match found for shloka:', currentShlokaNumber, currentShloka); // Debug log
@@ -636,7 +634,7 @@ async function performSearch() {
             }
             // Check the last shloka
             if (currentShloka.length > 0) {
-                const shlokaText = currentShloka.join(' ').replace(/\s+/g, ' ').trim();
+                const shlokaText = currentShloka.join(' ').replace(/\s+/g, ' ').trim().normalize('NFC');
                 if (shlokaText.includes(normalizedSearchInput)) {
                     results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
                     console.log('Telugu match found for last shloka:', currentShlokaNumber, currentShloka); // Debug log
@@ -646,7 +644,7 @@ async function performSearch() {
                 }
             }
 
-            console.log('Debug shlokas (5.7, 5.10):', debugContent); // Debug log
+            console.log('Debug shlokas (1.1, 5.7, 5.10) in BG_Sringeri.txt:', debugContent); // Debug log
 
             if (results.length > 0) {
                 const resultText = results.join('<br><br>');
@@ -664,7 +662,7 @@ async function performSearch() {
             // English word search
             const matchingShlokaNumbers = [];
             for (let i = 0; i < englishLines.length; i++) {
-                const line = englishLines[i].replace(/\s+/g, ' ').trim();
+                const line = englishLines[i].replace(/\s+/g, ' ').trim().normalize('NFC');
                 if (line.toLowerCase().includes(normalizedSearchInput.toLowerCase())) {
                     const shlokaNumber = line.split(/[\s\t]+/)[0];
                     if (shlokaNumber.match(shlokaNumberPattern)) {
@@ -680,7 +678,7 @@ async function performSearch() {
             let currentShlokaNumber = null;
 
             // Debug specific shlokas
-            const debugShlokas = ['5.7', '5.10'];
+            const debugShlokas = ['1.1', '1.4', '5.7', '5.10'];
             const debugContent = [];
 
             for (let i = 0; i < sringeriLines.length; i++) {
@@ -722,7 +720,7 @@ async function performSearch() {
                 console.log('No match in BG_Sringeri.txt for last shloka number:', currentShlokaNumber); // Debug log
             }
 
-            console.log('Debug shlokas (5.7, 5.10) in BG_Sringeri.txt:', debugContent); // Debug log
+            console.log('Debug shlokas (1.1, 1.4, 5.7, 5.10) in BG_Sringeri.txt:', debugContent); // Debug log
 
             if (results.length > 0) {
                 // Sort results by shloka number
