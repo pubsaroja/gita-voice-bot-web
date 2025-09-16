@@ -504,7 +504,7 @@ async function loadFiles() {
     }
 }
 
-// Highlight matched words in output without altering structure
+// Highlight matched words in output with red text
 function highlightText(text, searchTerm, isShlokaNumberSearch = false) {
     if (!searchTerm) return text;
     // Skip highlighting for shloka number in number searches
@@ -514,7 +514,7 @@ function highlightText(text, searchTerm, isShlokaNumberSearch = false) {
     // Escape special regex characters in searchTerm
     const escapedTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`(${escapedTerm})`, 'gi');
-    return text.replace(regex, `<mark>$1</mark>`);
+    return text.replace(regex, `<span style="color: red;">$1</span>`);
 }
 
 // Search function to handle Telugu, English, and shloka number searches
