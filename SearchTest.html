@@ -505,8 +505,12 @@ async function loadFiles() {
 }
 
 // Highlight matched words in output without altering structure
-function highlightText(text, searchTerm) {
+function highlightText(text, searchTerm, isShlokaNumberSearch = false) {
     if (!searchTerm) return text;
+    // Skip highlighting for shloka number in number searches
+    if (isShlokaNumberSearch) {
+        return text; // Return text without highlighting
+    }
     // Escape special regex characters in searchTerm
     const escapedTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`(${escapedTerm})`, 'gi');
@@ -574,7 +578,7 @@ async function performSearch() {
         }
 
         if (found) {
-            const highlighted = fullShloka.map(line => highlightText(line, searchInput)).join('<br>');
+            const highlighted = fullShloka.map(line => highlightText(line, searchInput, true)).join('<br>');
             sgsOutput.innerHTML = highlighted;
             sringeriOutput.innerHTML = highlighted;
             console.log('Shloka found:', fullShloka); // Debug log
@@ -584,9 +588,12 @@ async function performSearch() {
             console.log('Shloka not found:', searchInput); // Debug log
         }
     } else {
+        // Normalize search input for Telugu and English
+        const normalizedSearchInput = searchInput.replace(/\s+/g, ' ').trim();
+
         // Check if the input is Telugu (contains Telugu characters)
         const teluguPattern = /[\u0C00-\u0C7F]/;
-        if (teluguPattern.test(searchInput)) {
+        if (teluguPattern.test(normalizedSearchInput)) {
             // Search for Telugu word in sringeriContent
             const results = [];
             let currentShloka = [];
@@ -595,24 +602,31 @@ async function performSearch() {
             for (let i = 0; i < sringeriLines.length; i++) {
                 const line = sringeriLines[i].trim();
                 if (line.match(shlokaNumberPattern)) {
-                    if (currentShloka.length > 0 && currentShloka.join(' ').toLowerCase().includes(searchInput.toLowerCase())) {
-                        results.push(currentShloka.map(line => highlightText(line, searchInput)).join('<br>'));
+                    if (currentShloka.length > 0) {
+                        const shlokaText = currentShloka.join(' ').replace(/\s+/g, ' ').trim();
+                        if (shlokaText.includes(normalizedSearchInput)) {
+                            results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
+                        }
                     }
                     currentShloka = [line];
                     currentShlokaNumber = line.split(/[\s\t]+/)[0];
                 } else if (currentShloka.length > 0 && line) {
                     currentShloka.push(line);
                 } else if (currentShloka.length > 0) {
-                    if (currentShloka.join(' ').toLowerCase().includes(searchInput.toLowerCase())) {
-                        results.push(currentShloka.map(line => highlightText(line, searchInput)).join('<br>'));
+                    const shlokaText = currentShloka.join(' ').replace(/\s+/g, ' ').trim();
+                    if (shlokaText.includes(normalizedSearchInput)) {
+                        results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
                     }
                     currentShloka = [];
                     currentShlokaNumber = null;
                 }
             }
             // Check the last shloka
-            if (currentShloka.length > 0 && currentShloka.join(' ').toLowerCase().includes(searchInput.toLowerCase())) {
-                results.push(currentShloka.map(line => highlightText(line, searchInput)).join('<br>'));
+            if (currentShloka.length > 0) {
+                const shlokaText = currentShloka.join(' ').replace(/\s+/g, ' ').trim();
+                if (shlokaText.includes(normalizedSearchInput)) {
+                    results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
+                }
             }
 
             if (results.length > 0) {
@@ -631,8 +645,8 @@ async function performSearch() {
             // English word search
             const matchingShlokaNumbers = [];
             for (let i = 0; i < englishLines.length; i++) {
-                const line = englishLines[i].trim();
-                if (line.toLowerCase().includes(searchInput.toLowerCase())) {
+                const line = englishLines[i].replace(/\s+/g, ' ').trim();
+                if (line.toLowerCase().includes(normalizedSearchInput.toLowerCase())) {
                     const shlokaNumber = line.split(/[\s\t]+/)[0];
                     if (shlokaNumber.match(shlokaNumberPattern)) {
                         matchingShlokaNumbers.push(shlokaNumber);
@@ -650,7 +664,7 @@ async function performSearch() {
                 const line = sringeriLines[i].trim();
                 if (line.match(shlokaNumberPattern)) {
                     if (currentShloka.length > 0 && matchingShlokaNumbers.includes(currentShlokaNumber)) {
-                        results.push(currentShloka.map(line => highlightText(line, searchInput)).join('<br>'));
+                        results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
                     }
                     currentShloka = [line];
                     currentShlokaNumber = line.split(/[\s\t]+/)[0];
@@ -658,7 +672,7 @@ async function performSearch() {
                     currentShloka.push(line);
                 } else if (currentShloka.length > 0) {
                     if (matchingShlokaNumbers.includes(currentShlokaNumber)) {
-                        results.push(currentShloka.map(line => highlightText(line, searchInput)).join('<br>'));
+                        results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
                     }
                     currentShloka = [];
                     currentShlokaNumber = null;
@@ -666,7 +680,7 @@ async function performSearch() {
             }
             // Check the last shloka
             if (currentShloka.length > 0 && matchingShlokaNumbers.includes(currentShlokaNumber)) {
-                results.push(currentShloka.map(line => highlightText(line, searchInput)).join('<br>'));
+                results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
             }
 
             if (results.length > 0) {
