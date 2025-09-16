@@ -507,8 +507,10 @@ async function loadFiles() {
 // Highlight matched words in output without altering structure
 function highlightText(text, searchTerm) {
     if (!searchTerm) return text;
-    const regex = new RegExp(`(${searchTerm})`, 'gi');
-    return text.replace(regex, `<mark>${searchTerm}</mark>`);
+    // Escape special regex characters in searchTerm
+    const escapedTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedTerm})`, 'gi');
+    return text.replace(regex, `<mark>$1</mark>`);
 }
 
 // Search function to handle Telugu, English, and shloka number searches
@@ -544,17 +546,29 @@ async function performSearch() {
     if (shlokaNumberPattern.test(searchInput)) {
         const lines = sringeriContent.split('\n');
         let found = false;
+        let fullShloka = [];
+        let isShlokaLine = false;
 
         for (const line of lines) {
             if (line.startsWith(searchInput)) {
-                const highlighted = highlightText(line, searchInput);
-                sgsOutput.innerHTML = highlighted;
-                sringeriOutput.innerHTML = highlighted;
+                fullShloka.push(line);
+                isShlokaLine = true;
                 found = true;
-                break;
+                continue;
+            }
+            // Continue collecting lines until the next shloka number or empty line
+            if (isShlokaLine && line.trim() && !line.match(shlokaNumberPattern)) {
+                fullShloka.push(line);
+            } else if (isShlokaLine) {
+                isShlokaLine = false;
             }
         }
-        if (!found) {
+
+        if (found) {
+            const highlighted = fullShloka.map(line => highlightText(line, searchInput)).join('<br>');
+            sgsOutput.innerHTML = highlighted;
+            sringeriOutput.innerHTML = highlighted;
+        } else {
             sgsOutput.innerHTML = `Shloka ${searchInput} not found.`;
             sringeriOutput.innerHTML = `Shloka ${searchInput} not found.`;
         }
@@ -565,11 +579,33 @@ async function performSearch() {
             // Search for Telugu word in sringeriContent
             const lines = sringeriContent.split('\n');
             const results = [];
+            let currentShloka = [];
+            let isShlokaLine = false;
 
             for (const line of lines) {
-                if (line.includes(searchInput)) {
-                    results.push(highlightText(line, searchInput));
+                if (line.match(shlokaNumberPattern)) {
+                    if (currentShloka.length > 0) {
+                        // Check if the previous shloka contains the search term
+                        if (currentShloka.join(' ').includes(searchInput)) {
+                            results.push(currentShloka.map(line => highlightText(line, searchInput)).join('<br>'));
+                        }
+                        currentShloka = [];
+                    }
+                    currentShloka.push(line);
+                    isShlokaLine = true;
+                } else if (isShlokaLine && line.trim()) {
+                    currentShloka.push(line);
+                } else if (isShlokaLine) {
+                    isShlokaLine = false;
+                    if (currentShloka.join(' ').includes(searchInput)) {
+                        results.push(currentShloka.map(line => highlightText(line, searchInput)).join('<br>'));
+                    }
+                    currentShloka = [];
                 }
+            }
+            // Check the last shloka
+            if (currentShloka.length > 0 && currentShloka.join(' ').includes(searchInput)) {
+                results.push(currentShloka.map(line => highlightText(line, searchInput)).join('<br>'));
             }
 
             if (results.length > 0) {
@@ -604,14 +640,29 @@ async function performSearch() {
             // Fetch matching shlokas from sringeriContent
             const sringeriLines = sringeriContent.split('\n');
             const results = [];
+            let currentShloka = [];
+            let currentShlokaNumber = null;
 
-            for (const shlokaNumber of matchingShlokaNumbers) {
-                for (const line of sringeriLines) {
-                    if (line.startsWith(shlokaNumber)) {
-                        results.push(highlightText(line, searchInput));
-                        break;
+            for (const line of sringeriLines) {
+                if (line.match(shlokaNumberPattern)) {
+                    if (currentShloka.length > 0 && matchingShlokaNumbers.includes(currentShlokaNumber)) {
+                        results.push(currentShloka.map(line => highlightText(line, searchInput)).join('<br>'));
                     }
+                    currentShloka = [line];
+                    currentShlokaNumber = line.split(' ')[0];
+                } else if (currentShloka.length > 0 && line.trim()) {
+                    currentShloka.push(line);
+                } else if (currentShloka.length > 0) {
+                    if (matchingShlokaNumbers.includes(currentShlokaNumber)) {
+                        results.push(currentShloka.map(line => highlightText(line, searchInput)).join('<br>'));
+                    }
+                    currentShloka = [];
+                    currentShlokaNumber = null;
                 }
+            }
+            // Check the last shloka
+            if (currentShloka.length > 0 && matchingShlokaNumbers.includes(currentShlokaNumber)) {
+                results.push(currentShloka.map(line => highlightText(line, searchInput)).join('<br>'));
             }
 
             if (results.length > 0) {
