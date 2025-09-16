@@ -556,7 +556,8 @@ async function performSearch() {
 
         for (let i = 0; i < sringeriLines.length; i++) {
             const line = sringeriLines[i].trim();
-            if (line.startsWith(searchInput + ' ') || line === searchInput) {
+            // Exact match for shloka number (e.g., "12.2" but not "12.20")
+            if (line === searchInput || line.startsWith(searchInput + ' ') || line.startsWith(searchInput + '\t')) {
                 fullShloka.push(line);
                 isShlokaLine = true;
                 found = true;
@@ -594,15 +595,15 @@ async function performSearch() {
             for (let i = 0; i < sringeriLines.length; i++) {
                 const line = sringeriLines[i].trim();
                 if (line.match(shlokaNumberPattern)) {
-                    if (currentShloka.length > 0 && currentShloka.join(' ').includes(searchInput)) {
+                    if (currentShloka.length > 0 && currentShloka.join(' ').toLowerCase().includes(searchInput.toLowerCase())) {
                         results.push(currentShloka.map(line => highlightText(line, searchInput)).join('<br>'));
                     }
                     currentShloka = [line];
-                    currentShlokaNumber = line.split(' ')[0];
+                    currentShlokaNumber = line.split(/[\s\t]+/)[0];
                 } else if (currentShloka.length > 0 && line) {
                     currentShloka.push(line);
                 } else if (currentShloka.length > 0) {
-                    if (currentShloka.join(' ').includes(searchInput)) {
+                    if (currentShloka.join(' ').toLowerCase().includes(searchInput.toLowerCase())) {
                         results.push(currentShloka.map(line => highlightText(line, searchInput)).join('<br>'));
                     }
                     currentShloka = [];
@@ -610,7 +611,7 @@ async function performSearch() {
                 }
             }
             // Check the last shloka
-            if (currentShloka.length > 0 && currentShloka.join(' ').includes(searchInput)) {
+            if (currentShloka.length > 0 && currentShloka.join(' ').toLowerCase().includes(searchInput.toLowerCase())) {
                 results.push(currentShloka.map(line => highlightText(line, searchInput)).join('<br>'));
             }
 
@@ -619,10 +620,12 @@ async function performSearch() {
                 sgsOutput.innerHTML = resultText;
                 sringeriOutput.innerHTML = resultText;
                 console.log('Telugu search results:', results); // Debug log
+                console.log('First few lines of BG_Sringeri.txt:', sringeriLines.slice(0, 5)); // Debug log
             } else {
                 sgsOutput.innerHTML = `No shlokas found containing "${searchInput}".`;
                 sringeriOutput.innerHTML = `No shlokas found containing "${searchInput}".`;
                 console.log('No Telugu results for:', searchInput); // Debug log
+                console.log('First few lines of BG_Sringeri.txt:', sringeriLines.slice(0, 5)); // Debug log
             }
         } else {
             // English word search
@@ -630,13 +633,14 @@ async function performSearch() {
             for (let i = 0; i < englishLines.length; i++) {
                 const line = englishLines[i].trim();
                 if (line.toLowerCase().includes(searchInput.toLowerCase())) {
-                    const shlokaNumber = line.split(' ')[0];
+                    const shlokaNumber = line.split(/[\s\t]+/)[0];
                     if (shlokaNumber.match(shlokaNumberPattern)) {
                         matchingShlokaNumbers.push(shlokaNumber);
                     }
                 }
             }
             console.log('English matching shloka numbers:', matchingShlokaNumbers); // Debug log
+            console.log('First few lines of BG_English_single_line.txt:', englishLines.slice(0, 5)); // Debug log
 
             const results = [];
             let currentShloka = [];
@@ -649,7 +653,7 @@ async function performSearch() {
                         results.push(currentShloka.map(line => highlightText(line, searchInput)).join('<br>'));
                     }
                     currentShloka = [line];
-                    currentShlokaNumber = line.split(' ')[0];
+                    currentShlokaNumber = line.split(/[\s\t]+/)[0];
                 } else if (currentShloka.length > 0 && line) {
                     currentShloka.push(line);
                 } else if (currentShloka.length > 0) {
@@ -668,8 +672,8 @@ async function performSearch() {
             if (results.length > 0) {
                 // Sort results by shloka number
                 results.sort((a, b) => {
-                    const [aChapter, aVerse] = a.split(' ')[0].split('.').map(Number);
-                    const [bChapter, bVerse] = b.split(' ')[0].split('.').map(Number);
+                    const [aChapter, aVerse] = a.split(/[\s\t]+/)[0].split('.').map(Number);
+                    const [bChapter, bVerse] = b.split(/[\s\t]+/)[0].split('.').map(Number);
                     return aChapter === bChapter ? aVerse - bVerse : aChapter - bChapter;
                 });
                 const resultText = results.join('<br><br>');
