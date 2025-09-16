@@ -480,100 +480,176 @@
       </div>
       <script>
 // Global variables holding text file contents
-  let sringeriContent = '';
-  let englishContent = '';
+let sringeriContent = '';
+let englishContent = '';
 
-  // Load text files asynchronously from GitHub raw URLs
-  async function loadFiles() {
+// Load text files asynchronously from GitHub raw URLs
+async function loadFiles() {
     try {
-      const sringeriResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt');
-      if (!sringeriResponse.ok) throw new Error('Failed to load BG_Sringeri.txt');
-      sringeriContent = await sringeriResponse.text();
+        const sringeriResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt');
+        if (!sringeriResponse.ok) throw new Error('Failed to load BG_Sringeri.txt');
+        sringeriContent = await sringeriResponse.text();
 
-      const englishResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_English_single_line.txt');
-      if (!englishResponse.ok) throw new Error('Failed to load BG_English_single_line.txt');
-      englishContent = await englishResponse.text();
+        const englishResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_English_single_line.txt');
+        if (!englishResponse.ok) throw new Error('Failed to load BG_English_single_line.txt');
+        englishContent = await englishResponse.text();
 
-      console.log('Files loaded:', {
-        sringeriLines: sringeriContent.split('\n').length,
-        englishLines: englishContent.split('\n').length
-      });
+        console.log('Files loaded:', {
+            sringeriLines: sringeriContent.split('\n').length,
+            englishLines: englishContent.split('\n').length
+        });
     } catch (err) {
-      alert(err.message);
-      console.error(err);
+        alert(err.message);
+        console.error(err);
     }
-  }
+}
 
-  // Highlight matched words in output without altering structure
-  function highlightTerm(text, term) {
-    if (!term) return text;
-    const regex = new RegExp(term, 'gi');
-    return text.replace(regex, m => `<mark>${m}</mark>`);
-  }
+// Highlight matched words in output without altering structure
+function highlightText(text, searchTerm) {
+    if (!searchTerm) return text;
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    return text.replace(regex, `<mark>${searchTerm}</mark>`);
+}
 
-  // Search function with case-insensitive matching
-  function performSearch() {
-    const inputEl = document.getElementById('search-input');
-    const searchTerm = inputEl.value.trim();
-    if (!searchTerm) return alert('Please enter a search word');
-
+// Search function to handle Telugu, English, and shloka number searches
+async function performSearch() {
+    const searchInput = document.getElementById('search-input').value.trim();
     const sgsOutput = document.getElementById('sgsText');
     const sringeriOutput = document.getElementById('sringeriText');
 
     if (!sgsOutput || !sringeriOutput) {
-      alert('Output display elements missing');
-      return;
+        alert('Output display elements missing');
+        return;
     }
 
-    const isTelugu = /[^\x00-\x7F]/.test(searchTerm);
+    // Clear previous results
+    sgsOutput.innerHTML = '';
+    sringeriOutput.innerHTML = '';
 
-    let sgsResults = [];
-    let sringeriResults = [];
+    if (!searchInput) {
+        sgsOutput.innerHTML = 'Please enter a search term.';
+        sringeriOutput.innerHTML = 'Please enter a search term.';
+        return;
+    }
 
-    if (isTelugu) {
-      // Search Telugu directly in Sringeri content
-      const lines = sringeriContent.split('\n');
-      lines.forEach((line, idx) => {
-        if (line.toLowerCase().includes(searchTerm.toLowerCase())) { // Case-insensitive for Telugu if needed
-          const hl = highlightTerm(line, searchTerm);
-          sringeriResults.push(`Shloka ${idx + 1}: ${hl}`);
+    // Check if files are loaded
+    if (!sringeriContent || !englishContent) {
+        sgsOutput.innerHTML = 'Text files not loaded. Please try again.';
+        sringeriOutput.innerHTML = 'Text files not loaded. Please try again.';
+        return;
+    }
+
+    // Check if the input is a shloka number (e.g., 12.2)
+    const shlokaNumberPattern = /^\d+\.\d+$/;
+    if (shlokaNumberPattern.test(searchInput)) {
+        const lines = sringeriContent.split('\n');
+        let found = false;
+
+        for (const line of lines) {
+            if (line.startsWith(searchInput)) {
+                const highlighted = highlightText(line, searchInput);
+                sgsOutput.innerHTML = highlighted;
+                sringeriOutput.innerHTML = highlighted;
+                found = true;
+                break;
+            }
         }
-      });
-      sgsResults = [...sringeriResults];
+        if (!found) {
+            sgsOutput.innerHTML = `Shloka ${searchInput} not found.`;
+            sringeriOutput.innerHTML = `Shloka ${searchInput} not found.`;
+        }
     } else {
-      // English search (single-line format)
-      const englishLines = englishContent.split('\n');
-      const matchingNums = [];
-      englishLines.forEach(line => {
-        if (line.toLowerCase().includes(searchTerm.toLowerCase())) {
-          const num = line.split(' ')[0]; // Extract number like "1.1"
-          matchingNums.push(num);
-        }
-      });
+        // Check if the input is Telugu (contains Telugu characters)
+        const teluguPattern = /[\u0C00-\u0C7F]/;
+        if (teluguPattern.test(searchInput)) {
+            // Search for Telugu word in sringeriContent
+            const lines = sringeriContent.split('\n');
+            const results = [];
 
-      const sringeriLines = sringeriContent.split('\n');
-      matchingNums.forEach(num => {
-        const [chapter, verse] = num.split('.').map(Number);
-        const idx = calculateLineIndex(chapter, verse);
-        if (sringeriLines[idx]) {
-          const hl = highlightTerm(sringeriLines[idx], searchTerm);
-          sringeriResults.push(`Shloka ${num}: ${hl}`);
-        }
-      });
+            for (const line of lines) {
+                if (line.includes(searchInput)) {
+                    results.push(highlightText(line, searchInput));
+                }
+            }
 
-      sgsResults = matchingNums.length ? [`Found in shloka(s): ${matchingNums.join(', ')}`] : [];
+            if (results.length > 0) {
+                const resultText = results.join('<br><br>');
+                sgsOutput.innerHTML = resultText;
+                sringeriOutput.innerHTML = resultText;
+            } else {
+                sgsOutput.innerHTML = `No shlokas found containing "${searchInput}".`;
+                sringeriOutput.innerHTML = `No shlokas found containing "${searchInput}".`;
+            }
+        } else {
+            // English word search
+            const englishLines = englishContent.split('\n');
+            const matchingShlokaNumbers = [];
+
+            // Find shloka numbers where the English word appears
+            for (const line of englishLines) {
+                if (line.toLowerCase().includes(searchInput.toLowerCase())) {
+                    const shlokaNumber = line.split(' ')[0];
+                    if (shlokaNumber.match(shlokaNumberPattern)) {
+                        matchingShlokaNumbers.push(shlokaNumber);
+                    }
+                }
+            }
+
+            if (matchingShlokaNumbers.length === 0) {
+                sgsOutput.innerHTML = `No shlokas found for "${searchInput}".`;
+                sringeriOutput.innerHTML = `No shlokas found for "${searchInput}".`;
+                return;
+            }
+
+            // Fetch matching shlokas from sringeriContent
+            const sringeriLines = sringeriContent.split('\n');
+            const results = [];
+
+            for (const shlokaNumber of matchingShlokaNumbers) {
+                for (const line of sringeriLines) {
+                    if (line.startsWith(shlokaNumber)) {
+                        results.push(highlightText(line, searchInput));
+                        break;
+                    }
+                }
+            }
+
+            if (results.length > 0) {
+                // Sort results by shloka number
+                results.sort((a, b) => {
+                    const [aChapter, aVerse] = a.split(' ')[0].split('.').map(Number);
+                    const [bChapter, bVerse] = b.split(' ')[0].split('.').map(Number);
+                    return aChapter === bChapter ? aVerse - bVerse : aChapter - bChapter;
+                });
+                const resultText = results.join('<br><br>');
+                sgsOutput.innerHTML = resultText;
+                sringeriOutput.innerHTML = resultText;
+            } else {
+                sgsOutput.innerHTML = `No shlokas found for "${searchInput}".`;
+                sringeriOutput.innerHTML = `No shlokas found for "${searchInput}".`;
+            }
+        }
     }
-
-    // Stack results vertically with line breaks, preserving original shloka structure
-    sgsOutput.innerHTML = sgsResults.length ? sgsResults.join('<br><br>') : 'No matching shlokas found.';
-    sringeriOutput.innerHTML = sringeriResults.length ? sringeriResults.join('<br><br>') : 'No matching shlokas found.';
 
     // Auto-expand textboxes based on content
     [sgsOutput, sringeriOutput].forEach(el => {
-      el.style.height = 'auto'; // Reset height
-      el.style.height = `${el.scrollHeight}px`; // Expand to fit content
+        el.style.height = 'auto'; // Reset height
+        el.style.height = `${el.scrollHeight}px`; // Expand to fit content
     });
-  }
+}
+
+// Add event listener to the search button
+document.getElementById('search-button').addEventListener('click', performSearch);
+
+// Optional: Add enter key support for search
+document.getElementById('search-input').addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') {
+        performSearch();
+    }
+});
+
+// Load files when the page loads
+document.addEventListener('DOMContentLoaded', loadFiles);
 
 
 
