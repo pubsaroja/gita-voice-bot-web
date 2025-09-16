@@ -559,7 +559,7 @@ async function performSearch() {
 
         for (let i = 0; i < sringeriLines.length; i++) {
             const line = sringeriLines[i].trim();
-            const normalizedLineStart = line.split(/[\s\t]+/)[0];
+            const normalizedLineStart = line.split(/[\s\t]+/)[0].trim();
             if (normalizedLineStart === searchInput) {
                 fullShloka.push(line);
                 found = true;
@@ -598,7 +598,7 @@ async function performSearch() {
             let currentShlokaNumber = null;
 
             // Debug specific shlokas
-            const debugShlokas = ['1.1', '5.7', '5.10'];
+            const debugShlokas = ['1.1', '1.2', '5.7', '5.10'];
             const debugContent = [];
 
             for (let i = 0; i < sringeriLines.length; i++) {
@@ -607,7 +607,9 @@ async function performSearch() {
                 if (line.match(shlokaNumberPattern)) {
                     if (currentShloka.length > 0) {
                         const shlokaText = currentShloka.join(' ').replace(/\s+/g, ' ').trim().normalize('NFC');
-                        if (shlokaText.includes(normalizedSearchInput)) {
+                        // Use regex for flexible matching
+                        const regex = new RegExp(normalizedSearchInput.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                        if (regex.test(shlokaText)) {
                             results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
                             console.log('Telugu match found for shloka:', currentShlokaNumber, currentShloka); // Debug log
                         }
@@ -616,12 +618,13 @@ async function performSearch() {
                         }
                     }
                     currentShloka = [line];
-                    currentShlokaNumber = line.split(/[\s\t]+/)[0];
+                    currentShlokaNumber = line.split(/[\s\t]+/)[0].trim();
                 } else if (currentShloka.length > 0 && line) {
                     currentShloka.push(line);
                 } else if (currentShloka.length > 0) {
                     const shlokaText = currentShloka.join(' ').replace(/\s+/g, ' ').trim().normalize('NFC');
-                    if (shlokaText.includes(normalizedSearchInput)) {
+                    const regex = new RegExp(normalizedSearchInput.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                    if (regex.test(shlokaText)) {
                         results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
                         console.log('Telugu match found for shloka:', currentShlokaNumber, currentShloka); // Debug log
                     }
@@ -635,7 +638,8 @@ async function performSearch() {
             // Check the last shloka
             if (currentShloka.length > 0) {
                 const shlokaText = currentShloka.join(' ').replace(/\s+/g, ' ').trim().normalize('NFC');
-                if (shlokaText.includes(normalizedSearchInput)) {
+                const regex = new RegExp(normalizedSearchInput.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                if (regex.test(shlokaText)) {
                     results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
                     console.log('Telugu match found for last shloka:', currentShlokaNumber, currentShloka); // Debug log
                 }
@@ -644,7 +648,7 @@ async function performSearch() {
                 }
             }
 
-            console.log('Debug shlokas (1.1, 5.7, 5.10) in BG_Sringeri.txt:', debugContent); // Debug log
+            console.log('Debug shlokas (1.1, 1.2, 5.7, 5.10) in BG_Sringeri.txt:', debugContent); // Debug log
 
             if (results.length > 0) {
                 const resultText = results.join('<br><br>');
@@ -663,8 +667,9 @@ async function performSearch() {
             const matchingShlokaNumbers = [];
             for (let i = 0; i < englishLines.length; i++) {
                 const line = englishLines[i].replace(/\s+/g, ' ').trim().normalize('NFC');
-                if (line.toLowerCase().includes(normalizedSearchInput.toLowerCase())) {
-                    const shlokaNumber = line.split(/[\s\t]+/)[0];
+                const regex = new RegExp(normalizedSearchInput.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                if (regex.test(line)) {
+                    const shlokaNumber = line.split(/[\s\t]+/)[0].trim();
                     if (shlokaNumber.match(shlokaNumberPattern)) {
                         matchingShlokaNumbers.push(shlokaNumber);
                     }
@@ -678,12 +683,12 @@ async function performSearch() {
             let currentShlokaNumber = null;
 
             // Debug specific shlokas
-            const debugShlokas = ['1.1', '1.4', '5.7', '5.10'];
+            const debugShlokas = ['1.1', '1.2', '1.4', '5.7', '5.10'];
             const debugContent = [];
 
             for (let i = 0; i < sringeriLines.length; i++) {
                 const line = sringeriLines[i].trim();
-                const normalizedLineStart = line.split(/[\s\t]+/)[0];
+                const normalizedLineStart = line.split(/[\s\t]+/)[0].trim();
                 if (line.match(shlokaNumberPattern)) {
                     if (currentShloka.length > 0 && matchingShlokaNumbers.includes(currentShlokaNumber)) {
                         results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
@@ -720,13 +725,13 @@ async function performSearch() {
                 console.log('No match in BG_Sringeri.txt for last shloka number:', currentShlokaNumber); // Debug log
             }
 
-            console.log('Debug shlokas (1.1, 1.4, 5.7, 5.10) in BG_Sringeri.txt:', debugContent); // Debug log
+            console.log('Debug shlokas (1.1, 1.2, 1.4, 5.7, 5.10) in BG_Sringeri.txt:', debugContent); // Debug log
 
             if (results.length > 0) {
                 // Sort results by shloka number
                 results.sort((a, b) => {
-                    const [aChapter, aVerse] = a.split(/[\s\t]+/)[0].split('.').map(Number);
-                    const [bChapter, bVerse] = b.split(/[\s\t]+/)[0].split('.').map(Number);
+                    const [aChapter, aVerse] = a.split(/[\s\t]+/)[0].trim().split('.').map(Number);
+                    const [bChapter, bVerse] = b.split(/[\s\t]+/)[0].trim().split('.').map(Number);
                     return aChapter === bChapter ? aVerse - bVerse : aChapter - bChapter;
                 });
                 const resultText = results.join('<br><br>');
