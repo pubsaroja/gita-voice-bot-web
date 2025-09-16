@@ -552,7 +552,7 @@ async function performSearch() {
     const englishLines = englishContent.replace(/\r\n/g, '\n').split('\n');
 
     // Check if the input is a shloka number (e.g., 12.2)
-    const shlokaNumberPattern = /^\d+\.\d+$/;
+    const shlokaNumberPattern = /^\d+\.\d+\s*$/;
     if (shlokaNumberPattern.test(searchInput)) {
         let found = false;
         let fullShloka = [];
@@ -597,17 +597,19 @@ async function performSearch() {
             let currentShloka = [];
             let currentShlokaNumber = null;
 
-            // Debug specific shlokas
-            const debugShlokas = ['1.1', '1.2', '5.7', '5.10'];
+            // Debug specific shlokas and all detected numbers
+            const debugShlokas = ['1.1', '1.2', '1.4', '5.7', '5.10'];
             const debugContent = [];
+            const detectedNumbers = [];
 
             for (let i = 0; i < sringeriLines.length; i++) {
                 const line = sringeriLines[i].trim();
                 const normalizedLine = line.replace(/\s+/g, ' ').trim().normalize('NFC');
-                if (line.match(shlokaNumberPattern)) {
+                const lineStart = line.split(/[\s\t]+/)[0].trim();
+                if (lineStart.match(shlokaNumberPattern)) {
+                    detectedNumbers.push(lineStart); // Log all detected numbers
                     if (currentShloka.length > 0) {
                         const shlokaText = currentShloka.join(' ').replace(/\s+/g, ' ').trim().normalize('NFC');
-                        // Use regex for flexible matching
                         const regex = new RegExp(normalizedSearchInput.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
                         if (regex.test(shlokaText)) {
                             results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
@@ -618,7 +620,7 @@ async function performSearch() {
                         }
                     }
                     currentShloka = [line];
-                    currentShlokaNumber = line.split(/[\s\t]+/)[0].trim();
+                    currentShlokaNumber = lineStart;
                 } else if (currentShloka.length > 0 && line) {
                     currentShloka.push(line);
                 } else if (currentShloka.length > 0) {
@@ -648,7 +650,8 @@ async function performSearch() {
                 }
             }
 
-            console.log('Debug shlokas (1.1, 1.2, 5.7, 5.10) in BG_Sringeri.txt:', debugContent); // Debug log
+            console.log('Detected shloka numbers in BG_Sringeri.txt:', detectedNumbers.slice(0, 10)); // Debug first 10 numbers
+            console.log('Debug shlokas (1.1, 1.2, 1.4, 5.7, 5.10) in BG_Sringeri.txt:', debugContent); // Debug log
 
             if (results.length > 0) {
                 const resultText = results.join('<br><br>');
@@ -682,14 +685,16 @@ async function performSearch() {
             let currentShloka = [];
             let currentShlokaNumber = null;
 
-            // Debug specific shlokas
+            // Debug specific shlokas and all detected numbers
             const debugShlokas = ['1.1', '1.2', '1.4', '5.7', '5.10'];
             const debugContent = [];
+            const detectedNumbers = [];
 
             for (let i = 0; i < sringeriLines.length; i++) {
                 const line = sringeriLines[i].trim();
                 const normalizedLineStart = line.split(/[\s\t]+/)[0].trim();
-                if (line.match(shlokaNumberPattern)) {
+                if (normalizedLineStart.match(shlokaNumberPattern)) {
+                    detectedNumbers.push(normalizedLineStart); // Log all detected numbers
                     if (currentShloka.length > 0 && matchingShlokaNumbers.includes(currentShlokaNumber)) {
                         results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
                         console.log('English match found for shloka:', currentShlokaNumber, currentShloka); // Debug log
@@ -725,6 +730,7 @@ async function performSearch() {
                 console.log('No match in BG_Sringeri.txt for last shloka number:', currentShlokaNumber); // Debug log
             }
 
+            console.log('Detected shloka numbers in BG_Sringeri.txt:', detectedNumbers.slice(0, 10)); // Debug first 10 numbers
             console.log('Debug shlokas (1.1, 1.2, 1.4, 5.7, 5.10) in BG_Sringeri.txt:', debugContent); // Debug log
 
             if (results.length > 0) {
