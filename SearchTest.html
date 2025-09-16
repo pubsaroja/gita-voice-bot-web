@@ -529,6 +529,7 @@
          <div id="verseTableContent" class="verse-grid"></div>
       </div>
 
+
     <script defer>
         // Global variables
         let sringeriContent = '';
@@ -781,7 +782,7 @@
 
                     if (results.length > 0) {
                         const resultText = results.join('<br><br>');
-                        if (selectedStyle === 'sgs') {
+                        if,System: if (selectedStyle === 'sgs') {
                             sgsOutput.innerHTML = resultText;
                             sgsOutput.classList.add('multiline');
                             console.log('Output set to sgsText:', resultText);
@@ -840,7 +841,7 @@
                     for (let i = 0; i < englishLines.length; i++) {
                         const line = englishLines[i];
                         const normalizedLine = line.replace(/\s+/g, ' ').trim().normalize('NFC');
-                        const regex = new RegExp(normalizedSearchInput.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                        const regex = new RegExp(normalizedSearchInput.replace(/[.* Bongiorno, Sergio.]*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
                         if (regex.test(normalizedLine)) {
                             const shlokaNumber = line.split(/[\s\t]+/)[0].replace('-', '.');
                             if (shlokaNumber.match(shlokaNumberPattern)) {
@@ -985,6 +986,11 @@
                 const style = getSelectedStyle();
                 const activeTextbox = style === 'sgs' ? document.getElementById('sgsText') : document.getElementById('sringeriText');
 
+                if (!activeTextbox) {
+                    console.error('Error in toggleInstructions: Active textbox not found', { style });
+                    return;
+                }
+
                 if (!isInstructionsVisible) {
                     previousText = activeTextbox.innerText;
                     fetch(`${baseUrl}/instructions.txt`)
@@ -1015,8 +1021,10 @@
             } catch (error) {
                 console.error('Error in toggleInstructions:', error);
                 const activeTextbox = getSelectedStyle() === 'sgs' ? document.getElementById('sgsText') : document.getElementById('sringeriText');
-                activeTextbox.innerText = `Error in instructions: ${error.message}`;
-                adjustTextboxHeight();
+                if (activeTextbox) {
+                    activeTextbox.innerText = `Error in instructions: ${error.message}`;
+                    adjustTextboxHeight();
+                }
             }
         }
 
@@ -1233,8 +1241,8 @@
                         fetchShlokaText(chapter, verse, 'sgs'),
                         fetchShlokaText(chapter, verse, 'sringeri')
                     ]);
-                    sgsText.innerText = sgsShloka || `Shloka ${chapter}.${verse} not found`;
-                    sringeriText.innerText = sringeriShloka || `Shloka ${chapter}.${verse} not found`;
+                    if (sgsText) sgsText.innerText = sgsShloka || `Shloka ${chapter}.${verse} not found`;
+                    if (sringeriText) sringeriText.innerText = sringeriShloka || `Shloka ${chapter}.${verse} not found`;
                     adjustTextboxHeight();
                     updateTextboxVisibility();
 
@@ -1246,9 +1254,9 @@
                         audioPlayer.load();
                         await audioPlayer.play();
                     } catch (error) {
-                        const errorText = `${sgsText.innerText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
-                        sgsText.innerText = errorText;
-                        sringeriText.innerText = errorText;
+                        const errorText = `${sgsText ? sgsText.innerText : ''}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
+                        if (sgsText) sgsText.innerText = errorText;
+                        if (sringeriText) sringeriText.innerText = errorText;
                         adjustTextboxHeight();
                         console.error(`Error playing audio for ${chapter}.${verse}: ${error.message}`);
                     }
@@ -1265,8 +1273,8 @@
                 console.error('Error in handleContinuousPlay:', error);
                 const sgsText = document.getElementById('sgsText');
                 const sringeriText = document.getElementById('sringeriText');
-                sgsText.innerText = `Error in continuous play: ${error.message}`;
-                sringeriText.innerText = `Error in continuous play: ${error.message}`;
+                if (sgsText) sgsText.innerText = `Error in continuous play: ${error.message}`;
+                if (sringeriText) sringeriText.innerText = `Error in continuous play: ${error.message}`;
                 adjustTextboxHeight();
             }
         }
@@ -1279,6 +1287,13 @@
                 document.getElementById('instructionsButton').textContent = 'Instructions';
                 const modal = document.getElementById('verseTableModal');
                 const chapterSelect = document.getElementById('chapterTableSelect');
+                if (!modal || !chapterSelect) {
+                    console.error('Error in showVerseTable: Modal or chapter select not found', {
+                        modal: !!modal,
+                        chapterSelect: !!chapterSelect
+                    });
+                    return;
+                }
                 chapterSelect.value = '';
                 updateVerseGrid();
                 modal.style.display = 'flex';
@@ -1293,6 +1308,10 @@
                 console.log('updateVerseGrid called');
                 const chapter = parseInt(document.getElementById('chapterTableSelect').value);
                 const content = document.getElementById('verseTableContent');
+                if (!content) {
+                    console.error('Error in updateVerseGrid: verseTableContent not found');
+                    return;
+                }
                 content.innerHTML = '';
 
                 if (chapter) {
@@ -1316,7 +1335,12 @@
         function closeVerseTable() {
             try {
                 console.log('closeVerseTable called');
-                document.getElementById('verseTableModal').style.display = 'none';
+                const modal = document.getElementById('verseTableModal');
+                if (!modal) {
+                    console.error('Error in closeVerseTable: verseTableModal not found');
+                    return;
+                }
+                modal.style.display = 'none';
             } catch (error) {
                 console.error('Error in closeVerseTable:', error);
             }
@@ -1344,8 +1368,8 @@
                     fetchShlokaText(chapter, verse, 'sgs'),
                     fetchShlokaText(chapter, verse, 'sringeri')
                 ]);
-                sgsText.innerText = sgsShloka || `Shloka ${chapter}.${verse} not found`;
-                sringeriText.innerText = sringeriShloka || `Shloka ${chapter}.${verse} not found`;
+                if (sgsText) sgsText.innerText = sgsShloka || `Shloka ${chapter}.${verse} not found`;
+                if (sringeriText) sringeriText.innerText = sringeriShloka || `Shloka ${chapter}.${verse} not found`;
                 adjustTextboxHeight();
 
                 const audioUrl = await fetchAudioUrl(chapter, verse);
@@ -1355,9 +1379,9 @@
                     audioPlayer.load();
                     await audioPlayer.play();
                 } catch (error) {
-                    const errorText = `${sgsText.innerText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
-                    sgsText.innerText = errorText;
-                    sringeriText.innerText = errorText;
+                    const errorText = `${sgsText ? sgsText.innerText : ''}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
+                    if (sgsText) sgsText.innerText = errorText;
+                    if (sringeriText) sringeriText.innerText = errorText;
                     adjustTextboxHeight();
                     console.error(`Error playing audio for ${chapter}.${verse}: ${error.message}`);
                 }
@@ -1368,8 +1392,8 @@
                 console.error('Error in selectVerse:', error);
                 const sgsText = document.getElementById('sgsText');
                 const sringeriText = document.getElementById('sringeriText');
-                sgsText.innerText = `Error selecting verse: ${error.message}`;
-                sringeriText.innerText = `Error selecting verse: ${error.message}`;
+                if (sgsText) sgsText.innerText = `Error selecting verse: ${error.message}`;
+                if (sringeriText) sringeriText.innerText = `Error selecting verse: ${error.message}`;
                 adjustTextboxHeight();
             }
         }
@@ -1409,8 +1433,8 @@
                         fetchShlokaText(chapter, verse, 'sgs'),
                         fetchShlokaText(chapter, verse, 'sringeri')
                     ]);
-                    sgsText.innerText = sgsShloka || `Shloka ${chapter}.${verse} not found`;
-                    sringeriText.innerText = sringeriShloka || `Shloka ${chapter}.${verse} not found`;
+                    if (sgsText) sgsText.innerText = sgsShloka || `Shloka ${chapter}.${verse} not found`;
+                    if (sringeriText) sringeriText.innerText = sringeriShloka || `Shloka ${chapter}.${verse} not found`;
                     adjustTextboxHeight();
 
                     const audioUrl = getSelectedStyle() === 'sringeri'
@@ -1422,8 +1446,8 @@
 
                     updateTextboxVisibility();
                 } else {
-                    sgsText.innerText = 'Please select a Shloka first';
-                    sringeriText.innerText = 'Please select a Shloka first';
+                    if (sgsText) sgsText.innerText = 'Please select a Shloka first';
+                    if (sringeriText) sringeriText.innerText = 'Please select a Shloka first';
                     adjustTextboxHeight();
                     updateTextboxVisibility();
                 }
@@ -1431,8 +1455,8 @@
                 console.error('Error in handlePreviousShloka:', error);
                 const sgsText = document.getElementById('sgsText');
                 const sringeriText = document.getElementById('sringeriText');
-                sgsText.innerText = `Error in previous shloka: ${error.message}`;
-                sringeriText.innerText = `Error in previous shloka: ${error.message}`;
+                if (sgsText) sgsText.innerText = `Error in previous shloka: ${error.message}`;
+                if (sringeriText) sringeriText.innerText = `Error in previous shloka: ${error.message}`;
                 adjustTextboxHeight();
             }
         }
@@ -1452,25 +1476,25 @@
                     const verse = Math.floor(context.parameters.verse);
 
                     if (!isShowingMeanings) {
-                        previousText = sgsText.innerText;
+                        previousText = sgsText ? sgsText.innerText : '';
                         const meaningText = await fetchShlokaMeaning(chapter, verse);
-                        sgsText.innerText = meaningText || `Meaning for ${chapter}.${verse} not found`;
-                        sringeriText.innerText = meaningText || `Meaning for ${chapter}.${verse} not found`;
-                        meaningsButton.textContent = 'Close Meanings';
+                        if (sgsText) sgsText.innerText = meaningText || `Meaning for ${chapter}.${verse} not found`;
+                        if (sringeriText) sringeriText.innerText = meaningText || `Meaning for ${chapter}.${verse} not found`;
+                        if (meaningsButton) meaningsButton.textContent = 'Close Meanings';
                         document.getElementById('meaningsButton2').textContent = 'Close Meanings';
                         isShowingMeanings = true;
                     } else {
-                        sgsText.innerText = previousText || 'Your Shloka will appear here.';
-                        sringeriText.innerText = previousText || 'Your Shloka will appear here.';
-                        meaningsButton.textContent = 'Meanings';
+                        if (sgsText) sgsText.innerText = previousText || 'Your Shloka will appear here.';
+                        if (sringeriText) sringeriText.innerText = previousText || 'Your Shloka will appear here.';
+                        if (meaningsButton) meaningsButton.textContent = 'Meanings';
                         document.getElementById('meaningsButton2').textContent = 'Meanings';
                         isShowingMeanings = false;
                     }
                     adjustTextboxHeight();
                     updateTextboxVisibility();
                 } else {
-                    sgsText.innerText = 'Please select a Shloka first';
-                    sringeriText.innerText = 'Please select a Shloka first';
+                    if (sgsText) sgsText.innerText = 'Please select a Shloka first';
+                    if (sringeriText) sringeriText.innerText = 'Please select a Shloka first';
                     adjustTextboxHeight();
                     updateTextboxVisibility();
                 }
@@ -1478,8 +1502,8 @@
                 console.error('Error in handleMeanings:', error);
                 const sgsText = document.getElementById('sgsText');
                 const sringeriText = document.getElementById('sringeriText');
-                sgsText.innerText = `Error fetching meanings: ${error.message}`;
-                sringeriText.innerText = `Error fetching meanings: ${error.message}`;
+                if (sgsText) sgsText.innerText = `Error fetching meanings: ${error.message}`;
+                if (sringeriText) sringeriText.innerText = `Error fetching meanings: ${error.message}`;
                 adjustTextboxHeight();
             }
         }
@@ -1513,8 +1537,8 @@
                     fetchShlokaText(chapter, verse, 'sgs'),
                     fetchShlokaText(chapter, verse, 'sringeri')
                 ]);
-                sgsText.innerText = sgsShloka || `Shloka ${chapter}.${verse} not found`;
-                sringeriText.innerText = sringeriShloka || `Shloka ${chapter}.${verse} not found`;
+                if (sgsText) sgsText.innerText = sgsShloka || `Shloka ${chapter}.${verse} not found`;
+                if (sringeriText) sringeriText.innerText = sringeriShloka || `Shloka ${chapter}.${verse} not found`;
                 adjustTextboxHeight();
 
                 const folder = getSelectedStyle() === 'sringeri' ? 'AQ4PaadasSringeri' : 'AQ4PaadasSGS';
@@ -1526,9 +1550,9 @@
                     audioPlayer.load();
                     await audioPlayer.play();
                 } catch (error) {
-                    const errorText = `${sgsText.innerText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
-                    sgsText.innerText = errorText;
-                    sringeriText.innerText = errorText;
+                    const errorText = `${sgsText ? sgsText.innerText : ''}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
+                    if (sgsText) sgsText.innerText = errorText;
+                    if (sringeriText) sringeriText.innerText = errorText;
                     adjustTextboxHeight();
                     console.error(`Error playing audio for ${chapter}.${verse}: ${error.message}`);
                 }
@@ -1539,8 +1563,8 @@
                 console.error('Error in handleChapterSelect:', error);
                 const sgsText = document.getElementById('sgsText');
                 const sringeriText = document.getElementById('sringeriText');
-                sgsText.innerText = `Error selecting random shloka: ${error.message}`;
-                sringeriText.innerText = `Error selecting random shloka: ${error.message}`;
+                if (sgsText) sgsText.innerText = `Error selecting random shloka: ${error.message}`;
+                if (sringeriText) sringeriText.innerText = `Error selecting random shloka: ${error.message}`;
                 adjustTextboxHeight();
                 updateTextboxVisibility();
             }
@@ -1565,6 +1589,16 @@
                 const sringeriLabel = document.getElementById('sringeriLabel');
                 const sgsOutput = document.getElementById('sgsText');
                 const sringeriOutput = document.getElementById('sringeriText');
+
+                if (!sgsLabel || !sringeriLabel || !sgsOutput || !sringeriOutput) {
+                    console.error('Error in setSelectedStyle: One or more DOM elements not found', {
+                        sgsLabel: !!sgsLabel,
+                        sringeriLabel: !!sringeriLabel,
+                        sgsOutput: !!sgsOutput,
+                        sringeriOutput: !!sringeriOutput
+                    });
+                    return;
+                }
 
                 if (style === 'sgs') {
                     sgsLabel.classList.add('active');
@@ -1595,12 +1629,23 @@
 
                 // Check if all required elements exist
                 if (!sgsText || !sringeriText || !sgsLabel || !sringeriLabel) {
-                    console.error('Error in updateTextboxVisibility: One or more DOM elements not found', {
+                    const missingElements = [];
+                    if (!sgsText) missingElements.push('sgsText');
+                    if (!sringeriText) missingElements.push('sringeriText');
+                    if (!sgsLabel) missingElements.push('sgsLabel');
+                    if (!sringeriLabel) missingElements.push('sringeriLabel');
+                    console.error('Error in updateTextboxVisibility: DOM elements missing', {
+                        missing: missingElements,
                         sgsText: !!sgsText,
                         sringeriText: !!sringeriText,
                         sgsLabel: !!sgsLabel,
                         sringeriLabel: !!sringeriLabel
                     });
+
+                    // Display error in UI if possible
+                    if (sgsText) sgsText.innerText = 'Error: Required UI elements are missing. Please check the HTML.';
+                    if (sringeriText) sringeriText.innerText = 'Error: Required UI elements are missing. Please check the HTML.';
+                    if (sgsText || sringeriText) adjustTextboxHeight();
                     return;
                 }
 
@@ -1620,6 +1665,11 @@
                 adjustTextboxHeight();
             } catch (error) {
                 console.error('Error in updateTextboxVisibility:', error.message);
+                const sgsText = document.getElementById('sgsText');
+                const sringeriText = document.getElementById('sringeriText');
+                if (sgsText) sgsText.innerText = `Error updating visibility: ${error.message}`;
+                if (sringeriText) sringeriText.innerText = `Error updating visibility: ${error.message}`;
+                if (sgsText || sringeriText) adjustTextboxHeight();
             }
         }
 
@@ -1645,7 +1695,7 @@
                     verse = Math.floor(Math.random() * verseCounts[chapter]) + 1;
                     autoplay = true;
                 } else if (intent === 'SringeriPaada') {
-                    setSelectedStyle('sgs'); // Use SGS Style for Sringeri button to match previous behavior
+                    setSelectedStyle('sgs'); // Using SGS Style for consistency
                     quarter = 'pada1_or_pada3';
                     chapter = Math.floor(Math.random() * 18) + 1;
                     verse = Math.floor(Math.random() * verseCounts[chapter]) + 1;
@@ -1670,8 +1720,10 @@
                         chapter--;
                         if (chapter < 1) {
                             chapter = 18;
+                            verse = verseCounts[chapter];
+                        } else {
+                            verse = verseCounts[chapter];
                         }
-                        verse = verseCounts[chapter];
                     }
                     autoplay = false;
                 } else if (intent === 'FullShloka') {
@@ -1703,8 +1755,8 @@
                     fetchShlokaText(chapter, verse, 'sgs'),
                     fetchShlokaText(chapter, verse, 'sringeri')
                 ]);
-                sgsText.innerText = sgsShloka || `Shloka ${chapter}.${verse} not found`;
-                sringeriText.innerText = sringeriShloka || `Shloka ${chapter}.${verse} not found`;
+                if (sgsText) sgsText.innerText = sgsShloka || `Shloka ${chapter}.${verse} not found`;
+                if (sringeriText) sringeriText.innerText = sringeriShloka || `Shloka ${chapter}.${verse} not found`;
                 adjustTextboxHeight();
 
                 const audioUrl = await fetchAudioUrl(chapter, verse, quarter, isFullForQuarter);
@@ -1715,17 +1767,17 @@
                             audioPlayer.load();
                             await audioPlayer.play();
                         } catch (error) {
-                            const errorText = `${sgsText.innerText}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
-                            sgsText.innerText = errorText;
-                            sringeriText.innerText = errorText;
+                            const errorText = `${sgsText ? sgsText.innerText : ''}\nError playing audio for ${chapter}.${verse}: ${error.message}`;
+                            if (sgsText) sgsText.innerText = errorText;
+                            if (sringeriText) sringeriText.innerText = errorText;
                             adjustTextboxHeight();
                             console.error(`Error playing audio for ${chapter}.${verse}: ${error.message}`);
                         }
                     }
                 } else {
-                    const errorText = `${sgsText.innerText}\n${audioUrl.error}`;
-                    sgsText.innerText = errorText;
-                    sringeriText.innerText = errorText;
+                    const errorText = `${sgsText ? sgsText.innerText : ''}\n${audioUrl.error}`;
+                    if (sgsText) sgsText.innerText = errorText;
+                    if (sringeriText) sringeriText.innerText = errorText;
                     adjustTextboxHeight();
                     console.error(audioUrl.error);
                 }
@@ -1735,8 +1787,8 @@
                 console.error(`Error in sendCommand (${intent}): ${error.message}`);
                 const sgsText = document.getElementById('sgsText');
                 const sringeriText = document.getElementById('sringeriText');
-                sgsText.innerText = `Error processing command: ${error.message}`;
-                sringeriText.innerText = `Error processing command: ${error.message}`;
+                if (sgsText) sgsText.innerText = `Error processing command: ${error.message}`;
+                if (sringeriText) sringeriText.innerText = `Error processing command: ${error.message}`;
                 adjustTextboxHeight();
             }
         }
@@ -1746,100 +1798,161 @@
             const sgsButton = document.querySelector('.sgs-button');
             const sringeriButton = document.querySelector('.sringeri-button');
             const playerButtons = document.querySelectorAll('.player-container button');
-            sgsButton.classList.remove('sgs-playing', 'clicked');
-            sringeriButton.classList.remove('sringeri-playing', 'clicked');
-            sgsButton.classList.add('reset');
-            sringeriButton.classList.add('reset');
+            if (sgsButton) sgsButton.classList.remove('sgs-playing', 'clicked');
+            if (sringeriButton) sringeriButton.classList.remove('sringeri-playing', 'clicked');
+            if (sgsButton) sgsButton.classList.add('reset');
+            if (sringeriButton) sringeriButton.classList.add('reset');
             playerButtons.forEach(button => button.classList.remove('clicked'));
             console.log('Button states reset');
         }
 
         // Setup button listeners
         function setupButtonListeners() {
-            const sgsButton = document.querySelector('.sgs-button');
-            const sringeriButton = document.querySelector('.sringeri-button');
-            const searchButton = document.getElementById('search-button');
-            const instructionsButton = document.getElementById('instructionsButton');
-            const meaningsButton = document.getElementById('meaningsButton');
-            const previousShlokaButton = document.getElementById('previousShlokaButton');
-            const nextShlokaButton = document.getElementById('nextShlokaButton');
-            const sgsPadaButton = document.getElementById('sgsPadaButton');
-            const sringeriPadaButton = document.getElementById('sringeriPadaButton');
-            const fullShlokaButton = document.getElementById('fullShlokaButton');
-            const selectVerseButton = document.getElementById('selectVerseButton');
-            const previousButton = document.getElementById('previousButton');
-            const meaningsButton2 = document.getElementById('meaningsButton2');
-            const closeVerseTableButton = document.getElementById('closeVerseTableButton');
-            const chapterSelect = document.getElementById('chapterSelect');
-            const continuousPlaySelect = document.getElementById('continuousPlaySelect');
-            const chapterTableSelect = document.getElementById('chapterTableSelect');
-            const audioPlayer = document.getElementById('audioPlayer');
+            try {
+                console.log('setupButtonListeners called');
+                const sgsButton = document.querySelector('.sgs-button');
+                const sringeriButton = document.querySelector('.sringeri-button');
+                const searchButton = document.getElementById('search-button');
+                const instructionsButton = document.getElementById('instructionsButton');
+                const meaningsButton = document.getElementById('meaningsButton');
+                const previousShlokaButton = document.getElementById('previousShlokaButton');
+                const nextShlokaButton = document.getElementById('nextShlokaButton');
+                const sgsPadaButton = document.getElementById('sgsPadaButton');
+                const sringeriPadaButton = document.getElementById('sringeriPadaButton');
+                const fullShlokaButton = document.getElementById('fullShlokaButton');
+                const selectVerseButton = document.getElementById('selectVerseButton');
+                const previousButton = document.getElementById('previousButton');
+                const meaningsButton2 = document.getElementById('meaningsButton2');
+                const chapterSelect = document.getElementById('chapterSelect');
+                const continuousPlaySelect = document.getElementById('continuousPlaySelect');
+                const closeVerseTableButton = document.getElementById('closeVerseTableButton');
 
-            sgsButton.addEventListener('click', () => {
-                resetButtonStates();
-                sgsButton.classList.add('clicked', 'sgs-playing');
-                sendCommand('SGSFirstPaada');
-            });
+                if (sgsButton) {
+                    sgsButton.addEventListener('click', () => sendCommand('SGSFirstPaada'));
+                }
+                if (sringeriButton) {
+                    sringeriButton.addEventListener('click', () => sendCommand('SringeriPaada'));
+                }
+                if (searchButton) {
+                    searchButton.addEventListener('click', performSearch);
+                }
+                if (instructionsButton) {
+                    instructionsButton.addEventListener('click', toggleInstructions);
+                }
+                if (meaningsButton) {
+                    meaningsButton.addEventListener('click', handleMeanings);
+                }
+                if (previousShlokaButton) {
+                    previousShlokaButton.addEventListener('click', handlePreviousShloka);
+                }
+                if (nextShlokaButton) {
+                    nextShlokaButton.addEventListener('click', () => sendCommand('NextFullShloka'));
+                }
+                if (sgsPadaButton) {
+                    sgsPadaButton.addEventListener('click', () => sendCommand('SGSFirstPaada'));
+                }
+                if (sringeriPadaButton) {
+                    sringeriPadaButton.addEventListener('click', () => sendCommand('SringeriPaada'));
+                }
+                if (fullShlokaButton) {
+                    fullShlokaButton.addEventListener('click', () => sendCommand('FullShloka'));
+                }
+                if (selectVerseButton) {
+                    selectVerseButton.addEventListener('click', showVerseTable);
+                }
+                if (previousButton) {
+                    previousButton.addEventListener('click', handlePreviousShloka);
+                }
+                if (meaningsButton2) {
+                    meaningsButton2.addEventListener('click', handleMeanings);
+                }
+                if (chapterSelect) {
+                    chapterSelect.addEventListener('change', () => handleChapterSelect(chapterSelect));
+                }
+                if (continuousPlaySelect) {
+                    continuousPlaySelect.addEventListener('change', () => handleContinuousPlay(continuousPlaySelect));
+                }
+                if (closeVerseTableButton) {
+                    closeVerseTableButton.addEventListener('click', closeVerseTable);
+                }
 
-            sringeriButton.addEventListener('click', () => {
-                resetButtonStates();
-                sringeriButton.classList.add('clicked', 'sringeri-playing');
-                sendCommand('SringeriPaada');
-            });
-
-            searchButton.addEventListener('click', performSearch);
-
-            instructionsButton.addEventListener('click', toggleInstructions);
-
-            meaningsButton.addEventListener('click', handleMeanings);
-
-            previousShlokaButton.addEventListener('click', handlePreviousShloka);
-
-            nextShlokaButton.addEventListener('click', () => sendCommand('NextFullShloka'));
-
-            sgsPadaButton.addEventListener('click', () => {
-                resetButtonStates();
-                sgsPadaButton.classList.add('clicked');
-                sendCommand('SGSFirstPaada');
-            });
-
-            sringeriPadaButton.addEventListener('click', () => {
-                resetButtonStates();
-                sringeriPadaButton.classList.add('clicked');
-                sendCommand('SringeriPaada');
-            });
-
-            fullShlokaButton.addEventListener('click', () => {
-                resetButtonStates();
-                fullShlokaButton.classList.add('clicked');
-                sendCommand('FullShloka');
-            });
-
-            selectVerseButton.addEventListener('click', showVerseTable);
-
-            previousButton.addEventListener('click', handlePreviousShloka);
-
-            meaningsButton2.addEventListener('click', handleMeanings);
-
-            closeVerseTableButton.addEventListener('click', closeVerseTable);
-
-            chapterSelect.addEventListener('change', () => handleChapterSelect(chapterSelect));
-
-            continuousPlaySelect.addEventListener('change', () => handleContinuousPlay(continuousPlaySelect));
-
-            chapterTableSelect.addEventListener('change', updateVerseGrid);
-
-            audioPlayer.addEventListener('ended', resetButtonStates);
+                console.log('Button listeners set up successfully');
+            } catch (error) {
+                console.error('Error in setupButtonListeners:', error);
+            }
         }
 
-        // Document ready
+        // DOMContentLoaded event listener
         document.addEventListener('DOMContentLoaded', async () => {
-            await loadFiles();
-            initialize();
-            setupStyleListeners();
-            setupButtonListeners();
-            console.log('Document loaded, initialization complete');
+            try {
+                console.log('DOMContentLoaded event triggered');
+                await loadFiles();
+                setupStyleListeners();
+                setupButtonListeners();
+                initialize();
+                console.log('Initialization complete');
+            } catch (error) {
+                console.error('Error during DOMContentLoaded:', error);
+                const sgsText = document.getElementById('sgsText');
+                const sringeriText = document.getElementById('sringeriText');
+                if (sgsText) sgsText.innerText = `Initialization error: ${error.message}`;
+                if (sringeriText) sringeriText.innerText = `Initialization error: ${error.message}`;
+                adjustTextboxHeight();
+            }
         });
     </script>
 </body>
+</html>
+```
+
+### HTML `<body>` to Ensure DOM Elements Exist
+To prevent the `updateTextboxVisibility` error, ensure the HTML `<body>` contains the required elements with the correct IDs. Below is a suggested `<body>` snippet that matches the script’s expectations:
+
+```html
+<body>
+    <div class="style-labels">
+        <label id="sgsLabel" class="style-label active">SGS Style</label>
+        <label id="sringeriLabel" class="style-label">Sringeri Style</label>
+    </div>
+    <div id="sgsText" class="text-output active">Your Shloka will appear here.</div>
+    <div id="sringeriText" class="text-output">Your Shloka will appear here.</div>
+    <div class="controls">
+        <input id="search-input" type="text" placeholder="Enter shloka number or keyword">
+        <button id="search-button">Search</button>
+        <button id="instructionsButton">Instructions</button>
+        <button id="meaningsButton">Meanings</button>
+        <button id="previousShlokaButton">Previous Shloka</button>
+        <button id="nextShlokaButton">Next Shloka</button>
+        <button id="sgsPadaButton">SGS Pada</button>
+        <button id="sringeriPadaButton">Sringeri Pada</button>
+        <button id="fullShlokaButton">Full Shloka</button>
+        <button id="selectVerseButton">Select Verse</button>
+        <button id="previousButton">Previous</button>
+        <button id="meaningsButton2">Meanings</button>
+        <select id="chapterSelect">
+            <option value="">Select Chapter</option>
+            <option value="1">Chapter 1</option>
+            <option value="2">Chapter 2</option>
+            <!-- Add options for chapters 3-18 -->
+        </select>
+        <select id="continuousPlaySelect">
+            <option value="">Continuous Play</option>
+            <option value="1">Chapter 1</option>
+            <option value="2">Chapter 2</option>
+            <!-- Add options for chapters 3-18 -->
+        </select>
+    </div>
+    <div id="verseTableModal" style="display: none;">
+        <select id="chapterTableSelect">
+            <option value="">Select Chapter</option>
+            <option value="1">Chapter 1</option>
+            <option value="2">Chapter 2</option>
+            <!-- Add options for chapters 3-18 -->
+        </select>
+        <div id="verseTableContent"></div>
+        <button id="closeVerseTableButton">Close</button>
+    </div>
+    <audio id="audioPlayer" controls></audio>
+</body>
+
 </html>
