@@ -5,8 +5,36 @@
 <meta charset="UTF-8">
 <title>Bhagavad Gita Shlokas</title>
 <style>
-  body { font-family: Arial, sans-serif; line-height: 1.6; }
-  summary { cursor: pointer; font-weight: bold; }
+  body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    text-align: center;
+  }
+  .container {
+    display: inline-block;
+    text-align: left;
+    max-width: 900px;
+    width: 95%;
+  }
+  .search-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  #searchBox {
+    flex: 1 1 250px;
+    max-width: 400px;
+    padding: 8px;
+    font-size: 16px;
+  }
+  button {
+    padding: 6px 12px;
+    margin: 2px;
+    font-size: 14px;
+  }
   .match-highlight { background-color: orangered; color: white; }
   .current-match { outline: 3px solid #ffb84d; }
   #topBtn {
@@ -29,36 +57,29 @@
 </head>
 <body>
 
+<div class="container">
+
 <h2>Bhagavad Gita Shlokas</h2>
 
-<!-- Search UI -->
-<input type="text" id="searchBox" placeholder="Search shloka number or text...">
-<button id="searchBtn">Search</button>
-<button id="prevBtn">Previous</button>
-<button id="nextBtn">Next</button>
-<button id="clearBtn">Clear</button>
-<span id="searchInfo" style="margin-left:10px; font-weight:bold;"></span>
+<div class="search-bar">
+  <input type="text" id="searchBox" placeholder="Search shloka number or text...">
+  <button id="searchBtn">Search</button>
+  <button id="prevBtn">Previous</button>
+  <button id="nextBtn">Next</button>
+  <button id="clearBtn">Clear</button>
+</div>
 
-<div id="searchOptions" style="margin-top:5px; margin-bottom:10px;">
+<div id="searchOptions" style="margin-bottom:10px; text-align:center;">
   <label><input type="checkbox" id="caseSensitive"> Match Case</label>
   &nbsp;&nbsp;
   <label><input type="checkbox" id="transliterationMode" checked> Transliteration Mode</label>
+  &nbsp;&nbsp;
+  <span id="searchInfo" style="font-weight:bold;"></span>
 </div>
 
-<!-- Expand/Collapse -->
 <button id="expandAllBtn">Expand All</button>
 <button id="collapseAllBtn">Collapse All</button>
-
 <hr>
-
-<!-- 🔽 Replace this sample with ALL 700 shlokas -->
-<details>
-  <summary>Chapter 12</summary>
-  <table border="1" cellpadding="5">
-    <tr><td>12.2</td><td>శ్రీ భగవానువాచ | మయ్యావేష్య మనో యే మాం ...</td></tr>
-    <tr><td>12.20</td><td>ये तु धर्म्यामृतमिदं ...</td></tr>
-  </table>
-</details>
 
 <details>
 <summary>1.1 ధృతరాష్ట్ర ఉవాచ।<br>ధర్మక్షేత్రే కురుక్షేత్రే సమవేతా యుయుత్సవః।<br>మామకాః పాండవాశ్చైవ కిమకుర్వత సంజయ।।</summary>
@@ -2154,7 +2175,8 @@
 </tbody>
 </table>
 </details>
-<!-- 🔼 End sample, insert your full content here -->
+
+</div>
 
 <!-- Go to Top Button -->
 <button onclick="scrollToTop()" id="topBtn" title="Go to top">⬆ Top</button>
@@ -2187,11 +2209,15 @@ function normalizeToLatin(txt) {
   let out = '';
   for (let ch of txt) {
     if (map[ch] !== undefined) out += map[ch];
-    else {
-      const lower = ch.toLowerCase();
-      if ((lower >= 'a' && lower <= 'z') || (lower >= '0' && lower <= '9') || lower === ' ') out += lower;
-      else out += lower;
-    }
+else {
+  const lower = ch.toLowerCase();
+  if ((/[a-z0-9 ]/).test(lower)) {
+    out += lower;
+  } else {
+    out += lower;
+  }
+}
+
   }
   return out.replace(/[^a-z0-9]+/g, ' ').trim();
 }
@@ -2207,37 +2233,52 @@ function findMatches(query) {
   const opts = getOptions();
   const rawQuery = String(query || '').trim();
   if (!rawQuery) return [];
+
   let q = rawQuery;
-  if (!opts.caseSensitive) q = q.toLowerCase();
+
+  if (opts.transliteration) {
+    // Normalize query for transliteration mode
+    q = normalizeToLatin(q);
+  } else if (!opts.caseSensitive) {
+    q = q.toLowerCase();
+  }
+
   const matches = [];
+
+  // Case 1: shloka number (like 12.2)
   if (isShlokaNumber(q)) {
     document.querySelectorAll("details summary, details td").forEach(el => {
-      const m = (el.textContent || '').match(/\d+\.\d+/);
+      const m = (el.textContent || '').match(/\\d+\\.\\d+/);
       if (m) {
         const num = String(m[0]);
-        if (opts.caseSensitive ? num === rawQuery : num.toLowerCase() === q) {
+        if (opts.caseSensitive ? num === rawQuery : num.toLowerCase() === rawQuery.toLowerCase()) {
           matches.push({ el: el, details: el.closest("details") });
         }
       }
     });
     return matches;
   }
-  const normQuery = opts.transliteration ? normalizeToLatin(q) : q;
+
+  // Case 2: text search
   document.querySelectorAll("details").forEach(det => {
-    const summary = det.querySelector("summary");
-    if (summary) {
-      let text = String(summary.textContent || '');
-      if (opts.transliteration) text = normalizeToLatin(text);
-      if (!opts.caseSensitive) text = text.toLowerCase();
-      if (text.includes(normQuery)) matches.push({ el: summary, details: det });
-    }
-    det.querySelectorAll("td, p, div, span, li").forEach(el => {
+    const allNodes = [det.querySelector("summary"), ...det.querySelectorAll("td, p, div, span, li")];
+    allNodes.forEach(el => {
+      if (!el) return;
       let text = String(el.textContent || '');
-      if (opts.transliteration) text = normalizeToLatin(text);
-      if (!opts.caseSensitive) text = text.toLowerCase();
-      if (text.includes(normQuery)) matches.push({ el: el, details: det });
+
+      if (opts.transliteration) {
+        text = normalizeToLatin(text);
+      } else if (!opts.caseSensitive) {
+        text = text.toLowerCase();
+      }
+
+      if (text.includes(q)) {
+        matches.push({ el: el, details: det });
+      }
     });
   });
+
+  // remove duplicates
   const seen = new Set();
   return matches.filter(m => { if (seen.has(m.el)) return false; seen.add(m.el); return true; });
 }
@@ -2350,7 +2391,261 @@ window.addEventListener('scroll', function() {
 });
 
 function scrollToTop() { window.scrollTo({top:0, behavior:'smooth'}); }
-</script>
 
+
+</script><script src="https://cdn.jsdelivr.net/npm/@indic-transliteration/sanscript@3.0.0/dist/sanscript.min.js"></script>
+<script>
+let searchResults = [];
+let searchIndex = 0;
+let lastQuery = "";
+let originalTexts = new Map(); // Added for transliteration
+
+const HIGHLIGHT_COLOR = "orangered";
+
+function isShlokaNumber(q) { return /^\d+\.\d+$/.test(q); }
+
+// Updated normalizeToLatin to use Sanscript for consistency
+function normalizeToLatin(txt) {
+  if (!txt) return "";
+  if (document.getElementById("transliterationMode")?.checked) {
+    // Use Sanscript for Telugu/Devanagari to IAST conversion
+    return Sanscript.t(txt, 'telugu', 'iast').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  }
+  // Fallback to original normalization for non-transliteration mode
+  const map = {
+    "అ":"a","ఆ":"aa","ఇ":"i","ఈ":"ii","ఉ":"u","ఊ":"uu","ఋ":"r","ఎ":"e","ఏ":"ee","ఐ":"ai","ఒ":"o","ఓ":"oo","ఔ":"au",
+    "ా":"aa","ి":"i","ీ":"ii","ు":"u","ూ":"uu","ె":"e","ే":"ee","ై":"ai","ొ":"o","ో":"oo","ౌ":"au","ృ":"r",
+    "క":"k","ఖ":"kh","గ":"g","ఘ":"gh","ఙ":"ng","చ":"ch","ఛ":"chh","జ":"j","ఝ":"jh","ఞ":"ny",
+    "ట":"t","ఠ":"th","డ":"d","ఢ":"dh","ణ":"n","త":"t","థ":"th","ద":"d","ధ":"dh","న":"n",
+    "ప":"p","ఫ":"ph","బ":"b","భ":"bh","మ":"m","య":"y","ర":"r","ల":"l","వ":"v","శ":"sh","ష":"sh","స":"s","హ":"h","ళ":"l",
+    "अ":"a","आ":"aa","इ":"i","ई":"ii","उ":"u","ऊ":"uu","ऋ":"r","ए":"e","ऐ":"ai","ओ":"o","औ":"au",
+    "ा":"aa","ि":"i","ी":"ii","ु":"u","ू":"uu","ृ":"r","े":"e","ै":"ai","ो":"o","ौ":"au",
+    "क":"k","ख":"kh","ग":"g","घ":"gh","ङ":"ng","च":"ch","छ":"chh","ज":"j","झ":"jh","ञ":"ny",
+    "ट":"t","ठ":"th","ड":"d","ढ":"dh","ण":"n","त":"t","थ":"th","द":"d","ध":"dh","न":"n",
+    "प":"p","फ":"ph","ब":"b","भ":"bh","म":"m","य":"y","र":"r","ल":"l","व":"v","श":"sh","ष":"sh","स":"s","ह":"h",
+    "్":"","्":"","ం":"m","ँ":"m","ः":"h","ఁ":"m","ః":"h"
+  };
+  let out = '';
+  for (let ch of txt) {
+    if (map[ch] !== undefined) out += map[ch];
+    else {
+      const lower = ch.toLowerCase();
+      if ((/[a-z0-9 ]/).test(lower)) {
+        out += lower;
+      } else {
+        out += lower;
+      }
+    }
+  }
+  return out.replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+// Added transliteration toggle function
+function toggleTransliteration(isTranslit) {
+  if (isTranslit) {
+    walk(document.body, function(node) {
+      if (node.nodeType === 3 && /[\u0C00-\u0C7F]/.test(node.textContent)) {
+        if (!originalTexts.has(node)) {
+          originalTexts.set(node, node.textContent);
+        }
+        let translit = Sanscript.t(node.textContent, 'telugu', 'iast');
+        node.textContent = translit;
+      }
+    });
+  } else {
+    originalTexts.forEach(function(text, node) {
+      node.textContent = text;
+    });
+  }
+  // Re-run search if there's an active query to update highlights
+  if (lastQuery) {
+    searchResults = findMatches(lastQuery);
+    highlightAll();
+    showMatch(searchIndex);
+  }
+}
+
+function walk(node, func) {
+  func(node);
+  node = node.firstChild;
+  while (node) {
+    walk(node, func);
+    node = node.nextSibling;
+  }
+}
+
+function getOptions() {
+  return {
+    caseSensitive: document.getElementById("caseSensitive")?.checked || false,
+    transliteration: document.getElementById("transliterationMode")?.checked || false
+  };
+}
+
+function findMatches(query) {
+  const opts = getOptions();
+  const rawQuery = String(query || '').trim();
+  if (!rawQuery) return [];
+
+  let q = rawQuery;
+
+  if (opts.transliteration) {
+    q = normalizeToLatin(q);
+  } else if (!opts.caseSensitive) {
+    q = q.toLowerCase();
+  }
+
+  const matches = [];
+
+  // Case 1: shloka number (like 12.2)
+  if (isShlokaNumber(q)) {
+    document.querySelectorAll("details summary, details td").forEach(el => {
+      const m = (el.textContent || '').match(/\d+\.\d+/);
+      if (m) {
+        const num = String(m[0]);
+        if (opts.caseSensitive ? num === rawQuery : num.toLowerCase() === rawQuery.toLowerCase()) {
+          matches.push({ el: el, details: el.closest("details") });
+        }
+      }
+    });
+    return matches;
+  }
+
+  // Case 2: text search
+  document.querySelectorAll("details").forEach(det => {
+    const allNodes = [det.querySelector("summary"), ...det.querySelectorAll("td, p, div, span, li")];
+    allNodes.forEach(el => {
+      if (!el) return;
+      let text = String(el.textContent || '');
+
+      if (opts.transliteration) {
+        text = normalizeToLatin(text);
+      } else if (!opts.caseSensitive) {
+        text = text.toLowerCase();
+      }
+
+      if (text.includes(q)) {
+        matches.push({ el: el, details: det });
+      }
+    });
+  });
+
+  // Remove duplicates
+  const seen = new Set();
+  return matches.filter(m => { if (seen.has(m.el)) return false; seen.add(m.el); return true; });
+}
+
+function clearHighlights() {
+  document.querySelectorAll(".match-highlight").forEach(n => {
+    n.style.backgroundColor = "";
+    n.style.color = "";
+    n.classList.remove("match-highlight");
+  });
+  document.querySelectorAll(".current-match").forEach(n => {
+    n.style.outline = "";
+    n.classList.remove("current-match");
+  });
+}
+
+function highlightAll() {
+  clearHighlights();
+  searchResults.forEach(m => {
+    m.el.classList.add("match-highlight");
+    m.el.style.backgroundColor = HIGHLIGHT_COLOR;
+    m.el.style.color = "white";
+  });
+}
+
+function showMatch(index) {
+  if (!searchResults.length) return;
+  index = ((index % searchResults.length) + searchResults.length) % searchResults.length;
+  searchIndex = index;
+  const item = searchResults[index];
+  document.querySelectorAll(".current-match").forEach(n => {
+    n.style.outline = "";
+    n.classList.remove("current-match");
+  });
+  item.details.open = true;
+  item.el.scrollIntoView({ behavior: "smooth", block: "center" });
+  item.el.classList.add("current-match");
+  item.el.style.outline = "3px solid #ffb84d";
+  document.getElementById("searchInfo").textContent = `${index+1} / ${searchResults.length} matches`;
+}
+
+function startSearchAction() {
+  const query = document.getElementById("searchBox").value || '';
+  if (!query) return;
+  searchResults = findMatches(query);
+  lastQuery = query.trim().toLowerCase();
+  searchIndex = 0;
+  if (!searchResults.length) {
+    clearHighlights();
+    document.getElementById("searchInfo").textContent = "0 matches";
+    alert("No match found for: " + query);
+    return;
+  }
+  highlightAll();
+  showMatch(searchIndex);
+}
+
+function nextMatchAction() {
+  if (!searchResults.length) { startSearchAction(); return; }
+  searchIndex = (searchIndex + 1) % searchResults.length;
+  showMatch(searchIndex);
+}
+
+function prevMatchAction() {
+  if (!searchResults.length) { startSearchAction(); return; }
+  searchIndex = (searchIndex - 1 + searchResults.length) % searchResults.length;
+  showMatch(searchIndex);
+}
+
+function clearSearchAction() {
+  document.getElementById("searchBox").value = "";
+  document.getElementById("searchInfo").textContent = "";
+  searchResults = [];
+  searchIndex = 0;
+  lastQuery = "";
+  clearHighlights();
+}
+
+function expandAllAction() { document.querySelectorAll("details").forEach(d => d.open = true); }
+function collapseAllAction() { document.querySelectorAll("details").forEach(d => d.open = false); }
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById("searchBtn").addEventListener("click", startSearchAction);
+  document.getElementById("nextBtn").addEventListener("click", nextMatchAction);
+  document.getElementById("prevBtn").addEventListener("click", prevMatchAction);
+  document.getElementById("clearBtn").addEventListener("click", clearSearchAction);
+  document.getElementById("expandAllBtn").addEventListener("click", expandAllAction);
+  document.getElementById("collapseAllBtn").addEventListener("click", collapseAllAction);
+  // Added event listener for transliteration toggle
+  document.getElementById("transliterationMode").addEventListener("change", function(e) {
+    toggleTransliteration(e.target.checked);
+  });
+
+  document.addEventListener("keydown", function(e) {
+    const active = document.activeElement;
+    if (active && active.id === "searchBox") {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const cur = (document.getElementById("searchBox").value || '').trim().toLowerCase();
+        if (cur && cur === lastQuery && searchResults.length) nextMatchAction();
+        else startSearchAction();
+      }
+      return;
+    }
+    if (e.key === "F3") { e.preventDefault(); if (e.shiftKey) prevMatchAction(); else nextMatchAction(); }
+    if (e.key === "Escape") { e.preventDefault(); clearSearchAction(); }
+  });
+});
+
+window.addEventListener('scroll', function() {
+  const topBtn = document.getElementById("topBtn");
+  if (!topBtn) return;
+  if (window.scrollY > 200) topBtn.style.display = 'block'; else topBtn.style.display = 'none';
+});
+
+function scrollToTop() { window.scrollTo({top:0, behavior:'smooth'}); }
+</script>
 </body>
 </html>
