@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
    <head>
@@ -43,8 +42,8 @@
          }
          /* === COMMON BUTTON STYLE === */
          .top-buttons button {
-         width: 150px;
-         height: 150px;
+         width: 125px;
+         height: 125px;
          border-radius: 25%;
          border: none;
          background-color: #357EC7;
@@ -185,6 +184,37 @@
          display: block;
          text-align: left;
          }
+		 #sgsText, #sringeriText {
+  display: block;
+  width: 100%;
+  white-space: normal !important; /* Override any pre-wrap */
+  text-align: left;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 600px;
+  font-family: 'Noto Sans Telugu', sans-serif;
+  font-size: 1.5em;
+  line-height: 1.5;
+  border: 2px solid #d1d1d1;
+  border-radius: 5px;
+  padding: 10px;
+  overflow-y: auto;
+  min-height: 3em;
+}
+
+#sgsText > div,
+#sringeriText > div {
+  display: block;
+  width: 100%;
+  margin-bottom: 1em; /* Spacing between shlokas */
+}
+.hidden {
+  display: none !important;
+}
+.visible {
+  display: block !important;
+}
+
          #audioPlayer {
          margin: 10px auto;
          display: block;
@@ -361,8 +391,8 @@
       <h1>Srimad Bhagavad Gita</h1>
       <p>Listen, understand and memorize Bhagavad Gita shlokas</p>
       <div class="top-buttons">
-         <button class="sgs-button" onclick="sendCommand('SGSFirstPaada')">SGS<br>(1st Paada)</button>
-         <button class="sringeri-button" onclick="sendCommand('SringeriPaada')">Sringeri<br>(1st or 3rd Paada)</button>
+         <button class="sgs-button" onclick="sendCommand('SGSFirstPaada')">1st Paada<br>Only</button>
+         <button class="sringeri-button" onclick="sendCommand('SringeriPaada')">1st or 3rd Paada</button>
 <button class="third-paada-button" onclick="sendCommand('ThirdPaada')">3rd Paada<br>Only</button>
       </div>
       <audio id="audioPlayer" controls></audio>
@@ -378,21 +408,22 @@
          <button onclick="sendCommand('FullShloka')">Full</button>
          <button onclick="sendCommand('NextFullShloka')">Next</button>
       </div>
-      <div class="textbox-container">
-         <div>
-            <div id="sgsLabel" class="textbox-label">SGS Style Shloka</div>
-            <div id="sgsText" class="shloka-text">Your Shloka will appear here.</div>
-         </div>
-         <div>
-            <div id="sringeriLabel" class="textbox-label active">Sringeri Style Shloka</div>
-            <div id="sringeriText" class="shloka-text active">Your Shloka will appear here.</div>
-         </div>
-      </div>
+<div class="textbox-container">
+  <div>
+    <div id="sgsLabel" class="textbox-label">SGS Style Shloka</div>
+    <div id="sgsText" class="shloka-text hidden">Your Shloka will appear here.</div>
+  </div>
+  <div>
+    <div id="sringeriLabel" class="textbox-label active">Sringeri Style Shloka</div>
+    <div id="sringeriText" class="shloka-text visible">Your Shloka will appear here.</div>
+  </div>
+</div>
+
       <div class="player-container">
          <button id="meaningsButton" onclick="handleMeanings()">Meanings</button>
          <button onclick="showVerseTable()">Selector</button>
          <button id="instructionsButton" onclick="toggleInstructions()">Instructions</button>
-        <button id="groupButton" onclick="showGroupedShlokas()">Grouped Shlokas</button>
+		<button id="groupButton" onclick="window.open('https://pubsaroja.github.io/gita-voice-bot-web/GroupedShlokas.html', '_blank')">Grouped Shlokas</button>
         <button onclick="showConfusing()">Confusing Shlokas</button>
         <button id="showUvacha" onclick="showUvacha()">Uvacha</button>
 
@@ -839,6 +870,21 @@ document.getElementById('search-input').addEventListener('keypress', (event) => 
         performSearch();
     }
 });
+// Wrap each shloka/line in a block div for vertical stacking
+function setResults(linesArray) {
+  const html = linesArray.map(line => `<div>${line}</div>`).join('');
+  document.getElementById("sgsText").innerHTML = html;
+  document.getElementById("sringeriText").innerHTML = html;
+}
+
+// Adjust container heights after content change
+function adjustTextboxHeight() {
+  ['sgsText', 'sringeriText'].forEach(id => {
+    const el = document.getElementById(id);
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  });
+}
 
 // Load files when the page loads
 document.addEventListener('DOMContentLoaded', loadFiles);
@@ -955,27 +1001,20 @@ document.addEventListener('DOMContentLoaded', loadFiles);
                       }
                   }
                   
-                  function adjustTextboxHeight() {
-                      try {
-                          console.log('adjustTextboxHeight called');
-                          const sgsText = document.getElementById('sgsText');
-                          const sringeriText = document.getElementById('sringeriText');
-                          [sgsText, sringeriText].forEach(textbox => {
-                              textbox.style.height = 'auto';
-                              const scrollHeight = textbox.scrollHeight;
-                              textbox.style.height = `${scrollHeight}px`;
-                              if (textbox.innerText.includes('\n') || textbox.innerHTML.includes('<br>')) {
-                                  textbox.classList.add('multiline');
-                              } else {
-                                  textbox.classList.remove('multiline');
-                              }
-                              console.log(`adjustTextboxHeight: ${textbox.id}, scrollHeight: ${scrollHeight}px, multiline: ${textbox.classList.contains('multiline')}`);
-                          });
-                      } catch (error) {
-                          console.error('Error in adjustTextboxHeight:', error);
-                      }
-                  }
-                  
+function adjustTextboxHeight() {
+  ['sgsText', 'sringeriText'].forEach(id => {
+    const el = document.getElementById(id);
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+    if (el.innerHTML.includes('<br>')) {
+      el.classList.add('multiline');
+    } else {
+      el.classList.remove('multiline');
+    }
+  });
+}
+
+
  // Fetch audio URL
 async function fetchAudioUrl(chapter, verse, quarter = null, isFull = false) {
     try {
@@ -987,8 +1026,7 @@ async function fetchAudioUrl(chapter, verse, quarter = null, isFull = false) {
             const folder = style === 'sringeri' ? 'AudioFullSringeri' : 'AudioFullSGS';
             url = `${baseUrl}/${folder}/${key}.mp3`;
         } else if (quarter === 'pada1') {
-            const folder = style === 'sringeri' ? 'AQ4PaadasSringeri' : 'AQ4PaadasSGS';
-            url = `${baseUrl}/${folder}/Chapter ${chapter}/${verse}.1.mp3`;
+            url = `${baseUrl}/AQ4PaadasSGS/Chapter ${chapter}/${verse}.1.mp3`;
         } else if (quarter === 'pada3') {
             const folder = style === 'sringeri' ? 'AQ4PaadasSringeri' : 'AQ4PaadasSGS';
             url = `${baseUrl}/${folder}/Chapter ${chapter}/${verse}.3.mp3`;
@@ -1398,12 +1436,11 @@ async function showConfusing() {
         return aChapter === bChapter ? aVerse - bVerse : aChapter - bChapter;
     });
 
-    const currentStyle = getSelectedStyle();
     const shlokaTexts = await Promise.all(allShlokas.map(async shloka => {
         const [chapter, verse] = shloka.split('.').map(Number);
-        return fetchShlokaText(chapter, verse, currentStyle);
+        return fetchShlokaText(chapter, verse, selectedStyle);
     }));
-    const textOutput = shlokaTexts.join('\n\n');
+const textOutput = shlokaTexts.map(text => `<div>${text}</div>`).join('');
     sgsText.innerHTML = highlightText(textOutput, '');
     sringeriText.innerHTML = highlightText(textOutput, '');
     adjustTextboxHeight();
@@ -1411,7 +1448,7 @@ async function showConfusing() {
 
     for (const shloka of selectedGroup) {
         const [chapter, verse] = shloka.split('.').map(Number);
-        const audioUrl = await fetchAudioUrl(chapter, verse, 'pada1', false);
+        const audioUrl = await fetchAudioUrl(chapter, verse, 'isFull', false);
         if (!audioUrl.error) {
             audioPlayer.src = audioUrl;
             await new Promise(resolve => {
@@ -1432,7 +1469,7 @@ async function showConfusing() {
     }
 
     const [chapter, verse] = selectedGroup[0].split('.').map(Number);
-    currentContext = [{ name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`, lifespanCount: 5, parameters: { chapter, verse, style: getSelectedStyle() } }];
+    currentContext = [{ name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`, lifespanCount: 5, parameters: { chapter, verse, style: selectedStyle } }];
     localStorage.setItem('gitaContext', JSON.stringify(currentContext));
 }
 
@@ -1576,31 +1613,43 @@ async function showConfusing() {
                       }
                   }
                   
-                  async function updateTextboxVisibility() {
-                      try {
-                          console.log('updateTextboxVisibility called');
-                          const style = getSelectedStyle();
-                          const sgsText = document.getElementById('sgsText');
-                          const sringeriText = document.getElementById('sringeriText');
-                          const sgsLabel = document.getElementById('sgsLabel');
-                          const sringeriLabel = document.getElementById('sringeriLabel');
-                  
-                          if (style === 'sgs') {
-                              sgsText.classList.add('active');
-                              sgsLabel.classList.add('active');
-                              sringeriText.classList.remove('active');
-                              sringeriLabel.classList.remove('active');
-                          } else {
-                              sgsText.classList.remove('active');
-                              sgsLabel.classList.remove('active');
-                              sringeriText.classList.add('active');
-                              sringeriLabel.classList.add('active');
-                          }
-                          adjustTextboxHeight();
-                      } catch (error) {
-                          console.error('Error in updateTextboxVisibility:', error);
-                      }
-                  }
+function updateTextboxVisibility() {
+  const sgsText = document.getElementById('sgsText');
+  const sringeriText = document.getElementById('sringeriText');
+  const sgsLabel = document.getElementById('sgsLabel');
+  const sringeriLabel = document.getElementById('sringeriLabel');
+  const sgsRadio = document.getElementById('sgs');
+  const sringeriRadio = document.getElementById('sringeri');
+
+  // Make sure texts are synchronized
+  if (sgsRadio.checked) {
+    sringeriText.innerHTML = sgsText.innerHTML;
+
+    sgsText.classList.add('visible');
+    sgsText.classList.remove('hidden');
+
+    sringeriText.classList.add('hidden');
+    sringeriText.classList.remove('visible');
+
+    sgsLabel.classList.add('active');
+    sringeriLabel.classList.remove('active');
+  } else {
+    sgsText.innerHTML = sringeriText.innerHTML;
+
+    sringeriText.classList.add('visible');
+    sringeriText.classList.remove('hidden');
+
+    sgsText.classList.add('hidden');
+    sgsText.classList.remove('visible');
+
+    sringeriLabel.classList.add('active');
+    sgsLabel.classList.remove('active');
+  }
+
+  adjustTextboxHeight();  // fix heights after toggle
+}
+
+
                   
                   async function sendCommand(intent) {
                       try {
@@ -1630,7 +1679,7 @@ async function showConfusing() {
             quarter = 'pada3';
             chapter = Math.floor(Math.random() * 18) + 1;
             verse = Math.floor(Math.random() * verseCounts[chapter]) + 1;
-            autoplay = true;
+            autoPlay = true;
                           } else if (intent === 'NextFullShloka') {
                               const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
                               chapter = context ? Math.floor(context.parameters.chapter) : 1;
@@ -1766,8 +1815,20 @@ async function showConfusing() {
                });
             }
          });
-                  initialize();
-               
+             
+			 initialize();
+  document.addEventListener('DOMContentLoaded', () => {
+    loadFiles().then(() => {
+      updateTextboxVisibility();
+      adjustTextboxHeight();
+      // Comment out initial search on load to test responsiveness
+      // performSearch();
+    });
+  
+    document.getElementById('groupButton').onclick = () => {
+      window.open('https://pubsaroja.github.io/gita-voice-bot-web/GroupedShlokas.html', '_blank');
+    };
+  });			 
       </script>
    </body>
 </html>
