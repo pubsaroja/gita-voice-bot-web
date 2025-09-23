@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
    <head>
@@ -51,7 +50,7 @@
          @media (max-width: 600px) {
          .page-frame {
          margin: 4px;               /* reduce outer gap around border on mobile */
-         padding: 24px;             /* increase inner space so buttons don't hug border */
+         padding: 16px;             /* slightly smaller to avoid overflow */
          border-radius: 10px;       /* keep pleasant rounding on mobile */
          border-width: 4px;         /* thicker border to visually frame content */
          overflow: hidden;          /* keep children within border on wrap */
@@ -394,34 +393,33 @@
        width: 100%;
        max-width: 100%;           /* avoid fixed max-width causing overflow */
        margin: 0 auto;
-       padding-left: 20px;       /* more room from page-frame border */
-       padding-right: 20px;
+       padding-left: 12px;       /* standardized mobile padding */
+       padding-right: 12px;
        box-sizing: border-box;
        flex-wrap: wrap;          /* Allow wrapping if needed */
        }
-       /* Keep shloka borders aligned with others by not insetting them on mobile */
-       .textbox-container {
-       padding-left: 20px !important;  /* Match shared mobile padding */
-       padding-right: 20px !important; /* Match shared mobile padding */
-       }
-       .player-container {
-       padding-left: 20px;       /* create space from border on mobile */
-       padding-right: 20px;
-       }
+       .player-container { padding-left: 12px; padding-right: 12px; }
         /* Add a bit of breathing room above button sections */
         .top-buttons { margin-top: 6px; }
         .player-container { margin-top: 12px; }
         .button-groups { margin-top: 12px; }
         /* Slightly smaller shloka text on mobile for better fit */
         #sgsText, #sringeriText { font-size: 1.25em; }
-        .top-buttons {
+       .top-buttons {
+       gap: 5px;
+       flex-direction: row;
+       }
+       /* Make player controls responsive to avoid overflow */
+       .player-container {
+       grid-template-columns: repeat(3, 1fr);
+       }
+       .player-container button {
+       width: 100%;
+       }
+        .button-groups {
         gap: 5px;
         flex-direction: row;
         }
-         .button-groups {
-         gap: 5px;
-         flex-direction: row;
-         }
          .button-group {
          width: 50%;
          gap: 5px;
