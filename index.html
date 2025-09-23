@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
    <head>
@@ -373,19 +372,21 @@
         width: 100%;
         max-width: 100%;           /* avoid fixed max-width causing overflow */
         margin: 0 auto;
-        padding-left: 14px;       /* more room from page-frame border */
-        padding-right: 14px;
+        padding-left: 20px;       /* more room from page-frame border */
+        padding-right: 20px;
         box-sizing: border-box;
         flex-wrap: wrap;          /* Allow wrapping if needed */
         }
         .player-container {
-        padding-left: 14px;       /* create space from border on mobile */
-        padding-right: 14px;
+        padding-left: 20px;       /* create space from border on mobile */
+        padding-right: 20px;
         }
         /* Add a bit of breathing room above button sections */
         .top-buttons { margin-top: 6px; }
         .player-container { margin-top: 12px; }
         .button-groups { margin-top: 12px; }
+        /* Slightly smaller shloka text on mobile for better fit */
+        #sgsText, #sringeriText { font-size: 1.25em; }
         .top-buttons {
         gap: 5px;
         flex-direction: row;
@@ -583,8 +584,8 @@
       </div>
       </div>
       <div>
-         <h3 >Search for word (Telugu or English):</h3>
-         <input type="text" id="search-input" placeholder="Enter word to search" data-intro="Type a word to search across shlokas" data-title="Enter Query">
+         <h3>Search for word (Telugu or English or Number):</h3>
+         <input type="text" id="search-input" placeholder="Enter word or number to search" data-intro="Type a word to search across shlokas" data-title="Enter Query">
          <button id="search-button" data-intro="Click to search" data-title="Run Search">Search</button>
       </div>
       <div class="credits">
