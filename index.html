@@ -207,6 +207,8 @@
          }
          .shloka-text.active {
          display: flex;
+         flex-direction: column;   /* stack multiple shlokas vertically */
+         align-items: stretch;     /* let items take full width */
          }
          .shloka-text.active.multiline {
          display: block;
@@ -241,15 +243,17 @@
          /* Center placeholder only inside shloka text boxes */
          .shloka-text.visible {
          display: flex !important;
+         flex-direction: column;   /* stack vertically when visible */
+         align-items: stretch;     /* take full width */
          justify-content: center;
-         align-items: center;
          text-align: center !important;
          }
          /* Explicit placeholder state (works regardless of visible/active) */
          .shloka-text.placeholder {
          display: flex !important;
-         justify-content: center;
+         flex-direction: column;   /* keep vertical flow in placeholder too */
          align-items: center;
+         justify-content: center;
          text-align: center !important;
          }
          /* Revert to block and left-align when content spans multiple lines */
