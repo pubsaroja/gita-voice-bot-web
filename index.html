@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
    <head>
@@ -35,6 +36,23 @@
          color: #34495e;
          font-size: 1em;
          margin-top: 10px;
+         }
+         /* === PAGE FRAME (responsive border around the whole page) === */
+         .page-frame {
+         max-width: 900px;           /* wider than inner content for breathing room */
+         margin: 8px auto;           /* space from screen edges and centered */
+         padding: 12px;              /* inner padding so border doesn't hug content */
+         border: 2px solid #d1d1d1;  /* subtle border */
+         border-radius: 10px;        /* pleasant rounding */
+         background: #ffffff;        /* white card against body gray */
+         box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+         }
+         @media (max-width: 600px) {
+         .page-frame {
+         margin: 6px;               /* a bit tighter margins on small screens */
+         padding: 10px;             /* adjust padding for mobile */
+         border-radius: 8px;        /* slightly smaller rounding */
+         }
          }
          /* === TOP BUTTONS CONTAINER === */
          .top-buttons {
@@ -216,6 +234,18 @@
          .hidden {
          display: none !important;
          }
+         /* Center placeholder only inside shloka text boxes */
+         .shloka-text.visible {
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         text-align: center;
+         }
+         /* Revert to block and left-align when content spans multiple lines */
+         .shloka-text.visible.multiline {
+         display: block;
+         text-align: left;
+         }
          .visible {
          display: block !important;
          }
@@ -375,7 +405,7 @@
          margin: 20px auto 0;
          width: 100%;
          box-sizing: border-box;
-         border: 2px solid #ffffff/*#357EC7;*/
+         border: 2px solid #ffffff/*#357EC7;*/;
          border-radius: 5px;
          padding: 10px;
          }
@@ -439,6 +469,7 @@
       </style>
    </head>
    <body>
+      <div class="page-frame">
       <h1>Srimad Bhagavad Gita</h1>
       <p>Listen, understand and memorize Bhagavad Gita shlokas</p>
       <div class="top-buttons" data-intro="Choose how you want to hear the shloka" data-title="Playback Options">
@@ -472,7 +503,7 @@
       <div class="player-container" >
          <button id="meaningsButton" onclick="handleMeanings()" data-intro="Toggle word-by-word and overall meaning" data-title="Meanings">Meanings</button>
          <button onclick="showVerseTable()" data-intro="Open chapter/verse selector" data-title="Selector">Selector</button>
-         <button id="instructionsButton" onclick="toggleInstructions()" data-intro="Start a guided tour of the app" data-title="Instructions">Instructions</button>
+         <button id="instructionsButton" onclick="toggleInstructions()" data-intro="Start a guided tour of the app" data-title="Help">Help</button>
          <button id="groupButton" onclick="window.open('https://pubsaroja.github.io/gita-voice-bot-web/GroupedShlokas.html', '_blank')" data-intro="Open carefully curated grouped shlokas helpful in memorizing the shloka numbers in a new tab" data-title="Grouped Shlokas">Grouped Shlokas</button>
          <button onclick="showConfusing()" data-intro="Listen to a set of often-confused shlokas" data-title="Confusing Shlokas">Confusing Shlokas</button>
          <button id="showUvacha" onclick="showUvacha()" data-intro="Play a random 'Uvacha' shloka" data-title="Uvacha">Uvacha</button>
@@ -602,7 +633,7 @@
              ['5.3', '2.45'], ['5.5', '13.27'], ['5.6', '18.1'], ['5.24', '5.26'],
              ['5.25', '12.4'], ['5.29', '10.3'], ['6.7', '12.18'], ['6.8', '14.24'],
              ['6.15', '6.28'], ['6.22', '18.32'], ['6.31', '13.23'], ['6.34', '8.14'],
-             ['6.45', '13.28'], ['6.37', '6.40'], ['6.47', '4.40'], ['7.1', '7.35'],
+             ['6.45', '13.28'], ['6.37', '6.40'], ['6.47', '4.40'], ['7.1', '6.35'],
              ['7.6', '10.8'], ['7.10', '10.36', '10.24'], ['7.13', '7.25'], ['7.16', '7.11'],
              ['7.15', '7.20'], ['7.23', '9.11'], ['7.27', '13.6'], ['7.30', '8.2'],
              ['8.2', '8.4'], ['8.1', '8.4'], ['8.7', '8.27', '12.14'], ['8.13', '9.32'],
@@ -1008,7 +1039,8 @@
              if (input) input.addEventListener('keypress', e => {
                if (e.key === 'Enter') performSearch();
              });
-           });
+             // Tour starts only when user taps the 'Help' button.
+          });
          
          
          
@@ -1049,7 +1081,34 @@
                            
                            // Intro.js tour instance (new API)
                           let tourInstance = null;
-
+                          function buildTourInstance() {
+                              if (typeof introJs === 'undefined' || typeof introJs.tour !== 'function') {
+                                  console.error('Intro.js library not loaded or tour API unavailable');
+                                  return null;
+                              }
+                              const t = introJs.tour();
+                              t.setOptions({
+                                  showProgress: true,
+                                  showBullets: false,
+                                  exitOnOverlayClick: true,
+                                  disableInteraction: false,
+                                  nextLabel: 'Next',
+                                  prevLabel: 'Back',
+                                  skipLabel: 'Skip',
+                                  doneLabel: 'Done',
+                                  tooltipClass: 'introjs-tooltip--custom',
+                                  highlightClass: 'introjs-highlight--custom'
+                              });
+                              // Dynamically add steps from elements carrying data-intro
+                              const stepEls = Array.from(document.querySelectorAll('[data-intro]'));
+                              stepEls.forEach(el => {
+                                  const intro = el.getAttribute('data-intro') || '';
+                                  const title = el.getAttribute('data-title') || '';
+                                  try { t.addStep({ element: el, title, intro }); } catch (_) { /* ignore invalid elements */ }
+                              });
+                              return t;
+                          }
+                          
                           function toggleInstructions() {
                               try {
                                   console.log('toggleInstructions (tour) called');
@@ -1060,49 +1119,21 @@
                                       audioPlayer.pause();
                                   }
                                   isContinuousPlaying = false;
-        
-                                  // Intro.js v7+: introJs() is deprecated. Use introJs.tour()
-                                  if (typeof introJs === 'undefined' || typeof introJs.tour !== 'function') {
-                                      console.error('Intro.js library not loaded or tour API unavailable');
-                                      return;
-                                  }
-        
-                                  if (!isTourActive) {
-                                      // Start tour
-                                      tourInstance = introJs.tour();
-                                      tourInstance.setOptions({
-                                          showProgress: true,
-                                          showBullets: false,
-                                          exitOnOverlayClick: true,
-                                          disableInteraction: false,
-                                          nextLabel: 'Next',
-                                          prevLabel: 'Back',
-                                          skipLabel: 'Skip',
-                                          doneLabel: 'Done',
-                                          tooltipClass: 'introjs-tooltip--custom',
-                                          highlightClass: 'introjs-highlight--custom'
-                                      });
-        
-                                      const resetUI = () => {
-                                          isTourActive = false;
-                                          if (instructionsButton) instructionsButton.textContent = 'Instructions';
-                                          adjustTextboxHeight();
-                                          updateTextboxVisibility();
-                                      };
-        
-                                      tourInstance.onbeforeexit(() => { resetUI(); });
-                                      tourInstance.onexit(() => { resetUI(); });
-                                      tourInstance.oncomplete(() => { resetUI(); });
-        
-                                      if (instructionsButton) instructionsButton.textContent = 'Close Tour';
-                                      isTourActive = true;
-                                      tourInstance.start();
-                                  } else {
-                                      // Tour active: exit
-                                      try { if (tourInstance) { tourInstance.exit(); } } catch (e) { /* no-op */ }
+                                  // Build a fresh tour instance using data-intro elements
+                                  tourInstance = buildTourInstance();
+                                  if (!tourInstance) return;
+                                  const resetUI = () => {
                                       isTourActive = false;
-                                      if (instructionsButton) instructionsButton.textContent = 'Instructions';
-                                  }
+                                      if (instructionsButton) instructionsButton.textContent = 'Help';
+                                      adjustTextboxHeight();
+                                      updateTextboxVisibility();
+                                  };
+                                  tourInstance.onbeforeexit(() => { resetUI(); });
+                                  tourInstance.onexit(() => { resetUI(); });
+                                  tourInstance.oncomplete(() => { resetUI(); });
+                                  if (instructionsButton) instructionsButton.textContent = 'Close Tour';
+                                  isTourActive = true;
+                                  tourInstance.start();
                               } catch (error) {
                                   console.error('Error in toggleInstructions (tour):', error);
                               }
@@ -1238,7 +1269,7 @@
                                    }
                            
                                    isInstructionsVisible = false;
-                                   document.getElementById('instructionsButton').textContent = 'Instructions';
+                                   document.getElementById('instructionsButton').textContent = 'Help';
                                    const sgsText = document.getElementById('sgsText');
                                    const sringeriText = document.getElementById('sringeriText');
                                    const audioPlayer = document.getElementById('audioPlayer');
@@ -1313,7 +1344,7 @@
                                try {
                                    console.log('showVerseTable called');
                                    isInstructionsVisible = false;
-                                   document.getElementById('instructionsButton').textContent = 'Instructions';
+                                   document.getElementById('instructionsButton').textContent = 'Help';
                                    const modal = document.getElementById('verseTableModal');
                                    const chapterSelect = document.getElementById('chapterTableSelect');
                                    chapterSelect.value = '';
@@ -1362,7 +1393,7 @@
                                    console.log(`selectVerse called: chapter=${chapter}, verse=${verse}`);
                                    isContinuousPlaying = false;
                                    isInstructionsVisible = false;
-                                   document.getElementById('instructionsButton').textContent = 'Instructions';
+                                   document.getElementById('instructionsButton').textContent = 'Help';
                                    const sgsText = document.getElementById('sgsText');
                                    const sringeriText = document.getElementById('sringeriText');
                                    currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
@@ -1413,7 +1444,7 @@
                                    console.log('handlePreviousShloka called');
                                    isContinuousPlaying = false;
                                    isInstructionsVisible = false;
-                                   document.getElementById('instructionsButton').textContent = 'Instructions';
+                                   document.getElementById('instructionsButton').textContent = 'Help';
                                    const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
                                    const sgsText = document.getElementById('sgsText');
                                    const sringeriText = document.getElementById('sringeriText');
@@ -1522,10 +1553,10 @@
              currentAllShlokas = [];
              const instructionsButton = document.getElementById('instructionsButton');
              const meaningsButton = document.getElementById('meaningsButton');
-             if (instructionsButton) instructionsButton.textContent = 'Instructions';
-             if (meaningsButton) meaningsButton.textContent = 'Meanings';
-             const sgsText = document.getElementById('sgsText');
-             const sringeriText = document.getElementById('sringeriText');
+             if (instructionsButton) instructionsButton.textContent = 'Help';
+            if (meaningsButton) meaningsButton.textContent = 'Meanings';
+            const sgsText = document.getElementById('sgsText');
+            const sringeriText = document.getElementById('sringeriText');
              const audioPlayer = document.getElementById('audioPlayer');
          
              const randomGroupIndex = Math.floor(Math.random() * confusingShlokaGroups.length);
@@ -1592,10 +1623,10 @@
                      isShowingMeanings = false;
                      const instructionsButton = document.getElementById('instructionsButton');
                      const meaningsButton = document.getElementById('meaningsButton');
-                     if (instructionsButton) instructionsButton.textContent = 'Instructions';
-                     if (meaningsButton) meaningsButton.textContent = 'Meanings';
-                     const audioPlayer = document.getElementById('audioPlayer');
-                     const activeTextbox = getSelectedStyle() === 'sgs' ? document.getElementById('sgsText') : document.getElementById('sringeriText');
+                     if (instructionsButton) instructionsButton.textContent = 'Help';
+                    if (meaningsButton) meaningsButton.textContent = 'Meanings';
+                    const audioPlayer = document.getElementById('audioPlayer');
+                    const activeTextbox = getSelectedStyle() === 'sgs' ? document.getElementById('sgsText') : document.getElementById('sringeriText');
          
                      if (!audioPlayer || !activeTextbox) {
                          console.error('showUvacha: Missing audioPlayer or activeTextbox');
@@ -1641,7 +1672,7 @@
                                    console.log('handleChapterSelect called');
                                    isContinuousPlaying = false;
                                    isInstructionsVisible = false;
-                                   document.getElementById('instructionsButton').textContent = 'Instructions';
+                                   document.getElementById('instructionsButton').textContent = 'Help';
                                    const chapter = parseInt(selectElement.value);
                                    if (!chapter) {
                                        console.log('No chapter selected');
@@ -1766,7 +1797,7 @@
                                    isContinuousPlaying = false;
                                    isInstructionsVisible = false;
                                    isShowingMeanings = false;
-                                   document.getElementById('instructionsButton').textContent = 'Instructions';
+                                   document.getElementById('instructionsButton').textContent = 'Help';
                                    document.getElementById('meaningsButton').textContent = 'Meanings';
                                    const sgsText = document.getElementById('sgsText');
                                    const sringeriText = document.getElementById('sringeriText');
@@ -1784,11 +1815,11 @@
                                        chapter = Math.floor(Math.random() * 18) + 1;
                                        verse = Math.floor(Math.random() * verseCounts[chapter]) + 1;
                                        autoplay = true;
-                 } else if (intent === 'ThirdPaada') {
-                     quarter = 'pada3';
-                     chapter = Math.floor(Math.random() * 18) + 1;
-                     verse = Math.floor(Math.random() * verseCounts[chapter]) + 1;
-                     autoPlay = true;
+                } else if (intent === 'ThirdPaada') {
+                    quarter = 'pada3';
+                    chapter = Math.floor(Math.random() * 18) + 1;
+                    verse = Math.floor(Math.random() * verseCounts[chapter]) + 1;
+                    autoplay = true;
                                    } else if (intent === 'NextFullShloka') {
                                        const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
                                        chapter = context ? Math.floor(context.parameters.chapter) : 1;
@@ -1935,10 +1966,11 @@
              });
            
              document.getElementById('groupButton').onclick = () => {
-               window.open('https://pubsaroja.github.io/gita-voice-bot-web/GroupedShlokas.html', '_blank');
-             };
-           });			 
+             window.open('https://pubsaroja.github.io/gita-voice-bot-web/GroupedShlokas.html', '_blank');
+            };
+         });
                
       </script>
-   </body>
+      </div>
+  </body>
 </html>
