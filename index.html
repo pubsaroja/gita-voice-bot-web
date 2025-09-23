@@ -50,7 +50,7 @@
          @media (max-width: 600px) {
          .page-frame {
          margin: 6px;               /* a bit tighter margins on small screens */
-         padding: 10px;             /* adjust padding for mobile */
+         padding: 16px;             /* add more inner space from border */
          border-radius: 8px;        /* slightly smaller rounding */
          overflow: hidden;          /* keep children within border on wrap */
          }
@@ -370,8 +370,8 @@
          width: 100%;
          max-width: 100%;           /* avoid fixed max-width causing overflow */
          margin: 0 auto;
-         padding-left: 10px;       /* Padding inside to avoid edge contact */
-         padding-right: 10px;
+         padding-left: 14px;       /* more room from page-frame border */
+         padding-right: 14px;
          box-sizing: border-box;
          flex-wrap: wrap;          /* Allow wrapping if needed */
          }
