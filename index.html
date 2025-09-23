@@ -49,9 +49,10 @@
          }
          @media (max-width: 600px) {
          .page-frame {
-         margin: 6px;               /* a bit tighter margins on small screens */
-         padding: 20px;             /* add more inner space from border */
-         border-radius: 8px;        /* slightly smaller rounding */
+         margin: 4px;               /* reduce outer gap around border on mobile */
+         padding: 24px;             /* increase inner space so buttons don't hug border */
+         border-radius: 10px;       /* keep pleasant rounding on mobile */
+         border-width: 4px;         /* thicker border to visually frame content */
          overflow: hidden;          /* keep children within border on wrap */
          }
          }
@@ -365,22 +366,24 @@
          }
          /* == RESPONSIVE MOBILE STYLES (≤600px) == */
          @media (max-width: 600px) {
-        /* Containers respect body padding with internal padding */
-        .top-buttons,
-        .button-groups,
-        .dropdown-container {
-        width: 100%;
-        max-width: 100%;           /* avoid fixed max-width causing overflow */
-        margin: 0 auto;
-        padding-left: 20px;       /* more room from page-frame border */
-        padding-right: 20px;
-        box-sizing: border-box;
-        flex-wrap: wrap;          /* Allow wrapping if needed */
-        }
-        .player-container {
-        padding-left: 20px;       /* create space from border on mobile */
-        padding-right: 20px;
-        }
+       /* Reduce body padding on mobile to remove excess space around page border */
+       body { padding: 6px; }
+       /* Containers respect body padding with internal padding */
+       .top-buttons,
+       .button-groups,
+       .dropdown-container {
+       width: 100%;
+       max-width: 100%;           /* avoid fixed max-width causing overflow */
+       margin: 0 auto;
+       padding-left: 20px;       /* more room from page-frame border */
+       padding-right: 20px;
+       box-sizing: border-box;
+       flex-wrap: wrap;          /* Allow wrapping if needed */
+       }
+       .player-container {
+       padding-left: 20px;       /* create space from border on mobile */
+       padding-right: 20px;
+       }
         /* Add a bit of breathing room above button sections */
         .top-buttons { margin-top: 6px; }
         .player-container { margin-top: 12px; }
