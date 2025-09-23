@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
    <head>
@@ -50,7 +51,7 @@
          @media (max-width: 600px) {
          .page-frame {
          margin: 6px;               /* a bit tighter margins on small screens */
-         padding: 16px;             /* add more inner space from border */
+         padding: 20px;             /* add more inner space from border */
          border-radius: 8px;        /* slightly smaller rounding */
          overflow: hidden;          /* keep children within border on wrap */
          }
@@ -63,6 +64,8 @@
          width: 100%;
          max-width: 600px;   /* Match textbox max-width */
          margin: 0 auto;     /* Center horizontally */
+         padding-left: 12px; /* Space from page-frame border */
+         padding-right: 12px;/* Space from page-frame border */
          box-sizing: border-box;
          }
          /* === COMMON BUTTON STYLE === */
@@ -363,22 +366,30 @@
          }
          /* == RESPONSIVE MOBILE STYLES (≤600px) == */
          @media (max-width: 600px) {
-         /* Containers respect body padding with internal padding */
-         .top-buttons,
-         .button-groups,
-         .dropdown-container {
-         width: 100%;
-         max-width: 100%;           /* avoid fixed max-width causing overflow */
-         margin: 0 auto;
-         padding-left: 14px;       /* more room from page-frame border */
-         padding-right: 14px;
-         box-sizing: border-box;
-         flex-wrap: wrap;          /* Allow wrapping if needed */
-         }
-         .top-buttons {
-         gap: 5px;
-         flex-direction: row;
-         }
+        /* Containers respect body padding with internal padding */
+        .top-buttons,
+        .button-groups,
+        .dropdown-container {
+        width: 100%;
+        max-width: 100%;           /* avoid fixed max-width causing overflow */
+        margin: 0 auto;
+        padding-left: 14px;       /* more room from page-frame border */
+        padding-right: 14px;
+        box-sizing: border-box;
+        flex-wrap: wrap;          /* Allow wrapping if needed */
+        }
+        .player-container {
+        padding-left: 14px;       /* create space from border on mobile */
+        padding-right: 14px;
+        }
+        /* Add a bit of breathing room above button sections */
+        .top-buttons { margin-top: 6px; }
+        .player-container { margin-top: 12px; }
+        .button-groups { margin-top: 12px; }
+        .top-buttons {
+        gap: 5px;
+        flex-direction: row;
+        }
          .button-groups {
          gap: 5px;
          flex-direction: row;
@@ -1143,10 +1154,12 @@
                                   isTourActive = true;
                                   tourInstance.start();
                               } catch (error) {
-         
-         
+                                  console.error('Error in toggleInstructions (tour):', error);
+                              }
+                          }
+
           // Fetch audio URL
-         async function fetchAudioUrl(chapter, verse, quarter = null, isFull = false) {
+          async function fetchAudioUrl(chapter, verse, quarter = null, isFull = false) {
              try {
                  console.log(`fetchAudioUrl: chapter=${chapter}, verse=${verse}, quarter=${quarter}, isFull=${isFull}`);
                  const style = getSelectedStyle();
