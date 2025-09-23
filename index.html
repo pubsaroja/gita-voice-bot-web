@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
    <head>
@@ -27,6 +26,7 @@
          padding: 20px;                     /* Outer space around content */
          margin: 0;                         /* Remove default margin */
          background-color: #f0f0f0;         /* Light grey background */
+         overflow-x: hidden;                /* Prevent horizontal scroll on small screens */
          }
          h1 {
          color: #2c3e50;
@@ -52,6 +52,7 @@
          margin: 6px;               /* a bit tighter margins on small screens */
          padding: 10px;             /* adjust padding for mobile */
          border-radius: 8px;        /* slightly smaller rounding */
+         overflow: hidden;          /* keep children within border on wrap */
          }
          }
          /* === TOP BUTTONS CONTAINER === */
@@ -241,6 +242,13 @@
          align-items: center;
          text-align: center !important;
          }
+         /* Explicit placeholder state (works regardless of visible/active) */
+         .shloka-text.placeholder {
+         display: flex !important;
+         justify-content: center;
+         align-items: center;
+         text-align: center !important;
+         }
          /* Revert to block and left-align when content spans multiple lines */
          .shloka-text.visible.multiline {
          display: block !important;
@@ -360,7 +368,7 @@
          .button-groups,
          .dropdown-container {
          width: 100%;
-         max-width: 600px;
+         max-width: 100%;           /* avoid fixed max-width causing overflow */
          margin: 0 auto;
          padding-left: 10px;       /* Padding inside to avoid edge contact */
          padding-right: 10px;
@@ -380,8 +388,8 @@
          gap: 5px;
          }
          .top-buttons button {
-         flex: 1;             /* buttons share available width */
-         max-width: 100px;    /* prevent oversized buttons */
+         flex: 1 1 calc(33.333% - 10px); /* three per row minus gap */
+         max-width: none;     /* let flex-basis control width */
          height: auto;        /* adjust height automatically */
          aspect-ratio: 1/1;   /* keep square shape */
          font-size: 0.8em;    /* reduce text size for mobile */
@@ -389,7 +397,7 @@
          .button-groups button {
          padding: 6px 12px;
          font-size: 0.8em;
-         max-width: 150px;
+         max-width: 100%;
          }
          }
          /* == PLAYER CONTAINER == */
@@ -1135,22 +1143,6 @@
                                   isTourActive = true;
                                   tourInstance.start();
                               } catch (error) {
-                                  console.error('Error in toggleInstructions (tour):', error);
-                              }
-                          }
-                           
-         function adjustTextboxHeight() {
-           ['sgsText', 'sringeriText'].forEach(id => {
-             const el = document.getElementById(id);
-             el.style.height = 'auto';
-             el.style.height = `${el.scrollHeight}px`;
-             if (el.innerHTML.includes('<br>')) {
-               el.classList.add('multiline');
-             } else {
-               el.classList.remove('multiline');
-             }
-           });
-         }
          
          
           // Fetch audio URL
