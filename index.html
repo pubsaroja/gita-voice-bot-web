@@ -229,8 +229,10 @@
          overflow-y: auto;
          min-height: 3em;
          box-sizing: border-box;
-         text-align: left;       /* Changed from justify to left to prevent spacing issues */
+         text-align: left;       /* Ensure left alignment */
          text-align-last: left;  /* Ensure last line is left-aligned */
+         direction: ltr;         /* Ensure consistent text direction */
+         unicode-bidi: plaintext; /* Handle bidirectional text properly */
          }
          /* Media query for mobile devices */
          @media (max-width: 768px) {
@@ -238,23 +240,30 @@
                  text-align: left;
                  padding: 10px 15px;
                  font-size: 1.3em; /* Slightly smaller font on mobile */
-                 white-space: normal; /* Allow text to wrap naturally */
+                 white-space: pre-line; /* Keep line breaks but wrap text */
                  word-wrap: break-word; /* Ensure long words break properly */
+                 word-break: break-word; /* Break words if necessary */
+                 line-height: 1.6; /* Slightly reduced line height for mobile */
              }
-             /* Reset any potential spacing issues in child elements */
-             #sgsText, #sringeriText,
+             
+             /* Reset all spacing and indentation */
+             #sgsText *, #sringeriText *,
              #sgsText > div, #sringeriText > div,
-             #sgsText p, #sringeriText p {
-                 margin: 0;
-                 padding: 0;
-                 text-indent: 0;
-                 text-align: left;
+             #sgsText p, #sringeriText p,
+             #sgsText span, #sringeriText span {
+                 margin: 0 !important;
+                 padding: 0 !important;
+                 text-indent: 0 !important;
+                 text-align: left !important;
+                 display: inline !important; /* Prevent block-level spacing */
              }
-             /* Target the actual text nodes */
-             #sgsText, #sringeriText {
-                 text-indent: 0;
-                 margin-left: 0;
-                 padding-left: 0;
+             
+             /* Ensure first letter of each line doesn't have extra space */
+             #sgsText::first-letter,
+             #sringeriText::first-letter {
+                 margin-left: 0 !important;
+                 padding-left: 0 !important;
+                 text-indent: 0 !important;
              }
              }
          }
@@ -1276,13 +1285,21 @@
                                                }
                                                j++;
                                            }
-                                           let shlokaText = shlokaLines.join('\n').trim();
-                                           if (!shlokaText) {
-                                               console.warn(`Empty shloka text for ${chapter}.${verse}, style=${style}`);
-                                               return `${chapter}.${verse}\nShloka not found or empty`;
-                                           }
-                                           // Add shloka number at the beginning on a new line
-                                           return `${chapter}.${verse}\n${shlokaText}`;
+                                           // Clean up each line of the shloka
+                                          shlokaLines = shlokaLines.map(line => {
+                                              // Remove any leading/trailing spaces and normalize spaces between words
+                                              return line.trim().replace(/\s+/g, ' ');
+                                          });
+                                          
+                                          let shlokaText = shlokaLines.join('\n').trim();
+                                          
+                                          if (!shlokaText) {
+                                              console.warn(`Empty shloka text for ${chapter}.${verse}, style=${style}`);
+                                              return `${chapter}.${verse}\nShloka not found or empty`;
+                                          }
+                                          
+                                          // Add shloka number at the beginning on a new line
+                                          return `${chapter}.${verse}\n${shlokaText}`;
                                        }
                                    }
                            
