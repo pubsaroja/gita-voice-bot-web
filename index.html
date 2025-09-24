@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
    <head>
@@ -193,23 +194,21 @@
          color: #333;
          white-space: pre-wrap;
          max-width: 100%;
-         margin-left: 0;        /* Avoid shrinking due to auto margins */
-         margin-right: 0;       /* Avoid shrinking due to auto margins */
+         margin-left: 0;
+         margin-right: 0;
          line-height: 1.5;
          min-height: 3em;
          overflow-y: auto;
-         padding: 0;             /* Let container provide padding */
+         padding: 0;
          display: none;
          justify-content: center;
          align-items: center;
-         text-align: left;
+         text-align: center;
          font-family: 'Noto Sans Telugu', sans-serif;
          box-sizing: border-box;
          }
          .shloka-text.active {
          display: flex;
-         flex-direction: column;   /* stack multiple shlokas vertically */
-         align-items: stretch;     /* let items take full width */
          }
          .shloka-text.active.multiline {
          display: block;
@@ -218,16 +217,16 @@
          #sgsText, #sringeriText {
          display: block;
          width: 100%;
-         white-space: normal !important; /* Override any pre-wrap */
-         text-align: left;
-         margin-left: 0;        /* Avoid shrinking due to auto margins */
-         margin-right: 0;       /* Avoid shrinking due to auto margins */
+         white-space: normal !important;
+         text-align: center;
+         margin-left: 0;
+         margin-right: 0;
          max-width: 100%;
          font-family: 'Noto Sans Telugu', sans-serif;
          font-size: 1.5em;
          line-height: 1.5;
-         border: none;           /* Border handled by container */
-         padding: 0;             /* Padding handled by container */
+         border: none;
+         padding: 0;
          overflow-y: auto;
          min-height: 3em;
          box-sizing: border-box;
@@ -236,28 +235,25 @@
          #sringeriText > div {
          display: block;
          width: 100%;
-         margin-bottom: 1em; /* Spacing between shlokas */
+         margin-bottom: 1em;
          }
          .hidden {
          display: none !important;
          }
-         /* Center placeholder only inside shloka text boxes */
          .shloka-text.visible {
          display: flex !important;
-         flex-direction: column;   /* stack vertically when visible */
-         align-items: stretch;     /* take full width */
-         justify-content: left;
-         text-align: center !important;
-         }
-         /* Explicit placeholder state (works regardless of visible/active) */
-         .shloka-text.placeholder {
-         display: flex !important;
-         flex-direction: column;   /* keep vertical flow in placeholder too */
+         flex-direction: column;
          align-items: center;
          justify-content: center;
-         text-align: center !important;
+         text-align: center;
          }
-         /* Revert to block and left-align when content spans multiple lines */
+         .shloka-text.placeholder {
+         display: flex !important;
+         flex-direction: column;
+         align-items: center;
+         justify-content: center;
+         text-align: center;
+         }
          .shloka-text.visible.multiline {
          display: block !important;
          text-align: left;
