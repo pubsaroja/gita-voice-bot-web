@@ -229,8 +229,23 @@
          overflow-y: auto;
          min-height: 3em;
          box-sizing: border-box;
-         text-align: justify;    /* Justify text for better alignment */
+         text-align: left;       /* Changed from justify to left to prevent spacing issues */
          text-align-last: left;  /* Ensure last line is left-aligned */
+         }
+         /* Media query for mobile devices */
+         @media (max-width: 768px) {
+             #sgsText, #sringeriText {
+                 text-align: left;
+                 padding: 10px 15px;
+                 font-size: 1.3em; /* Slightly smaller font on mobile */
+             }
+             /* Ensure first and third paadas don't have extra space */
+             #sgsText div:not(:first-child),
+             #sringeriText div:not(:first-child) {
+                 text-indent: 0;
+                 margin-left: 0;
+                 padding-left: 0;
+             }
          }
          /* Style for the shloka number line */
          #sgsText div:first-child,
