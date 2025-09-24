@@ -1245,9 +1245,10 @@
                                            let shlokaText = shlokaLines.join('\n').trim();
                                            if (!shlokaText) {
                                                console.warn(`Empty shloka text for ${chapter}.${verse}, style=${style}`);
-                                               return `Shloka ${chapter}.${verse} not found or empty`;
+                                               return `Shloka not found or empty ${chapter}.${verse}`;
                                            }
-                                           return `${chapter}.${verse} ${shlokaText}`;
+                                           // Move the shloka number to the end of the text
+                                           return `${shlokaText} ${chapter}.${verse}`;
                                        }
                                    }
                            
