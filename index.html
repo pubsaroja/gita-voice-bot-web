@@ -23,7 +23,7 @@
          body {
          font-family: Outfit, sans-serif;    /* Page font */
          text-align: center;                 /* Center page text */
-         padding: 0;                        /* Remove default padding */
+         padding: 20px;                     /* Outer space around content */
          margin: 0;                         /* Remove default margin */
          background-color: #f0f0f0;         /* Light grey background */
          overflow-x: hidden;                /* Prevent horizontal scroll on small screens */
@@ -40,60 +40,28 @@
          /* === PAGE FRAME (responsive border around the whole page) === */
          .page-frame {
          max-width: 900px;           /* wider than inner content for breathing room */
-         margin: 0 auto;             /* center the frame */
-         padding: 16px;              /* inner padding */
+         margin: 8px auto;           /* space from screen edges and centered */
+         padding: 12px;              /* inner padding so border doesn't hug content */
          border: 2px solid #357EC7;  /* theme-aligned border */
-         border-radius: 0;           /* remove border radius for full width on mobile */
+         border-radius: 10px;        /* pleasant rounding */
          background: #ffffff;        /* white card against body gray */
          box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-         min-height: 100vh;          /* full viewport height */
-         box-sizing: border-box;     /* include padding in width calculation */
          }
          @media (max-width: 600px) {
-           /* Reset page frame for mobile */
-           .page-frame {
-             margin: 0;
-             padding: 8px;
-             border: none;
-             width: 100%;
-             max-width: 100%;
-             border-radius: 0;
-             box-shadow: none;
-           }
-           
-           /* Fix for shloka text container */
-           .shloka-text {
-             width: 100% !important;
-             margin: 10px 0 !important;
-             padding: 0 4px !important;
-             box-sizing: border-box !important;
-             font-size: 1.2em;
-             line-height: 1.5;
-           }
-           
-           /* Audio player fixes */
-           audio {
-             width: 100% !important;
-             max-width: 100% !important;
-             margin: 10px 0 !important;
-             padding: 0 4px !important;
-             box-sizing: border-box !important;
-           }
-           
-           /* Ensure proper text sizing */
-           html {
-             -webkit-text-size-adjust: 100%;
-             -ms-text-size-adjust: 100%;
-           }
+         .page-frame {
+         margin: 4px;               /* reduce outer gap around border on mobile */
+         padding: 16px;             /* slightly smaller to avoid overflow */
+         border-radius: 10px;       /* keep pleasant rounding on mobile */
+         border-width: 4px;         /* thicker border to visually frame content */
+         overflow: hidden;          /* keep children within border on wrap */
          }
-      
-      /* === TOP BUTTONS CONTAINER === */
-      .top-buttons {
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 10px;
-        width: 100%;
+         }
+         /* === TOP BUTTONS CONTAINER === */
+         .top-buttons {
+         display: flex;
+         justify-content: center;
+         gap: 10px;
+         width: 100%;
          max-width: 600px;   /* Match textbox max-width */
          margin: 0 auto;     /* Center horizontally */
          padding-left: 12px; /* Space from page-frame border */
@@ -142,12 +110,17 @@
          .top-buttons button.reset:active,
          .top-buttons button.reset:focus {
          background: #357EC7 !important;   /* solid blue */
+         color: white !important;          /* visible text */
          background-image: none !important;/* force remove picture */
          }
          /* == BUTTON GROUPS CONTAINER == */
          .button-groups {
          display: flex;
          justify-content: center;
+         gap: 10px;
+         max-width: 600px;
+         margin: 0 auto;
+         width: 100%;
          padding-left: 12px; /* Align with other containers */
          padding-right: 12px;/* Align with other containers */
          box-sizing: border-box;
@@ -169,23 +142,20 @@
          font-family: 'Outfit', sans-serif;
          font-size: 1.6em;
          width: 100%;
+         max-width: 150px;
          transition: background-color 0.3s ease;
          }
          .button-groups button:hover {
          background-color: #ffffff;
          color: transparent;
          }
-         audio {
-         width: 100%;
-         max-width: 100%;
-         margin: 10px auto;
-         display: block;
+         select {
+         padding: 10px;
+         margin: 5px;
+         font-size: 1em;
          border-radius: 5px;
-         background: #f5f5f5;
-         padding: 5px;
-         -webkit-appearance: none;
-         appearance: none;
-         height: 40px;
+         width: 100%;
+         max-width: 150px;
          }
          /* == DROPDOWN CONTAINER == */
          .dropdown-container {
@@ -218,24 +188,23 @@
          }
          /* == SHLOKA TEXT == */
          .shloka-text {
-         margin: 10px auto;
-         padding: 0 8px;
+         margin-top: 10px;
          font-size: 1.5em;
          color: #333;
          white-space: pre-wrap;
-         width: 100%;
          max-width: 100%;
-         box-sizing: border-box;
-         line-height: 1.6;
+         margin-left: 0;        /* Avoid shrinking due to auto margins */
+         margin-right: 0;       /* Avoid shrinking due to auto margins */
+         line-height: 1.5;
          min-height: 3em;
          overflow-y: auto;
-         text-align: center;
-         word-wrap: break-word;
-         -webkit-overflow-scrolling: touch;
-         display: flex;
+         padding: 0;             /* Let container provide padding */
+         display: none;
          justify-content: center;
          align-items: center;
+         text-align: center;
          font-family: 'Noto Sans Telugu', sans-serif;
+         box-sizing: border-box;
          }
          .shloka-text.active {
          display: flex;
@@ -249,61 +218,19 @@
          #sgsText, #sringeriText {
          display: block;
          width: 100%;
-         white-space: pre-line;  /* Preserve line breaks and wrap text */
-         text-align: left;       /* Left-align shloka text */
-         margin: 0;              /* Remove auto margins */
-         padding: 10px 20px;     /* Add some padding */
+         white-space: normal !important; /* Override any pre-wrap */
+         text-align: left;
+         margin-left: 0;        /* Avoid shrinking due to auto margins */
+         margin-right: 0;       /* Avoid shrinking due to auto margins */
+         max-width: 100%;
          font-family: 'Noto Sans Telugu', sans-serif;
          font-size: 1.5em;
-         line-height: 1.8;       /* Slightly more line height for better readability */
+         line-height: 1.5;
          border: none;           /* Border handled by container */
+         padding: 0;             /* Padding handled by container */
          overflow-y: auto;
          min-height: 3em;
          box-sizing: border-box;
-         text-align: left;       /* Ensure left alignment */
-         text-align-last: left;  /* Ensure last line is left-aligned */
-         direction: ltr;         /* Ensure consistent text direction */
-         unicode-bidi: plaintext; /* Handle bidirectional text properly */
-         }
-         /* Media query for mobile devices */
-         @media (max-width: 768px) {
-             #sgsText, #sringeriText {
-                 text-align: left;
-                 padding: 10px 15px;
-                 font-size: 1.3em; /* Slightly smaller font on mobile */
-                 white-space: pre-line; /* Keep line breaks but wrap text */
-                 word-wrap: break-word; /* Ensure long words break properly */
-                 word-break: break-word; /* Break words if necessary */
-                 line-height: 1.6; /* Slightly reduced line height for mobile */
-             }
-             
-             /* Reset all spacing and indentation */
-             #sgsText *, #sringeriText *,
-             #sgsText > div, #sringeriText > div,
-             #sgsText p, #sringeriText p,
-             #sgsText span, #sringeriText span {
-                 margin: 0 !important;
-                 padding: 0 !important;
-                 text-indent: 0 !important;
-                 text-align: left !important;
-                 display: inline !important; /* Prevent block-level spacing */
-             }
-             
-             /* Ensure first letter of each line doesn't have extra space */
-             #sgsText::first-letter,
-             #sringeriText::first-letter {
-                 margin-left: 0 !important;
-                 padding-left: 0 !important;
-                 text-indent: 0 !important;
-             }
-             }
-         }
-         /* Style for the shloka number line */
-         #sgsText div:first-child,
-         #sringeriText div:first-child {
-         text-align: left;       /* Left-align the shloka number */
-         margin-bottom: 10px;    /* Add space after the number */
-         font-weight: bold;      /* Make the number bold */
          }
          #sgsText > div,
          #sringeriText > div {
@@ -318,10 +245,9 @@
          .shloka-text.visible {
          display: flex !important;
          flex-direction: column;   /* stack vertically when visible */
-         align-items: center;      /* center horizontally */
+         align-items: stretch;     /* take full width */
          justify-content: center;
          text-align: center !important;
-         height: 100%;            /* Ensure it takes full height */
          }
          /* Explicit placeholder state (works regardless of visible/active) */
          .shloka-text.placeholder {
@@ -524,7 +450,7 @@
          margin: 20px auto 0;
          width: 100%;
          box-sizing: border-box;
-         border: none;
+         border: 2px solid #357EC7;
          border-radius: 5px;
          padding: 12px;             /* Align side padding with others */
          }
@@ -1293,7 +1219,7 @@
                                try {
                                    console.log(`fetchShlokaText called: chapter=${chapter}, verse=${verse}, style=${style}`);
                                    const url = style === 'sgs'
-                                       ? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG Telugu with Uvacha4.txt'
+                                       ? 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG Telugu with Uvacha2.txt'
                                        : 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Sringeri.txt';
                                    const response = await fetch(url);
                                    if (!response.ok) {
@@ -1316,21 +1242,12 @@
                                                }
                                                j++;
                                            }
-                                           // Clean up each line of the shloka
-                                          shlokaLines = shlokaLines.map(line => {
-                                              // Remove any leading/trailing spaces and normalize spaces between words
-                                              return line.trim().replace(/\s+/g, ' ');
-                                          });
-                                          
-                                          let shlokaText = shlokaLines.join('\n').trim();
-                                          
-                                          if (!shlokaText) {
-                                              console.warn(`Empty shloka text for ${chapter}.${verse}, style=${style}`);
-                                              return `${chapter}.${verse}\nShloka not found or empty`;
-                                          }
-                                          
-                                          // Add shloka number at the beginning on a new line
-                                          return `${chapter}.${verse}\n${shlokaText}`;
+                                           let shlokaText = shlokaLines.join('\n').trim();
+                                           if (!shlokaText) {
+                                               console.warn(`Empty shloka text for ${chapter}.${verse}, style=${style}`);
+                                               return `Shloka ${chapter}.${verse} not found or empty`;
+                                           }
+                                           return `${chapter}.${verse} ${shlokaText}`;
                                        }
                                    }
                            
