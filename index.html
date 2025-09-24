@@ -218,19 +218,25 @@
          #sgsText, #sringeriText {
          display: block;
          width: 100%;
-         white-space: normal !important; /* Override any pre-wrap */
-         text-align: right;     /* Right-align shloka text */
-         margin-left: auto;     /* Push to right */
-         margin-right: 0;       /* Align to right */
-         max-width: 100%;
+         white-space: pre-line;  /* Preserve line breaks and wrap text */
+         text-align: left;       /* Left-align shloka text */
+         margin: 0 auto;         /* Center the block */
+         max-width: 800px;       /* Limit width for better readability */
          font-family: 'Noto Sans Telugu', sans-serif;
          font-size: 1.5em;
-         line-height: 1.5;
+         line-height: 1.8;       /* Slightly more line height for better readability */
          border: none;           /* Border handled by container */
-         padding: 0;             /* Padding handled by container */
+         padding: 10px 20px;     /* Add some padding */
          overflow-y: auto;
          min-height: 3em;
          box-sizing: border-box;
+         }
+         /* Style for the shloka number line */
+         #sgsText div:last-child,
+         #sringeriText div:last-child {
+         text-align: right;      /* Right-align the shloka number */
+         margin-top: 10px;       /* Add space before the number */
+         font-weight: bold;      /* Make the number bold */
          }
          #sgsText > div,
          #sringeriText > div {
@@ -248,6 +254,7 @@
          align-items: center;      /* center horizontally */
          justify-content: center;
          text-align: center !important;
+         height: 100%;            /* Ensure it takes full height */
          }
          /* Explicit placeholder state (works regardless of visible/active) */
          .shloka-text.placeholder {
@@ -1245,10 +1252,10 @@
                                            let shlokaText = shlokaLines.join('\n').trim();
                                            if (!shlokaText) {
                                                console.warn(`Empty shloka text for ${chapter}.${verse}, style=${style}`);
-                                               return `Shloka not found or empty ${chapter}.${verse}`;
+                                               return `Shloka not found or empty\n${chapter}.${verse}`;
                                            }
-                                           // Move the shloka number to the end of the text
-                                           return `${shlokaText} ${chapter}.${verse}`;
+                                           // Add shloka number on a new line at the end
+                                           return `${shlokaText}\n${chapter}.${verse}`;
                                        }
                                    }
                            
