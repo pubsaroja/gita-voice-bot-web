@@ -23,7 +23,7 @@
          body {
          font-family: Outfit, sans-serif;    /* Page font */
          text-align: center;                 /* Center page text */
-         padding: 20px;                     /* Outer space around content */
+         padding: 0;                        /* Remove default padding */
          margin: 0;                         /* Remove default margin */
          background-color: #f0f0f0;         /* Light grey background */
          overflow-x: hidden;                /* Prevent horizontal scroll on small screens */
@@ -40,20 +40,23 @@
          /* === PAGE FRAME (responsive border around the whole page) === */
          .page-frame {
          max-width: 900px;           /* wider than inner content for breathing room */
-         margin: 8px auto;           /* space from screen edges and centered */
-         padding: 12px;              /* inner padding so border doesn't hug content */
+         margin: 0 auto;             /* center the frame */
+         padding: 16px;              /* inner padding */
          border: 2px solid #357EC7;  /* theme-aligned border */
-         border-radius: 10px;        /* pleasant rounding */
+         border-radius: 0;           /* remove border radius for full width on mobile */
          background: #ffffff;        /* white card against body gray */
          box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+         min-height: 100vh;          /* full viewport height */
+         box-sizing: border-box;     /* include padding in width calculation */
          }
          @media (max-width: 600px) {
          .page-frame {
-         margin: 4px;               /* reduce outer gap around border on mobile */
-         padding: 16px;             /* slightly smaller to avoid overflow */
-         border-radius: 10px;       /* keep pleasant rounding on mobile */
-         border-width: 4px;         /* thicker border to visually frame content */
-         overflow: hidden;          /* keep children within border on wrap */
+         margin: 0;                /* remove margin on mobile */
+         padding: 12px;            /* consistent padding */
+         border-radius: 0;         /* remove border radius for full width */
+         border-width: 0;          /* remove border on mobile */
+         width: 100%;              /* full width */
+         max-width: 100%;          /* ensure it takes full width */
          }
          }
          /* === TOP BUTTONS CONTAINER === */
@@ -110,17 +113,12 @@
          .top-buttons button.reset:active,
          .top-buttons button.reset:focus {
          background: #357EC7 !important;   /* solid blue */
-         color: white !important;          /* visible text */
          background-image: none !important;/* force remove picture */
          }
          /* == BUTTON GROUPS CONTAINER == */
          .button-groups {
          display: flex;
          justify-content: center;
-         gap: 10px;
-         max-width: 600px;
-         margin: 0 auto;
-         width: 100%;
          padding-left: 12px; /* Align with other containers */
          padding-right: 12px;/* Align with other containers */
          box-sizing: border-box;
@@ -188,13 +186,13 @@
          }
          /* == SHLOKA TEXT == */
          .shloka-text {
-         margin-top: 10px;
+         margin: 10px 0;       /* Consistent vertical margins */
+         padding: 0 8px;       /* Add horizontal padding */
          font-size: 1.5em;
          color: #333;
          white-space: pre-wrap;
-         max-width: 100%;
-         margin-left: 0;        /* Avoid shrinking due to auto margins */
-         margin-right: 0;       /* Avoid shrinking due to auto margins */
+         width: 100%;
+         box-sizing: border-box;
          line-height: 1.5;
          min-height: 3em;
          overflow-y: auto;
