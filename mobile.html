@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
    <head>
@@ -1870,7 +1869,7 @@
          
            // Make sure texts are synchronized
            if (sgsRadio.checked) {
-             sringeriText.innerHTML = sgsText.innerHTML;
+             
          
              sgsText.classList.add('visible');
              sgsText.classList.remove('hidden');
@@ -1881,7 +1880,7 @@
              sgsLabel.classList.add('active');
              sringeriLabel.classList.remove('active');
            } else {
-             sgsText.innerHTML = sringeriText.innerHTML;
+             
          
              sringeriText.classList.add('visible');
              sringeriText.classList.remove('hidden');
@@ -1895,7 +1894,12 @@
          
            adjustTextboxHeight();  // fix heights after toggle
          }
-         
+ // After updateTextboxVisibility();
+const ctx = currentContext.find(c => c && c.name && c.name.includes('shloka-context'));
+if (ctx && ctx.parameters) {
+  ctx.parameters.style = style; // 'sgs' or 'sringeri'
+  localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+}        
          
                            
                            async function sendCommand(intent) {
