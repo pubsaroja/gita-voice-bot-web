@@ -50,69 +50,50 @@
          box-sizing: border-box;     /* include padding in width calculation */
          }
          @media (max-width: 600px) {
-         .page-frame {
-         margin: 0;
-         padding: 8px;
-         border-radius: 0;
-         border-width: 0;
-         width: 100%;
-         max-width: 100%;
-         box-sizing: border-box;
+           /* Reset page frame for mobile */
+           .page-frame {
+             margin: 0;
+             padding: 8px;
+             border: none;
+             width: 100%;
+             max-width: 100%;
+             border-radius: 0;
+             box-shadow: none;
+           }
+           
+           /* Fix for shloka text container */
+           .shloka-text {
+             width: 100% !important;
+             margin: 10px 0 !important;
+             padding: 0 4px !important;
+             box-sizing: border-box !important;
+             font-size: 1.2em;
+             line-height: 1.5;
+           }
+           
+           /* Audio player fixes */
+           audio {
+             width: 100% !important;
+             max-width: 100% !important;
+             margin: 10px 0 !important;
+             padding: 0 4px !important;
+             box-sizing: border-box !important;
+           }
+           
+           /* Ensure proper text sizing */
+           html {
+             -webkit-text-size-adjust: 100%;
+             -ms-text-size-adjust: 100%;
+           }
          }
-         
-         /* Force full width for shloka container */
-         .shloka-container {
-         width: 100% !important;
-         padding: 0 8px !important;
-         box-sizing: border-box !important;
-         }
-         
-         /* Ensure shloka text takes full width */
-        .shloka-text {
-          width: 100% !important;
-          margin: 10px 0 !important;
-          padding: 0 8px !important;
-          font-size: 1.3em !important;
-          line-height: 1.6 !important;
-          box-sizing: border-box !important;
-        }
-        
-        /* Audio player styles */
-        audio {
-          width: 100% !important;
-          max-width: 100% !important;
-          margin: 10px 0 !important;
-          padding: 0 8px !important;
-          box-sizing: border-box !important;
-        }
-        
-        /* Mobile-specific styles */
-        @media (max-width: 600px) {
-          .top-buttons, 
-          .button-groups, 
-          .dropdown-container {
-            width: 100% !important;
-            margin: 0 !important;
-            padding: 0 8px !important;
-            box-sizing: border-box !important;
-          }
-          
-          /* Ensure proper text sizing on mobile */
-          html {
-            width: 100%;
-            -webkit-text-size-adjust: 100%;
-            -ms-text-size-adjust: 100%;
-          }
-        } }
       
       /* === TOP BUTTONS CONTAINER === */
-.top-buttons {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap; /* Allow buttons to wrap to new line on mobile */
-{{ ... }}
-         gap: 10px;
-         width: 100%;
+      .top-buttons {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        width: 100%;
          max-width: 600px;   /* Match textbox max-width */
          margin: 0 auto;     /* Center horizontally */
          padding-left: 12px; /* Space from page-frame border */
