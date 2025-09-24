@@ -394,32 +394,52 @@
        box-sizing: border-box;
        flex-wrap: wrap;          /* Allow wrapping if needed */
        }
-       .player-container { padding-left: 12px; padding-right: 12px; }
-        /* Add a bit of breathing room above button sections */
-        .top-buttons { margin-top: 6px; }
-        .player-container { margin-top: 12px; }
-        .button-groups { margin-top: 12px; }
-        /* Slightly smaller shloka text on mobile for better fit */
-        #sgsText, #sringeriText { font-size: 1.25em; }
-       .top-buttons {
-       gap: 5px;
-       flex-direction: row;
+       .player-container { 
+         padding-left: 12px; 
+         padding-right: 12px; 
+       }
+       /* Add a bit of breathing room above button sections */
+       .top-buttons { 
+         margin-top: 6px;
+         gap: 5px;
+         flex-direction: row;
+       }
+       .player-container { 
+         margin-top: 12px; 
+         padding-left: 12px; 
+         padding-right: 12px; 
+       }
+       /* Ensure Shloka text is properly aligned on mobile */
+       .shloka-text {
+         font-size: 1.25em;
+         padding: 0 5px;
+         text-align: center;
+       }
+       #sgsText, #sringeriText {
+         font-size: 1.25em;
+         text-align: center;
+       }
+       .shloka-text.visible,
+       .shloka-text.placeholder {
+         justify-content: center;
+         text-align: center;
+       }
+       .button-groups { 
+         margin-top: 12px;
+         gap: 5px;
+         flex-direction: row;
        }
        /* Make player controls responsive to avoid overflow */
        .player-container {
-       grid-template-columns: repeat(3, 1fr);
+         grid-template-columns: repeat(3, 1fr);
        }
        .player-container button {
-       width: 100%;
+         width: 100%;
        }
-        .button-groups {
-        gap: 5px;
-        flex-direction: row;
-        }
-         .button-group {
+       .button-group {
          width: 50%;
          gap: 5px;
-         }
+       }
          .top-buttons button {
          flex: 1 1 calc(33.333% - 10px); /* three per row minus gap */
          max-width: none;     /* let flex-basis control width */
