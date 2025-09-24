@@ -220,22 +220,23 @@
          width: 100%;
          white-space: pre-line;  /* Preserve line breaks and wrap text */
          text-align: left;       /* Left-align shloka text */
-         margin: 0 auto;         /* Center the block */
-         max-width: 800px;       /* Limit width for better readability */
+         margin: 0;              /* Remove auto margins */
+         padding: 10px 20px;     /* Add some padding */
          font-family: 'Noto Sans Telugu', sans-serif;
          font-size: 1.5em;
          line-height: 1.8;       /* Slightly more line height for better readability */
          border: none;           /* Border handled by container */
-         padding: 10px 20px;     /* Add some padding */
          overflow-y: auto;
          min-height: 3em;
          box-sizing: border-box;
+         text-align: justify;    /* Justify text for better alignment */
+         text-align-last: left;  /* Ensure last line is left-aligned */
          }
          /* Style for the shloka number line */
-         #sgsText div:last-child,
-         #sringeriText div:last-child {
-         text-align: right;      /* Right-align the shloka number */
-         margin-top: 10px;       /* Add space before the number */
+         #sgsText div:first-child,
+         #sringeriText div:first-child {
+         text-align: left;       /* Left-align the shloka number */
+         margin-bottom: 10px;    /* Add space after the number */
          font-weight: bold;      /* Make the number bold */
          }
          #sgsText > div,
@@ -1252,10 +1253,10 @@
                                            let shlokaText = shlokaLines.join('\n').trim();
                                            if (!shlokaText) {
                                                console.warn(`Empty shloka text for ${chapter}.${verse}, style=${style}`);
-                                               return `Shloka not found or empty\n${chapter}.${verse}`;
+                                               return `${chapter}.${verse}\nShloka not found or empty`;
                                            }
-                                           // Add shloka number on a new line at the end
-                                           return `${shlokaText}\n${chapter}.${verse}`;
+                                           // Add shloka number at the beginning on a new line
+                                           return `${chapter}.${verse}\n${shlokaText}`;
                                        }
                                    }
                            
