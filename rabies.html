@@ -1,7 +1,3 @@
-
-HomeHTMLHTML IntroductionTryit: HTML introduction 
-Result Size: 661 x 518
-ayabhaskar
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -35,15 +31,15 @@ ayabhaskar
             <p class="mt-2 text-lg">Dr.P.Udayabhaskar</p>
         </div>
     </header>
-​
+
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-8">
       
-​
+
         <!-- Post-Exposure Schedule -->
         <section class="mb-8">
             <h2 class="text-2xl font-semibold text-blue-900">Post-Exposure Prophylaxis (PEP)</h2>
-​
+
             <!-- Scheduler and RIG Calculator -->
             <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
                 <h3 class="text-xl font-semibold text-blue-900 mb-4">Calculate Your PEP Schedule and RIG Dosage</h3>
@@ -56,3 +52,134 @@ ayabhaskar
                         <label for="weight" class="block text-gray-700 font-medium mb-2">Enter Weight (kg, optional):</label>
                         <input type="number" id="weight" min="0" step="0.1" placeholder="e.g., 70" class="border border-gray-300 rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
+                    <div>
+                        <label for="rig-type" class="block text-gray-700 font-medium mb-2">Select RIG Type (if applicable):</label>
+                        <select id="rig-type" class="border border-gray-300 rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="hrig">Human RIG (HRIG)</option>
+                            <option value="erig">Equine RIG (ERIG)</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="calculateScheduleAndDosage()" class="bg-blue-900 text-white py-2 px-4 rounded-md hover:bg-blue-800">Generate Schedule and Dosage</button>
+                <div id="schedule-output" class="mt-4">
+                    <table class="schedule-table w-full hidden" id="schedule-table">
+                        <thead>
+                            <tr>
+                                <th>Treatment</th>
+                                <th>Day</th>
+                                <th>Date (DD/MM/YYYY)</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedule-body">
+                            <!-- Schedule and dosage will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Static PEP Schedule Table -->
+            <table class="schedule-table w-full mt-4">
+                <thead>
+                    <tr>
+                        <th>Treatment</th>
+                        <th>Timing</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Rabies Immune Globulin (RIG)</td>
+                        <td>Day 0</td>
+                        <td>Administered at the site of the bite, if possible</td>
+                    </tr>
+                    <tr>
+                        <td>Dose 1</td>
+                        <td>Day 0</td>
+                        <td>First dose of rabies vaccine</td>
+                    </tr>
+                    <tr>
+                        <td>Dose 2</td>
+                        <td>Day 3</td>
+                        <td>Second dose, three days after the first</td>
+                    </tr>
+                    <tr>
+                        <td>Dose 3</td>
+                        <td>Day 7</td>
+                        <td>Third dose, one week after the first</td>
+                    </tr>
+                    <tr>
+                        <td>Dose 4</td>
+                        <td>Day 14</td>
+                        <td>Fourth dose, two weeks after the first</td>
+                    </tr>
+                    <tr>
+                        <td>Dose 5</td>
+                        <td>Day 28</td>
+                        <td>Fifth dose, four weeks after the first</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Additional Information -->
+    
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-blue-900 text-white py-6">
+            <h1 class="text-3xl font-bold">Rabies Immunization Schedule</h1>
+            <p class="mt-2 text-lg">Protect yourself and your community from rabies</p>
+        </div>
+    </footer>
+
+    <script>
+        function calculateScheduleAndDosage() {
+            const inputDate = document.getElementById('first-dose-date').value;
+            const weight = parseFloat(document.getElementById('weight').value);
+            const rigType = document.getElementById('rig-type').value;
+            const outputTable = document.getElementById('schedule-table');
+            const outputBody = document.getElementById('schedule-body');
+
+            if (!inputDate) {
+                alert('Please select a date for the first dose.');
+                return;
+            }
+
+            const firstDoseDate = new Date(inputDate);
+            let rigDetails = 'Administered at the site of the bite, if possible';
+            if (weight && weight > 0) {
+                const rigDosage = rigType === 'hrig' ? (20 * weight).toFixed(2) : (40 * weight).toFixed(2);
+                const rigLabel = rigType === 'hrig' ? 'Human RIG' : 'Equine RIG';
+                rigDetails = `Dosage: ${rigDosage} IU, administered at the site of the bite, if possible`;
+            }
+
+            const scheduleDays = [
+                { treatment: `Rabies Immune Globulin (${weight && weight > 0 ? (rigType === 'hrig' ? 'Human RIG' : 'Equine RIG') : 'RIG'})`, day: 0, details: rigDetails },
+                { treatment: 'Dose 1', day: 0, details: 'First dose of rabies vaccine' },
+                { treatment: 'Dose 2', day: 3, details: 'Second dose, three days after the first' },
+                { treatment: 'Dose 3', day: 7, details: 'Third dose, one week after the first' },
+                { treatment: 'Dose 4', day: 14, details: 'Fourth dose, two weeks after the first' },
+                { treatment: 'Dose 5', day: 28, details: 'Fifth dose, four weeks after the first' }
+            ];
+
+            outputBody.innerHTML = '';
+            scheduleDays.forEach(({ treatment, day, details }) => {
+                const doseDate = new Date(firstDoseDate);
+                doseDate.setDate(firstDoseDate.getDate() + day);
+                const formattedDate = `${String(doseDate.getDate()).padStart(2, '0')}/${String(doseDate.getMonth() + 1).padStart(2, '0')}/${doseDate.getFullYear()}`;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${treatment}</td>
+                    <td>Day ${day}</td>
+                    <td>${formattedDate}</td>
+                    <td>${details}</td>
+                `;
+                outputBody.appendChild(row);
+            });
+
+            outputTable.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
