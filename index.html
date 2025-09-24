@@ -412,17 +412,26 @@
        /* Ensure Shloka text is properly aligned on mobile */
        .shloka-text {
          font-size: 1.25em;
-         padding: 0 5px;
-         text-align: center;
+         padding: 0 15px;
+         text-align: left;
+       }
+       .shloka-number {
+         font-weight: bold;
+         margin-bottom: 5px;
+         text-align: left;
+         font-size: 1em;
+         padding-left: 15px;
        }
        #sgsText, #sringeriText {
          font-size: 1.25em;
-         text-align: center;
+         text-align: left;
+         padding-left: 15px;
+         white-space: pre-line;
        }
        .shloka-text.visible,
        .shloka-text.placeholder {
-         justify-content: center;
-         text-align: center;
+         justify-content: flex-start;
+         text-align: left;
        }
        .button-groups { 
          margin-top: 12px;
