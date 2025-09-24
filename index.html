@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
    <head>
@@ -214,6 +213,15 @@
          display: block;
          text-align: left;
          }
+         .shloka-number {
+         font-weight: bold;
+         margin-bottom: 5px;
+         text-align: left;
+         font-size: 1em;
+         }
+         .shloka-lines {
+         text-align: left;
+         }
          #sgsText, #sringeriText {
          display: block;
          width: 100%;
@@ -375,7 +383,7 @@
          color: #000;
          margin-top: 10px;
          }
-         /* == RESPONSIVE MOBILE STYLES (≤600px) == */
+         /* == RESPONSIVE MOBILE STYLES (â‰¤600px) == */
          @media (max-width: 600px) {
        /* Reduce body padding on mobile to remove excess space around page border */
        body { padding: 6px; }
@@ -412,7 +420,7 @@
        /* Ensure Shloka text is properly aligned on mobile */
        .shloka-text {
          font-size: 1.25em;
-         padding: 0 15px;
+         padding: 0;
          text-align: left;
        }
        .shloka-number {
@@ -420,12 +428,12 @@
          margin-bottom: 5px;
          text-align: left;
          font-size: 1em;
-         padding-left: 15px;
+         padding-left: 0;
        }
        #sgsText, #sringeriText {
          font-size: 1.25em;
          text-align: left;
-         padding-left: 15px;
+         padding-left: 0;
          white-space: pre-line;
        }
        .shloka-text.visible,
@@ -586,25 +594,25 @@
             Random Shloka Chapterwise:
             </label>
             <select id="chapterSelect" onchange="handleChapterSelect(this)" data-intro="Pick a chapter to play a random shloka from it" data-title="Random by Chapter">
-               <option value="" selected disabled>Select Chapter</option>
+               <option value="" selected disabled>Select Chapter</option>                
                <option value="1">1. అర్జునవిషాదయోగః</option>
-               <option value="2">2. సాఙ్ఖ్యయోగః</option>
-               <option value="3">3. కర్మయోగః</option>
-               <option value="4">4. జ్ఞానయోగః</option>
-               <option value="5">5. కర్మసన్న్యాసయోగః</option>
-               <option value="6">6. ఆత్మసంయమయోగః</option>
-               <option value="7">7. జ్ఞానవిజ్ఞానయోగః</option>
-               <option value="8">8. అక్షరపరబ్రహ్మయోగః</option>
-               <option value="9">9. రాజవిద్యారాజగుహ్యయోగః</option>
-               <option value="10">10. విభూతియోగః</option>
-               <option value="11">11. విశ్వరూపసన్దర్శనయోగః</option>
-               <option value="12">12. భక్తియోగః</option>
-               <option value="13">13. క్షేత్రక్షేత్రజ్ఞవిభాగయోగః</option>
-               <option value="14">14. గుణత్రయవిభాగయోగః</option>
-               <option value="15">15. పురుషోత్తమప్రాప్తియోగః</option>
-               <option value="16">16. దైవాసురసమ్పద్విభాగయోగః</option>
-               <option value="17">17. శ్రద్ధాత్రయవిభాగయోగః</option>
-               <option value="18">18. మోక్షసన్న్యాసయోగః</option>
+                <option value="2">2. సాఙ్ఖ్యయోగః</option>
+                <option value="3">3. కర్మయోగః</option>
+                <option value="4">4. జ్ఞానయోగః</option>
+                <option value="5">5. కర్మసన్న్యాసయోగః</option>
+                <option value="6">6. ఆత్మసంయమయోగః</option>
+                <option value="7">7. జ్ఞానవిజ్ఞానయోగః</option>
+                <option value="8">8. అక్షరపరబ్రహ్మయోగః</option>
+                <option value="9">9. రాజవిద్యారాజగుహ్యయోగః</option>
+                <option value="10">10. విభూతియోగః</option>
+                <option value="11">11. విశ్వరూపసన్దర్శనయోగః</option>
+                <option value="12">12. భక్తియోగః</option>
+                <option value="13">13. క్షేత్రక్షేత్రజ్ఞవిభాగయోగః</option>
+                <option value="14">14. గుణత్రయవిభాగయోగః</option>
+                <option value="15">15. పురుషోత్తమప్రాప్తియోగః</option>
+                <option value="16">16. దైవాసురసమ్పద్విభాగయోగః</option>
+                <option value="17">17. శ్రద్ధాత్రయవిభాగయోగః</option>
+                <option value="18">18. మోక్షసన్న్యాసయోగః</option>
             </select>
          </div>
          <div>
@@ -769,6 +777,48 @@
              const regex = new RegExp(`(${escapedTerm})`, 'gi');
              return text.replace(regex, `<span style="color: red;">$1</span>`);
          }
+
+        // Format shloka display with number on its own line and two poetic lines
+        function formatShlokaDisplay(lines, searchTerm, isShlokaNumberSearch = false) {
+            try {
+                if (!Array.isArray(lines) || lines.length === 0) return '';
+                const firstLine = (lines[0] || '').trim();
+                let number = '';
+                let firstRemainder = '';
+                const m = firstLine.match(/^(\d+\.\d+)\s*(.*)$/);
+                if (m) {
+                    number = m[1];
+                    firstRemainder = (m[2] || '').trim();
+                } else {
+                    number = (firstLine.split(/[\s\t]+/)[0] || '').trim();
+                    firstRemainder = firstLine.slice(number.length).trim();
+                }
+                const contentParts = [];
+                if (firstRemainder) contentParts.push(firstRemainder);
+                for (let i = 1; i < lines.length; i++) {
+                    const part = (lines[i] || '').trim();
+                    if (part) contentParts.push(part);
+                }
+                let content = contentParts.join(' ').replace(/\s+/g, ' ').trim();
+                let line1 = content;
+                let line2 = '';
+                const dandaIdx = content.indexOf('à¥¤');
+                if (dandaIdx !== -1) {
+                    line1 = content.slice(0, dandaIdx + 1).trim();
+                    line2 = content.slice(dandaIdx + 1).trim();
+                }
+                if (searchTerm && !isShlokaNumberSearch) {
+                    line1 = highlightText(line1, searchTerm, false);
+                    line2 = highlightText(line2, searchTerm, false);
+                }
+                const numHtml = `<div class="shloka-number">${number}</div>`;
+                const linesHtml = `<div class="shloka-lines">${line1}${line2 ? '<br>' + line2 : ''}</div>`;
+                return `<div>${numHtml}${linesHtml}</div>`;
+            } catch (e) {
+                console.error('formatShlokaDisplay error:', e);
+                return lines.map(l => highlightText(l, searchTerm, isShlokaNumberSearch)).join('<br>');
+            }
+        }
          
          // Search function to handle Telugu, English, and shloka number searches
          async function performSearch() {
@@ -833,9 +883,9 @@
                  }
          
                  if (found) {
-                     const highlighted = fullShloka.map(line => highlightText(line, searchInput, true)).join('<br>');
-                     sgsOutput.innerHTML = highlighted;
-                     sringeriOutput.innerHTML = highlighted;
+                     const formatted = formatShlokaDisplay(fullShloka, searchInput, true);
+                     sgsOutput.innerHTML = formatted;
+                     sringeriOutput.innerHTML = formatted;
                      console.log('Shloka found:', fullShloka); // Debug log
          
                      // Save context for this shloka
@@ -904,7 +954,7 @@
                                  const shlokaText = currentShloka.join(' ').replace(/\s+/g, ' ').trim().normalize('NFC');
                                  const regex = new RegExp(normalizedSearchInput.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
                                  if (regex.test(shlokaText)) {
-                                     results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
+                                     results.push(formatShlokaDisplay(currentShloka, normalizedSearchInput, false));
                                      console.log('Telugu match found for shloka:', currentShlokaNumber, currentShloka); // Debug log
                                  }
                                  if (debugShlokas.includes(currentShlokaNumber)) {
@@ -919,7 +969,7 @@
                              const shlokaText = currentShloka.join(' ').replace(/\s+/g, ' ').trim().normalize('NFC');
                              const regex = new RegExp(normalizedSearchInput.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
                              if (regex.test(shlokaText)) {
-                                 results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
+                                 results.push(formatShlokaDisplay(currentShloka, normalizedSearchInput, false));
                                  console.log('Telugu match found for shloka:', currentShlokaNumber, currentShloka); // Debug log
                              }
                              if (debugShlokas.includes(currentShlokaNumber)) {
@@ -934,7 +984,7 @@
                          const shlokaText = currentShloka.join(' ').replace(/\s+/g, ' ').trim().normalize('NFC');
                          const regex = new RegExp(normalizedSearchInput.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
                          if (regex.test(shlokaText)) {
-                             results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
+                             results.push(formatShlokaDisplay(currentShloka, normalizedSearchInput, false));
                              console.log('Telugu match found for last shloka:', currentShlokaNumber, currentShloka); // Debug log
                          }
                          if (debugShlokas.includes(currentShlokaNumber)) {
@@ -988,7 +1038,7 @@
                          if (normalizedLineStart.match(shlokaNumberPattern)) {
                              detectedNumbers.push(normalizedLineStart); // Log all detected numbers
                              if (currentShloka.length > 0 && matchingShlokaNumbers.includes(currentShlokaNumber)) {
-                                 results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
+                                 results.push(formatShlokaDisplay(currentShloka, normalizedSearchInput, false));
                                  console.log('English match found for shloka:', currentShlokaNumber, currentShloka); // Debug log
                              } else if (currentShloka.length > 0 && !matchingShlokaNumbers.includes(currentShlokaNumber)) {
                                  console.log('No match in BG_Sringeri.txt for shloka number:', currentShlokaNumber); // Debug log
@@ -1005,7 +1055,7 @@
                              }
                          } else if (currentShloka.length > 0) {
                              if (matchingShlokaNumbers.includes(currentShlokaNumber)) {
-                                 results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
+                                 results.push(formatShlokaDisplay(currentShloka, normalizedSearchInput, false));
                                  console.log('English match found for shloka:', currentShlokaNumber, currentShloka); // Debug log
                              } else if (!matchingShlokaNumbers.includes(currentShlokaNumber)) {
                                  console.log('No match in BG_Sringeri.txt for shloka number:', currentShlokaNumber); // Debug log
@@ -1016,7 +1066,7 @@
                      }
                      // Check the last shloka
                      if (currentShloka.length > 0 && matchingShlokaNumbers.includes(currentShlokaNumber)) {
-                         results.push(currentShloka.map(line => highlightText(line, normalizedSearchInput)).join('<br>'));
+                         results.push(formatShlokaDisplay(currentShloka, normalizedSearchInput, false));
                          console.log('English match found for last shloka:', currentShlokaNumber, currentShloka); // Debug log
                      } else if (currentShloka.length > 0 && !matchingShlokaNumbers.includes(currentShlokaNumber)) {
                          console.log('No match in BG_Sringeri.txt for last shloka number:', currentShlokaNumber); // Debug log
@@ -1295,8 +1345,8 @@
                                    const data = await response.json();
                                    const key = `${chapter}.${verse}`;
                                    if (data[key]) {
-                                       let meaningText = `${chapter}.${verse} Meaning:\n\nప్రతిపదార్థం (Word-to-Word Meaning):\n`;
-                                       const wordToWord = data[key]["ప్రతిపదార్థం"];
+                                       let meaningText = `${chapter}.${verse} Meaning:\n\nప్రతిపదార్థం(Word-to-Word Meaning):\n`;
+                                       const wordToWord = data[key]["\u0C2A\u0C4D\u0C30\u0C24\u0C3F\u0C2A\u0C26\u0C3E\u0C30\u0C4D\u0C25\u0C02"];
                                        if (wordToWord) {
                                            for (const [word, meaning] of Object.entries(wordToWord)) {
                                                meaningText += `${word}: ${meaning}\n`;
@@ -1304,7 +1354,7 @@
                                        } else {
                                            meaningText += 'Word-to-word meaning not available\n';
                                        }
-                                       meaningText += `\nఅర్థము (Overall Meaning):\n${data[key].అర్థము || 'Overall meaning not available'}`;
+                                       meaningText += `\n\u0C05\u0C30\u0C4D\u0C25\u0C2E\u0C41 (Overall Meaning):\n${data[key]["\u0C05\u0C30\u0C4D\u0C25\u0C2E\u0C41"] || 'Overall meaning not available'}`;
                                        return meaningText;
                                    } else {
                                        return `Meaning for ${chapter}.${verse} not found`;
@@ -1819,7 +1869,7 @@
          
            // Make sure texts are synchronized
            if (sgsRadio.checked) {
-             sringeriText.innerHTML = sgsText.innerHTML;
+             
          
              sgsText.classList.add('visible');
              sgsText.classList.remove('hidden');
@@ -1830,7 +1880,7 @@
              sgsLabel.classList.add('active');
              sringeriLabel.classList.remove('active');
            } else {
-             sgsText.innerHTML = sringeriText.innerHTML;
+             
          
              sringeriText.classList.add('visible');
              sringeriText.classList.remove('hidden');
@@ -1844,7 +1894,12 @@
          
            adjustTextboxHeight();  // fix heights after toggle
          }
-         
+ // After updateTextboxVisibility();
+const ctx = currentContext.find(c => c && c.name && c.name.includes('shloka-context'));
+if (ctx && ctx.parameters) {
+  ctx.parameters.style = style; // 'sgs' or 'sringeri'
+  localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+}        
          
                            
                            async function sendCommand(intent) {
