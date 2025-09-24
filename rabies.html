@@ -14,6 +14,7 @@
             background-color: #1e3a8a;
             color: #ffffff;
             padding: 1.5rem 0;
+            text-align: center;
         }
         .container {
             width: 100%;
@@ -25,11 +26,12 @@
             font-size: 1.875rem;
             font-weight: bold;
             margin: 0;
-            text-align: center;
+            
         }
-        header p {
+        header p1 {
             font-size: 1.125rem;
             margin-top: 0.5rem;
+            
         }
         main {
             padding: 2rem 1rem;
@@ -42,6 +44,11 @@
         p {
             color: #4b5563;
             margin-top: 1rem;
+        }
+        p1 {
+            color: #ffffff;
+            margin-top: 1rem;
+            
         }
         .schedule-table {
             width: 100%;
@@ -134,20 +141,16 @@
     <!-- Header Section -->
     <header>
         <div class="container">
-            <h1>Sneha Clinic <br> Dr.P.Udayabhaskar</h1>
-         
+            <h1>Sneha Clinic</h1>
+            <p1>Dr.P.Udayabhaskar</p1>
         </div>
     </header>
 
     <!-- Main Content -->
     <main class="container">
-
-
         <!-- Post-Exposure Schedule -->
         <section>
-            <h2>Post-Exposure Prophylaxis (PEP)</h2>
 
-            <!-- Scheduler and RIG Calculator -->
             <div class="scheduler-box">
                 <h3>Calculate Your PEP Schedule and RIG Dosage</h3>
                 <div class="grid">
@@ -173,7 +176,6 @@
                         <thead>
                             <tr>
                                 <th>Treatment</th>
-                                <th>Day</th>
                                 <th>Date (DD/MM/YYYY)</th>
                                 <th>Details</th>
                             </tr>
@@ -184,7 +186,10 @@
                     </table>
                 </div>
             </div>
+        </section>
 
+        <!-- Additional Information -->
+  
     </main>
 
     <!-- Footer -->
@@ -216,12 +221,12 @@
             }
 
             const scheduleDays = [
-                { treatment: `Rabies Immune Globulin (${weight && weight > 0 ? (rigType === 'hrig' ? 'Human RIG' : 'Equine RIG') : 'RIG'})`, day: 0, details: rigDetails },
-                { treatment: 'Dose 1', day: 0, details: 'First dose of rabies vaccine' },
-                { treatment: 'Dose 2', day: 3, details: 'Second dose, three days after the first' },
-                { treatment: 'Dose 3', day: 7, details: 'Third dose, one week after the first' },
-                { treatment: 'Dose 4', day: 14, details: 'Fourth dose, two weeks after the first' },
-                { treatment: 'Dose 5', day: 28, details: 'Fifth dose, four weeks after the first' }
+                { treatment: `Rabies Immune Globulin (${weight && weight > 0 ? (rigType === 'hrig' ? 'Human RIG' : 'Equine RIG') : 'RIG'}, Day: 0)`, day: 0, details: rigDetails },
+                { treatment: 'Dose 1, Day: 0', day: 0, details: 'First dose of rabies vaccine' },
+                { treatment: 'Dose 2, Day: 3', day: 3, details: 'Second dose, three days after the first' },
+                { treatment: 'Dose 3, Day: 7', day: 7, details: 'Third dose, one week after the first' },
+                { treatment: 'Dose 4, Day: 14', day: 14, details: 'Fourth dose, two weeks after the first' },
+                { treatment: 'Dose 5, Day: 28', day: 28, details: 'Fifth dose, four weeks after the first' }
             ];
 
             outputBody.innerHTML = '';
@@ -233,7 +238,6 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${treatment}</td>
-                    <td>Day ${day}</td>
                     <td>${formattedDate}</td>
                     <td>${details}</td>
                 `;
