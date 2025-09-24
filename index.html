@@ -238,13 +238,24 @@
                  text-align: left;
                  padding: 10px 15px;
                  font-size: 1.3em; /* Slightly smaller font on mobile */
+                 white-space: normal; /* Allow text to wrap naturally */
+                 word-wrap: break-word; /* Ensure long words break properly */
              }
-             /* Ensure first and third paadas don't have extra space */
-             #sgsText div:not(:first-child),
-             #sringeriText div:not(:first-child) {
+             /* Reset any potential spacing issues in child elements */
+             #sgsText, #sringeriText,
+             #sgsText > div, #sringeriText > div,
+             #sgsText p, #sringeriText p {
+                 margin: 0;
+                 padding: 0;
+                 text-indent: 0;
+                 text-align: left;
+             }
+             /* Target the actual text nodes */
+             #sgsText, #sringeriText {
                  text-indent: 0;
                  margin-left: 0;
                  padding-left: 0;
+             }
              }
          }
          /* Style for the shloka number line */
