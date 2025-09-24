@@ -219,9 +219,9 @@
          display: block;
          width: 100%;
          white-space: normal !important; /* Override any pre-wrap */
-         text-align: left;
-         margin-left: 0;        /* Avoid shrinking due to auto margins */
-         margin-right: 0;       /* Avoid shrinking due to auto margins */
+         text-align: right;     /* Right-align shloka text */
+         margin-left: auto;     /* Push to right */
+         margin-right: 0;       /* Align to right */
          max-width: 100%;
          font-family: 'Noto Sans Telugu', sans-serif;
          font-size: 1.5em;
@@ -245,7 +245,7 @@
          .shloka-text.visible {
          display: flex !important;
          flex-direction: column;   /* stack vertically when visible */
-         align-items: stretch;     /* take full width */
+         align-items: center;      /* center horizontally */
          justify-content: center;
          text-align: center !important;
          }
