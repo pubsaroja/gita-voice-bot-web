@@ -89,7 +89,7 @@
         .theme-toggle {
             position: fixed;
             top: 10px;
-            left: 10px;
+            right: 10px; /* Changed to align to the right */
             display: flex;
             gap: 10px;
             z-index: 1001;
@@ -693,7 +693,7 @@
    </head>
    <body>
                 <div class="theme-toggle">
-        <button id="themeSystem" title="System Theme" data-theme="system">🖥️</button>
+        //<button id="themeSystem" title="System Theme" data-theme="system">🖥️</button>
         <button id="themeLight" title="Light Theme" data-theme="light" class="active">☀️</button>
         <button id="themeDark" title="Dark Theme" data-theme="dark">🌙</button>
     </div>
@@ -2241,10 +2241,10 @@ if (ctx && ctx.parameters) {
             });
             localStorage.setItem('theme', theme);
 
-            // Handle system theme
-            if (theme === 'system') {
-                const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                document.documentElement.setAttribute('data-theme', systemTheme);
+            // Handle  theme
+            if (theme === '') {
+                const Theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', Theme);
             }
         };
 
@@ -2259,10 +2259,10 @@ if (ctx && ctx.parameters) {
             });
         });
 
-        // Listen for system theme changes
+        // Listen for  theme changes
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-            if (document.documentElement.getAttribute('data-theme') === 'system') {
-                setTheme('system');
+            if (document.documentElement.getAttribute('data-theme') === '') {
+                setTheme('');
             }
         });
       </script>
