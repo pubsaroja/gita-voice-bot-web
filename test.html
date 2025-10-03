@@ -16,30 +16,46 @@
       <!-- Intro.js for elegant guided tours -->
       <link rel="stylesheet" href="https://unpkg.com/intro.js/minified/introjs.min.css">
       <script src="https://unpkg.com/intro.js/minified/intro.min.js"></script>
-      <style>
+    <style>
         /* Define CSS variables for theming */
         :root {
             --bg-color: #f0f0f0;
             --text-color: #2c3e50;
-            --card-bg: #f9f9f9;
-            --card-border: #d1d1d1;
+            --card-bg: #ffffff;
+            --card-border: #357EC7;
             --button-bg: #357EC7;
             --button-text: #ffffff;
             --button-hover-bg: #1e40af;
             --header-color: #2c3e50;
             --subheader-color: #34495e;
+            --input-border: #ccc;
+            --modal-bg: #ffffff;
+            --verse-button-bg: #f9f9f9;
+            --verse-button-hover-bg: #e0e0e0;
+            --intro-overlay: rgba(0,0,0,0.5);
+            --intro-button-bg: #e5e7eb;
+            --intro-button-text: #111827;
+            --intro-tooltip-bg: #ffffff;
         }
 
         [data-theme="dark"] {
             --bg-color: #1a1a1a;
             --text-color: #ffffff;
             --card-bg: #2a2a2a;
-            --card-border: #444;
+            --card-border: #4a90e2;
             --button-bg: #4a90e2;
             --button-text: #ffffff;
             --button-hover-bg: #357abd;
             --header-color: #ffffff;
             --subheader-color: #cccccc;
+            --input-border: #444;
+            --modal-bg: #2a2a2a;
+            --verse-button-bg: #333;
+            --verse-button-hover-bg: #444;
+            --intro-overlay: rgba(0,0,0,0.7);
+            --intro-button-bg: #444;
+            --intro-button-text: #ffffff;
+            --intro-tooltip-bg: #333;
         }
 
         /* Global box-sizing for consistent sizing */
@@ -54,6 +70,7 @@
             margin: 0;
             background-color: var(--bg-color);
             color: var(--text-color);
+            overflow-x: hidden;
             transition: all 0.3s ease;
         }
 
@@ -75,7 +92,7 @@
             left: 10px;
             display: flex;
             gap: 10px;
-            z-index: 1000;
+            z-index: 1001;
         }
 
         .theme-toggle button {
@@ -93,11 +110,38 @@
             opacity: 1;
         }
 
+        /* Page frame */
+        .page-frame {
+            max-width: 900px;
+            margin: 8px auto;
+            padding: 12px;
+            border: 2px solid var(--card-border);
+            border-radius: 10px;
+            background: var(--card-bg);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+
+        @media (max-width: 600px) {
+            .page-frame {
+                margin: 4px;
+                padding: 16px;
+                border-radius: 10px;
+                border-width: 4px;
+                overflow: hidden;
+            }
+        }
+
         /* Top buttons container */
         .top-buttons {
             display: flex;
             justify-content: center;
             gap: 10px;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding-left: 12px;
+            padding-right: 12px;
+            box-sizing: border-box;
         }
 
         .top-buttons button {
@@ -148,6 +192,8 @@
             max-width: 600px;
             margin: 0 auto;
             width: 100%;
+            padding-left: 12px;
+            padding-right: 12px;
             box-sizing: border-box;
         }
 
@@ -173,7 +219,7 @@
         }
 
         .button-groups button:hover {
-            background-color: #ffffff;
+            background-color: var(--card-bg);
             color: transparent;
         }
 
@@ -186,7 +232,7 @@
             margin: 0 auto;
             border: 2px solid var(--card-border);
             border-radius: 5px;
-            padding: 10px;
+            padding: 10px 12px;
             box-sizing: border-box;
         }
 
@@ -207,7 +253,7 @@
             padding: 8px;
             font-size: 1em;
             border-radius: 5px;
-            border: 1px solid var(--card-border);
+            border: 1px solid var(--input-border);
             background-color: var(--card-bg);
             color: var(--text-color);
         }
@@ -218,20 +264,19 @@
             font-size: 1.5em;
             color: var(--text-color);
             white-space: pre-wrap;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
+            max-width: 100%;
+            margin-left: 0;
+            margin-right: 0;
             line-height: 1.5;
             min-height: 3em;
             overflow-y: auto;
-            padding: 10px;
-            border: 2px solid var(--card-border);
-            border-radius: 5px;
+            padding: 0;
             display: none;
             justify-content: center;
             align-items: center;
             text-align: center;
             font-family: 'Noto Sans Telugu', sans-serif;
+            box-sizing: border-box;
         }
 
         .shloka-text.active {
@@ -243,22 +288,33 @@
             text-align: left;
         }
 
+        .shloka-number {
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-align: left;
+            font-size: 1em;
+        }
+
+        .shloka-lines {
+            text-align: left;
+        }
+
         #sgsText, #sringeriText {
             display: block;
             width: 100%;
             white-space: normal !important;
-            text-align: left;
-            margin-left: auto;
-            margin-right: auto;
-            max-width: 600px;
+            text-align: center;
+            margin-left: 0;
+            margin-right: 0;
+            max-width: 100%;
             font-family: 'Noto Sans Telugu', sans-serif;
             font-size: 1.5em;
             line-height: 1.5;
-            border: 2px solid var(--card-border);
-            border-radius: 5px;
-            padding: 10px;
+            border: none;
+            padding: 0;
             overflow-y: auto;
             min-height: 3em;
+            box-sizing: border-box;
         }
 
         #sgsText > div,
@@ -270,6 +326,27 @@
 
         .hidden {
             display: none !important;
+        }
+
+        .shloka-text.visible {
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .shloka-text.placeholder {
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .shloka-text.visible.multiline {
+            display: block !important;
+            text-align: left;
         }
 
         .visible {
@@ -288,6 +365,13 @@
             justify-content: center;
             align-items: center;
             gap: 10px;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 12px;
+            padding-right: 12px;
+            box-sizing: border-box;
         }
 
         .radio-group label {
@@ -295,16 +379,47 @@
             color: var(--text-color);
         }
 
+        .radio-group input[type="text"] {
+            padding: 8px;
+            font-size: 1em;
+            border-radius: 5px;
+            border: 1px solid var(--input-border);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .radio-group input[type="submit"] {
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .radio-group input[type="submit"]:hover {
+            background-color: var(--button-hover-bg);
+        }
+
         .textbox-container {
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: stretch;
             gap: 10px;
+            width: 100%;
+            max-width: 600px;
+            margin: 12px auto 0;
+            padding-left: 12px;
+            padding-right: 12px;
+            border: 2px solid var(--card-border);
+            border-radius: 5px;
+            box-sizing: border-box;
         }
 
         .textbox-container > div {
             width: 100%;
-            max-width: 600px;
+            max-width: 100%;
         }
 
         .textbox-label {
@@ -326,20 +441,20 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: var(--intro-overlay);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
 
         .modal-content {
-            background-color: var(--card-bg);
+            background-color: var(--modal-bg);
             padding: 20px;
             border-radius: 5px;
             max-width: 80%;
             max-height: 80%;
             overflow-y: auto;
-            border: 2px solid var(--button-bg);
+            border: 2px solid var(--card-border);
         }
 
         .chapter-select {
@@ -351,7 +466,7 @@
             max-width: 200px;
             background-color: var(--card-bg);
             color: var(--text-color);
-            border: 1px solid var(--card-border);
+            border: 1px solid var(--input-border);
         }
 
         /* Verse grid */
@@ -363,8 +478,8 @@
         }
 
         .verse-button {
-            background-color: var(--card-bg);
-            border: 1px solid var(--button-bg);
+            background-color: var(--verse-button-bg);
+            border: 1px solid var(--card-border);
             border-radius: 5px;
             padding: 10px;
             text-align: center;
@@ -374,7 +489,7 @@
         }
 
         .verse-button:hover {
-            background-color: #e0e0e0;
+            background-color: var(--verse-button-hover-bg);
         }
 
         .close-button {
@@ -410,9 +525,9 @@
             margin: 20px auto 0;
             width: 100%;
             box-sizing: border-box;
-            border: 2px solid var(--card-bg);
+            border: none;
             border-radius: 5px;
-            padding: 10px;
+            padding: 12px;
         }
 
         .player-container button {
@@ -437,7 +552,7 @@
 
         /* Elegant Intro.js customization */
         .introjs-overlay {
-            background: rgba(0,0,0,0.5);
+            background: var(--intro-overlay);
         }
 
         .introjs-helperLayer {
@@ -450,6 +565,7 @@
             font-family: Outfit, sans-serif;
             line-height: 1.4;
             color: var(--text-color);
+            background-color: var(--intro-tooltip-bg);
         }
 
         .introjs-tooltip-header {
@@ -473,8 +589,8 @@
 
         .introjs-skipbutton,
         .introjs-prevbutton {
-            background: var(--card-bg);
-            color: var(--text-color);
+            background: var(--intro-button-bg);
+            color: var(--intro-button-text);
         }
 
         .introjs-nextbutton,
@@ -485,24 +601,71 @@
 
         /* Responsive mobile styles (≤600px) */
         @media (max-width: 600px) {
+            body {
+                padding: 6px;
+            }
+
             .top-buttons,
             .button-groups,
-            .dropdown-container {
+            .dropdown-container,
+            .radio-group,
+            .player-container,
+            .textbox-container {
                 width: 100%;
-                max-width: 600px;
+                max-width: 100%;
                 margin: 0 auto;
-                padding-left: 10px;
-                padding-right: 10px;
+                padding-left: 12px;
+                padding-right: 12px;
                 box-sizing: border-box;
                 flex-wrap: wrap;
             }
 
             .top-buttons {
+                margin-top: 6px;
                 gap: 5px;
                 flex-direction: row;
             }
 
+            .player-container {
+                margin-top: 12px;
+                padding-left: 12px;
+                padding-right: 12px;
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .player-container button {
+                width: 100%;
+            }
+
+            .shloka-text {
+                font-size: 1.25em;
+                padding: 0;
+                text-align: left;
+            }
+
+            .shloka-number {
+                font-weight: bold;
+                margin-bottom: 5px;
+                text-align: left;
+                font-size: 1em;
+                padding-left: 0;
+            }
+
+            #sgsText, #sringeriText {
+                font-size: 1.25em;
+                text-align: left;
+                padding-left: 0;
+                white-space: pre-line;
+            }
+
+            .shloka-text.visible,
+            .shloka-text.placeholder {
+                justify-content: flex-start;
+                text-align: left;
+            }
+
             .button-groups {
+                margin-top: 12px;
                 gap: 5px;
                 flex-direction: row;
             }
@@ -513,8 +676,8 @@
             }
 
             .top-buttons button {
-                flex: 1;
-                max-width: 100px;
+                flex: 1 1 calc(33.333% - 10px);
+                max-width: none;
                 height: auto;
                 aspect-ratio: 1/1;
                 font-size: 0.8em;
@@ -523,10 +686,10 @@
             .button-groups button {
                 padding: 6px 12px;
                 font-size: 0.8em;
-                max-width: 150px;
+                max-width: 100%;
             }
         }
-      </style>
+    </style>
    </head>
    <body>
                 <div class="theme-toggle">
