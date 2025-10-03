@@ -76,6 +76,28 @@
          font-size: 1em;
          margin-top: 10px;
          }
+                  /* Theme toggle buttons */
+         .theme-toggle {
+         position: fixed;
+         top: 10px;
+         right: 10px; /* Changed to align to the right */
+         display: flex;
+         gap: 10px;
+         z-index: 1001;
+         }
+         .theme-toggle button {
+         background: none;
+         border: none;
+         cursor: pointer;
+         font-size: 20px;
+         color: var(--text-color);
+         opacity: 0.6;
+         transition: opacity 0.3s;
+         }
+         .theme-toggle button:hover,
+         .theme-toggle button.active {
+         opacity: 1;
+         }
          /* === PAGE FRAME (responsive border around the whole page) === */
          .page-frame {
          max-width: 900px;           /* wider than inner content for breathing room */
