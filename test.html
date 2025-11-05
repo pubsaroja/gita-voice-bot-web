@@ -583,7 +583,7 @@
          font-size: 1.25em;
          text-align: left;
          padding-left: 0;
-         white-space: pre-wrap;
+         white-space: pre-line;
          }
          .shloka-text.visible,
          .shloka-text.placeholder {
@@ -1630,7 +1630,7 @@
                const audioPlayer = document.getElementById('audioPlayer');
                const sgsText = document.getElementById('sgsText');
                const sringeriText = document.getElementById('sringeriText');
-
+            
                 const randomGroupIndex = Math.floor(Math.random() * confusingShlokaGroups.length);
                 const selectedGroup = confusingShlokaGroups[randomGroupIndex];
                 currentAllShlokas = selectedGroup.slice();
@@ -2098,7 +2098,7 @@
             });
             
             // Listen for system theme changes
-            window.matchMedia('(prefers-color-scheme: dark').addEventListener('change', (e) => {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
                if (document.documentElement.getAttribute('data-theme') === 'system') {
                    setTheme('system');
                }
