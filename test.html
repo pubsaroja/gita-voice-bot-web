@@ -640,13 +640,18 @@
             <button onclick="sendCommand('FullShloka')" data-intro="Play the full shloka" data-title="Full Shloka">Full</button>
             <button onclick="sendCommand('NextFullShloka')" data-intro="Go to next shloka" data-title="Next">Next</button>
          </div>
-         <div class="radio-group language-group" data-intro="Select languages for shloka display" data-title="Languages">
-            <label>Languages:</label>
-            <input type="checkbox" id="telugu" checked> Telugu
-            <input type="checkbox" id="devanagari"> Devanagari
-            <input type="checkbox" id="kannada"> Kannada
-            <input type="checkbox" id="tamil"> Tamil
-         </div>
+<div class="radio-group language-group">
+   <label>Languages:</label>
+   <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px;">
+      <label><input type="checkbox" name="language" value="te" id="telugu" checked> Telugu</label>
+      <label><input type="checkbox" name="language" value="sa" id="devanagari"> Devanagari</label>
+      <label><input type="checkbox" name="language" value="kn" id="kannada"> Kannada</label>
+      <label><input type="checkbox" name="language" value="ta" id="tamil"> Tamil</label>
+   </div>
+   <div style="text-align:center; margin-top:8px;">
+      <label><input type="checkbox" name="language" value="en" id="english"> English</label>
+   </div>
+</div>
          <div class="textbox-container">
             <div>
                <div id="sgsLabel" class="textbox-label">SGS Style Shloka</div>
@@ -1258,7 +1263,11 @@
                     return { error: `Audio not found for ${chapter}.${verse}` };
                 }
             }
-                              async function fetchCombinedShlokaText(chapter, verse, style) {
+           function getSelectedLanguages() {
+    const checkboxes = document.querySelectorAll('input[name="language"]:checked');
+    const selected = Array.from(checkboxes).map(cb => cb.value);
+    return selected.length > 0 ? selected : ['te']; // Default to Telugu
+}                   async function fetchCombinedShlokaText(chapter, verse, style) {
                                   try {
                                       console.log(`fetchCombinedShlokaText called: chapter=${chapter}, verse=${verse}, style=${style}`);
                                       const langs = getSelectedLanguages();
