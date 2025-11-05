@@ -1287,7 +1287,9 @@
                                           for (let i = 0; i < lines.length; i++) {
                                               const line = lines[i].trim();
                                               if (line.match(new RegExp(`^${key1}\\s+|^${key2}\\s+|^${key1}\\t|^${key2}\\t|^${key1}$|^${key2}$`))) {
-                                                      let shlokaLines = [line.substring(line.indexOf(' ') + 1 || line.indexOf('\t') + 1 || line.length).trim()];
+const shlokaStart = line.replace(/^\d+[.-]\d+\s*/, '').trim();
+let shlokaLines = [shlokaStart];
+
                                                       let j = i + 1;
                                                       while (j < lines.length && !lines[j].match(/^\d+[.-]\d+/)) {
                                                           if (lines[j].trim()) {
