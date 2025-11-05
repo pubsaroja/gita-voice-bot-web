@@ -1,7 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Bhagavad Gita Bot</title>
+   <meta name="description" content="Explore Bhagavad Gita shlokas in Telugu with SGS and Sringeri styles, featuring audio recitations and meanings.">
+   <meta name="keywords" content="Bhagavad Gita, SGS, Sringeri, Telugu shlokas, audio recitation, spiritual app">
+   <meta name="author" content="Dr. P. Udayabhaskar">
+   <link href="https://fonts.googleapis.com/css2?family=Ramabhadra&display=swap" rel="stylesheet">
+   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300&display=swap" rel="stylesheet">
+   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu&display=swap" rel="stylesheet">
+   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari&display=swap" rel="stylesheet">
+   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada&display=swap" rel="stylesheet">
+   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil&display=swap" rel="stylesheet">
+   <link rel="stylesheet" href="https://unpkg.com/intro.js/minified/introjs.min.css">
+   <script src="https://unpkg.com/intro.js/minified/intro.min.js"></script>
 
-﻿
-raw.githubuserconten…h_with_Uvacha.txt:1 
- Failed to load resource: the server responded with a status of 404 ()
-index2.html:216 Files loaded successfully
-6
-index2.html:235 Uncaught (in promise) ReferenceError: fetchAudioUrl is not defined
+   <style>
+      :root{
+         --bg:#f0f0f0;--txt:#2c3e50;--card:#fff;--border:#357EC7;
+         --btn:#357EC7;--btn-txt:#fff;--btn-hov:#1e40af;
+         --hdr:#2c3e50;--sub:#34495e;--inp:#ccc;
+         --modal:#fff;--vbtn:#f9f9f9;--vbtn-hov:#e0e0e0;
+      }
+      [data-theme="dark"]{
+         --bg:#1a1a1a;--txt:#fff;--card:#2a2a2a;--border:#4a90e2;
+         --btn:#4a90e2;--btn-hov:#357abd;--hdr:#fff;--sub:#ccc;--inp:#444;
+         --modal:#2a2a2a;--vbtn:#333;--vbtn-hov:#444;
+      }
+      *,*::before,*::after{box-sizing:border-box;}
+      body{font-family:Outfit,sans-serif;text-align:center;padding:20px;margin:0;
+           background:var(--bg);color:var(--txt);overflow-x:hidden;transition:all .3s;}
+      h1{color:var(--hdr);font-size:1.5em;}
+      .theme-toggle{position:fixed;top:10px;right:10px;display:flex;gap:10px;z-index:1001;}
+      .theme-toggle button{background:none;border:none;cursor:pointer;font-size:20px;
+                           color:var(--txt);opacity:.6;transition:opacity .3s;}
+      .theme-toggle button:hover,.theme-toggle button.active{opacity:1;}
+      .page{max-width:900px;margin:8px auto;padding:12px;border:2px solid var(--border);
+            border-radius:10px;background:var(--card);box-shadow:0 2px 6px rgba(0,0,0,.04);}
+      .top-btns{display:flex;justify-content:center;gap:12px;max-width:600px;margin:0 auto;}
+      .top-btns button{width:150px;height:150px;border-radius:25%;border:none;
+                       background:var(--btn);color:var(--btn-txt);font-size:20px;cursor:pointer;
+                       background-size:contain;background-repeat:no-repeat;background-position:center;}
+      .top-btns button.sgs:hover,
+      .top-btns button.sgs:active{background-image:url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/sankhu.png');background-color:transparent;color:transparent;}
+      .top-btns button.sringeri:hover,
+      .top-btns button.third-paada:hover{background-image:url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/chakra.png');background-color:transparent;color:transparent;}
+      .radio-group{display:flex;justify-content:center;align-items:center;gap:10px;max-width:600px;margin:10px auto;flex-wrap:wrap;}
+      .player{display:grid;grid-template-columns:repeat(3,max-content);gap:10px 5px;
+              justify-content:center;max-width:600px;margin:20px auto;}
+      .player button{width:100px;height:40px;border:none;border-radius:25px;
+                     background:var(--btn);color:var(--btn-txt);cursor:pointer;}
+      .player button:hover{background:var(--btn-hov);}
+      .textbox{display:flex;flex-direction:column;gap:10px;max-width:600px;margin:12px auto;
+               border:2px solid var(--border);border-radius:5px;padding:12px;}
+      .shloka{font-size:1.5em;line-height:1.5;white-space:pre-wrap;overflow-y:auto;
+              font-family:'Noto Sans Telugu','Noto Sans Devanagari','Noto Sans Kannada','Noto Sans Tamil',sans-serif;}
+      .lang-sep{border:none;border-top:1px solid var(--border);margin:.7em 0;opacity:.6;}
+      .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);
+              justify-content:center;align-items:center;z-index:1000;}
+      .modal-content{background:var(--modal);padding:20px;border-radius:5px;max-width:80%;max-height:80%;
+                     overflow-y:auto;border:2px solid var(--border);}
+      .verse-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:10px;padding:10px;}
+      .verse-btn{background:var(--vbtn);border:1px solid var(--border);border-radius:5px;
+                 padding:10px;text-align:center;cursor:pointer;}
+      .close{background:#ff4444;color:#fff;padding:5px 10px;border:none;border-radius:5px;
+             cursor:pointer;float:right;}
+      .credits{font-size:.9em;margin-top:10px;}
+
+      /* ---- LANGUAGE CHECKBOXES – TWO ROWS ON MOBILE ---- */
+      .lang-group{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:15px auto;max-width:600px;font-size:.95em;}
+      .lang-group > div{flex:1 1 48%;display:flex;align-items:center;gap:5px;white-space:nowrap;}
+      @media (max-width:600px){
+         .lang-group > div{flex:1 1 48%;}
+      }
+
+      /* ---- MOBILE FIXES ---- */
+      @media (max-width:600px){
+         .shloka{white-space:pre-wrap!important;word-break:keep-all;overflow-wrap:anywhere;
+                 padding-left:0!important;font-size:1.25em!important;}
+         #sgsText,#sringeriText{white-space:pre-wrap!important;font-size:1.25em!important;}
+         .top-btns button{font-size:.8em;height:auto;aspect-ratio:1/1;}
+      }
+   </style>
+</head>
+<body>
+   <div class="theme-toggle">
+      <button id="themeLight" class="active">Light</button>
+      <button id="themeDark">Dark</button>
+   </div>
+
+   <div class="page">
+      <h1>Srimad Bhagavad Gita</h1>
+      <p>Listen, understand and memorize Bhagavad Gita shlokas</p>
+
+      <div class="top-btns">
+         <button class="sgs" onclick="sendCommand('SGSFirstPaada')">1st Paada<br>Only</button>
+         <button class="sringeri" onclick="sendCommand('SringeriPaada')">1st or 3rd Paada</button>
+         <button class="third-paada" onclick="sendCommand('ThirdPaada')">3rd Paada<br>Only</button>
+      </div>
+
+      <audio id="audioPlayer" controls></audio>
+
+      <div class="radio-group">
+         <label>Style:</label>
+         <input type="radio" name="style" value="sgs" id="sgs" onchange="updateTextboxVisibility()">
+         <label for="sgs">SGS</label>
+         <input type="radio" name="style" value="sringeri" id="sringeri" checked onchange="updateTextboxVisibility()">
+         <label for="sringeri">Sringeri</label>
+      </div>
+
+      <div class="player">
+         <button onclick="sendCommand('PreviousShloka')">Previous</button>
+         <button onclick="sendCommand('FullShloka')">Full</button>
+         <button onclick="sendCommand('NextFullShloka')">Next</button>
+      </div>
+
+      <!-- LANGUAGE CHECKBOXES – TWO ROWS -->
+      <div class="lang-group">
+         <div><input type="checkbox" id="telugu" checked> <label for="telugu">Telugu</label></div>
+         <div><input type="checkbox" id="devanagari"> <label for="devanagari">Devanagari</label></div>
+         <div><input type="checkbox" id="kannada"> <label for="kannada">Kannada</label></div>
+         <div><input type="checkbox" id="tamil"> <label for="tamil">Tamil</label></div>
+         <div><input type="checkbox" id="english"> <label for="english">English</label></div>
+      </div>
+
+      <div class="textbox">
+         <div><div id="sgsLabel" class="textbox-label">SGS Style Shloka</div>
+              <div id="sgsText" class="shloka hidden">Your Shloka will appear here.</div></div>
+         <div><div id="sringeriLabel" class="textbox-label active">Sringeri Style Shloka</div>
+              <div id="sringeriText" class="shloka visible">Your Shloka will appear here.</div></div>
+      </div>
+
+      <div class="player">
+         <button id="meaningsButton" onclick="handleMeanings()">Meanings</button>
+         <button onclick="showVerseTable()">Selector</button>
+         <button id="instructionsButton" onclick="toggleInstructions()">Help</button>
+         <button onclick="window.open('https://pubsaroja.github.io/gita-voice-bot-web/GroupedShlokas.html','_blank')">Grouped Shlokas</button>
+         <button onclick="showConfusing()">Confusing Shlokas</button>
+         <button id="showUvacha" onclick="showUvacha()">Uvacha</button>
+      </div>
+
+      <div class="dropdown-container">
+         <div><label>Random Shloka Chapterwise:</label>
+            <select id="chapterSelect" onchange="handleChapterSelect(this)">
+               <option value="" selected disabled>Select Chapter</option>
+               <option value="1">1. అర్జునవిషాదయోగః</option>
+               <option value="2">2. సాఙ్ఖ్యయోగః</option>
+               <option value="3">3. కర్మయోగః</option>
+               <option value="4">4. జ్ఞానయోగః</option>
+               <option value="5">5. కర్మసన్న్యాసయోగః</option>
+               <option value="6">6. ఆత్మసంయమయోగః</option>
+               <option value="7">7. జ్ఞానవిజ్ఞానయోగః</option>
+               <option value="8">8. అక్షరపరబ్రహ్మయోగః</option>
+               <option value="9">9. రాజవిద్యారాజగుహ్యయోగః</option>
+               <option value="10">10. విభూతియోగః</option>
+               <option value="11">11. విశ్వరూపసన్దర్శనయోగః</option>
+               <option value="12">12. భక్తియోగః</option>
+               <option value="13">13. క్షేత్రక్షేత్రజ్ఞవిభాగయోగః</option>
+               <option value="14">14. గుణత్రయవిభాగయోగః</option>
+               <option value="15">15. పురుషోత్తమప్రాప్తియోగః</option>
+               <option value="16">16. దైవాసురసమ్పద్విభాగయోగః</option>
+               <option value="17">17. శ్రద్ధాత్రయవిభాగయోగః</option>
+               <option value="18">18. మోక్షసన్న్యాసయోగః</option>
+            </select>
+         </div>
+      </div>
+   </div>
+
+   <div class="credits">
+      SGS Audio:<br>Pujya Sri Datta Vijayanand Teertha Swamiji<br>
+      Sringeri Audio courtesy:<br>Smt Mathangi Kailasnath<br>
+      Developed by<br>Dr. P. Udayabhaskar
+   </div>
+
+   <!-- Verse selector modal -->
+   <div id="verseTableModal" class="modal">
+      <div class="modal-content">
+         <button class="close" onclick="closeVerseTable()">Close</button>
+         <select id="chapterTableSelect" class="chapter-select" onchange="updateVerseGrid()">
+            <option value="" selected disabled>-- Select Chapter --</option>
+            <option value="1">Chapter 1 (47 verses)</option>
+            <option value="2">Chapter 2 (72 verses)</option>
+            <option value="3">Chapter 3 (43 verses)</option>
+            <option value="4">Chapter 4 (42 verses)</option>
+            <option value="5">Chapter 5 (29 verses)</option>
+            <option value="6">Chapter 6 (47 verses)</option>
+            <option value="7">Chapter 7 (30 verses)</option>
+            <option value="8">Chapter 8 (28 verses)</option>
+            <option value="9">Chapter 9 (34 verses)</option>
+            <option value="10">Chapter 10 (42 verses)</option>
+            <option value="11">Chapter 11 (55 verses)</option>
+            <option value="12">Chapter 12 (20 verses)</option>
+            <option value="13">Chapter 13 (34 verses)</option>
+            <option value="14">Chapter 14 (27 verses)</option>
+            <option value="15">Chapter 15 (20 verses)</option>
+            <option value="16">Chapter 16 (24 verses)</option>
+            <option value="17">Chapter 17 (28 verses)</option>
+            <option value="18">Chapter 18 (78 verses)</option>
+         </select>
+         <div id="verseTableContent" class="verse-grid"></div>
+      </div>
+   </div>
+
+   <script>
+      // ==================== GLOBALS ====================
+      const baseUrl = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main';
+      let sgsTeluguContent = '', sringeriTeluguContent = '', englishContent = '';
+      let selectedStyle = 'sringeri';
+      let sessionId = 'session-' + Math.random().toString(36).substr(2,9);
+      let currentContext = [];
+      let isContinuousPlaying = false;
+      const verseCounts = {1:47,2:72,3:43,4:42,5:29,6:47,7:30,8:28,9:34,10:42,11:55,12:20,13:34,14:27,15:20,16:24,17:28,18:78};
+
+      // ==================== LOAD TEXT FILES (OLD WORKING) ====================
+      async function loadFiles(){
+         try{
+            const [tSgs, tSri, eng] = await Promise.all([
+               fetch(`${baseUrl}/BG Telugu with Uvacha.txt`).then(r=>r.text()),
+               fetch(`${baseUrl}/BG_Sringeri.txt`).then(r=>r.text()),
+               fetch(`${baseUrl}/BG_English_single_line.txt`).then(r=>r.text())
+            ]);
+            sgsTeluguContent = tSgs;
+            sringeriTeluguContent = tSri;
+            englishContent = eng;
+            console.log('Files loaded successfully');
+         }catch(e){
+            console.error('Failed to load text files',e);
+         }
+      }
+
+      // ==================== LANGUAGE HELPERS ====================
+      function getSelectedLanguages(){
+         const l=[];
+         if(document.getElementById('telugu').checked)     l.push('Telugu');
+         if(document.getElementById('devanagari').checked) l.push('Devanagari');
+         if(document.getElementById('kannada').checked)    l.push('Kannada');
+         if(document.getElementById('tamil').checked)      l.push('Tamil');
+         if(document.getElementById('english').checked)    l.push('English');
+         return l.length ? l : ['Telugu'];
+      }
+
+      // ==================== PARSE SHLOKA (OLD FORMAT) ====================
+      async function fetchCombinedShlokaText(ch, vs, style){
+         const langs = getSelectedLanguages();
+         const out = [];
+         const key = `${ch}.${vs}`;
+
+         // ---- Telugu ----
+         const telSrc = style === 'sgs' ? sgsTeluguContent : sringeriTeluguContent;
+         const telLine = telSrc.split('\n').find(l => l.trim().startsWith(key + ' '));
+         if(telLine && langs.includes('Telugu')){
+            const txt = telLine.trim().substring(key.length + 1);
+            out.push(`<strong>Telugu:</strong><br>${txt}`);
+            out.push('<hr class="lang-sep">');
+         }
+
+         // ---- Devanagari / Kannada / Tamil (not in old files) ----
+         if(['Devanagari','Kannada','Tamil'].some(l=>langs.includes(l))){
+            out.push(`<strong>Note:</strong> Devanagari/Kannada/Tamil not in old files. Use new multi-language files for full support.`);
+            out.push('<hr class="lang-sep">');
+         }
+
+         // ---- English ----
+         if(langs.includes('English')){
+            const engLine = englishContent.split('\n').find(l => l.trim().startsWith(key + ' '));
+            if(engLine){
+               const txt = engLine.trim().substring(key.length + 1);
+               out.push(`<strong>English:</strong><br>${txt}`);
+               out.push('<hr class="lang-sep">');
+            }
+         }
+
+         return out.length ? out.join('') : `Shloka ${ch}.${vs} not found`;
+      }
+
+      // ==================== AUDIO URL ====================
+      async function fetchAudioUrl(ch,vs,quarter=null,isFull=false){
+         const style = getSelectedStyle();
+         let url;
+         if(isFull){
+            const folder = style==='sringeri'?'AudioFullSringeri':'AudioFullSGS';
+            url = `${baseUrl}/${folder}/${ch}.${vs}.mp3`;
+         }else if(quarter==='pada1'){
+            url = `${baseUrl}/AQ4PaadasSGS/Chapter ${ch}/${vs}.1.mp3`;
+         }else if(quarter==='pada3'){
+            const folder = style==='sringeri'?'AQ4PaadasSringeri':'AQ4PaadasSGS';
+            url = `${baseUrl}/${folder}/Chapter ${ch}/${vs}.3.mp3`;
+         }else{
+            const folder = style==='sringeri'?'AudioFullSringeri':'AudioFullSGS';
+            url = `${baseUrl}/${folder}/${ch}.${vs}.mp3`;
+         }
+         try{await fetch(url,{method:'HEAD'});return url;}
+         catch{return {error:`Audio not found for ${ch}.${vs}`};}
+      }
+
+      // ==================== UI HELPERS ====================
+      function updateTextboxVisibility(){
+         const sgs = document.getElementById('sgsText');
+         const sri = document.getElementById('sringeriText');
+         const sgsL = document.getElementById('sgsLabel');
+         const sriL = document.getElementById('sringeriLabel');
+
+         if(document.getElementById('sgs').checked){
+            sgs.classList.add('visible'); sgs.classList.remove('hidden');
+            sri.classList.add('hidden');  sri.classList.remove('visible');
+            sgsL.classList.add('active'); sriL.classList.remove('active');
+         }else{
+            sri.classList.add('visible'); sri.classList.remove('hidden');
+            sgs.classList.add('hidden');  sgs.classList.remove('visible');
+            sriL.classList.add('active'); sgsL.classList.remove('active');
+         }
+         adjustTextboxHeight();
+      }
+
+      function adjustTextboxHeight(){
+         ['sgsText','sringeriText'].forEach(id=>{
+            const el=document.getElementById(id);
+            el.style.height='auto';
+            el.style.height=el.scrollHeight+'px';
+         });
+      }
+
+      function getSelectedStyle(){
+         return document.querySelector('input[name="style"]:checked').value;
+      }
+      function setSelectedStyle(st){
+         document.getElementById(st).checked=true;
+         updateTextboxVisibility();
+      }
+
+      // ==================== SEND COMMAND ====================
+      async function sendCommand(intent){
+         isContinuousPlaying = false;
+         document.getElementById('instructionsButton').textContent='Help';
+         document.getElementById('meaningsButton').textContent='Meanings';
+
+         let ch, vs, quarter=null, isFull=false, autoplay=true;
+
+         if(intent==='SGSFirstPaada'){
+            setSelectedStyle('sgs'); quarter='pada1';
+            ch=Math.floor(Math.random()*18)+1;
+            vs=Math.floor(Math.random()*verseCounts[ch])+1;
+         }else if(intent==='SringeriPaada'){
+            quarter='pada1_or_pada3';
+            ch=Math.floor(Math.random()*18)+1;
+            vs=Math.floor(Math.random()*verseCounts[ch])+1;
+         }else if(intent==='ThirdPaada'){
+            quarter='pada3';
+            ch=Math.floor(Math.random()*18)+1;
+            vs=Math.floor(Math.random()*verseCounts[ch])+1;
+         }else if(intent==='NextFullShloka'){
+            const ctx=currentContext.find(c=>c.name.includes('shloka-context'));
+            ch=ctx?ctx.parameters.chapter:1;
+            vs=ctx?(ctx.parameters.verse%verseCounts[ch])+1:1;
+            if(vs>verseCounts[ch]){ch++;vs=1;if(ch>18)ch=1;}
+            autoplay=false;
+         }else if(intent==='PreviousShloka'){
+            const ctx=currentContext.find(c=>c.name.includes('shloka-context'));
+            ch=ctx?ctx.parameters.chapter:1;
+            vs=ctx?ctx.parameters.verse-1:1;
+            if(vs<1){ch--;if(ch<1)ch=18;vs=verseCounts[ch];}
+            autoplay=false;
+         }else if(intent==='FullShloka'){
+            const ctx=currentContext.find(c=>c.name.includes('shloka-context'));
+            ch=ctx?ctx.parameters.chapter:1;
+            vs=ctx?ctx.parameters.verse:1;
+            isFull=true;
+         }
+
+         // store context
+         currentContext = currentContext.filter(c=>!c.name.includes('shloka-context'));
+         currentContext.push({
+            name:`projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+            lifespanCount:5,
+            parameters:{chapter:ch,verse:vs,style:getSelectedStyle()}
+         });
+         localStorage.setItem('gitaContext',JSON.stringify(currentContext));
+
+         // display text
+         const sgsTxt = await fetchCombinedShlokaText(ch,vs,'sgs');
+         const sriTxt = await fetchCombinedShlokaText(ch,vs,'sringeri');
+         document.getElementById('sgsText').innerHTML = sgsTxt;
+         document.getElementById('sringeriText').innerHTML = sriTxt;
+         adjustTextboxHeight();
+
+         // play audio
+         const audioUrl = await fetchAudioUrl(ch,vs,quarter,isFull);
+         const player = document.getElementById('audioPlayer');
+         if(audioUrl.error){
+            document.getElementById('sgsText').innerHTML += `<br>${audioUrl.error}`;
+            document.getElementById('sringeriText').innerHTML += `<br>${audioUrl.error}`;
+         }else{
+            player.src = audioUrl;
+            player.load();
+            if(autoplay) player.play().catch(()=>{});
+         }
+         updateTextboxVisibility();
+      }
+
+      // ==================== CONFUSING SHLOKAS ====================
+      async function showConfusing(){
+         isContinuousPlaying=false;
+         const groups = [
+            ['8.23','10.1','18.64'],
+            ['1.24','2.9','11.9']
+         ];
+         const idx = Math.floor(Math.random()*groups.length);
+         const selected = groups[idx];
+
+         const sgsP = selected.map(s=>{const [c,v]=s.split('.').map(Number);return fetchCombinedShlokaText(c,v,'sgs');});
+         const sriP = selected.map(s=>{const [c,v]=s.split('.').map(Number);return fetchCombinedShlokaText(c,v,'sringeri');});
+
+         const sgsOut = (await Promise.all(sgsP)).join('<br><br>');
+         const sriOut = (await Promise.all(sriP)).join('<br><br>');
+
+         document.getElementById('sgsText').innerHTML = sgsOut;
+         document.getElementById('sringeriText').innerHTML = sriOut;
+         adjustTextboxHeight();
+         updateTextboxVisibility();
+      }
+
+      // ==================== OTHER UI (unchanged) ====================
+      async function handleChapterSelect(sel){
+         const ch = parseInt(sel.value);
+         if(!ch) return;
+         const vs = Math.floor(Math.random()*verseCounts[ch])+1;
+         await sendCommand('FullShloka');
+         sel.selectedIndex=0;
+      }
+      function handleMeanings(){/* your code */ }
+      function toggleInstructions(){
+         introJs().setOptions({steps:Array.from(document.querySelectorAll('[data-intro]')).map(el=>({
+            element:el,intro:el.getAttribute('data-intro'),title:el.getAttribute('data-title')||''
+         }))}).start();
+      }
+
+      // ==================== INIT ====================
+      document.addEventListener('DOMContentLoaded',async()=>{
+         await loadFiles();
+         updateTextboxVisibility();
+         adjustTextboxHeight();
+
+         // language change → refresh current shloka
+         document.querySelectorAll('.lang-group input[type="checkbox"]').forEach(cb=>{
+            cb.addEventListener('change',async()=>{
+               const ctx=currentContext.find(c=>c.name.includes('shloka-context'));
+               if(ctx && ctx.parameters){
+                  const {chapter,verse}=ctx.parameters;
+                  const sgs=await fetchCombinedShlokaText(chapter,verse,'sgs');
+                  const sri=await fetchCombinedShlokaText(chapter,verse,'sringeri');
+                  document.getElementById('sgsText').innerHTML=sgs;
+                  document.getElementById('sringeriText').innerHTML=sri;
+                  adjustTextboxHeight();
+                  updateTextboxVisibility();
+               }
+            });
+         });
+      });
+
+      // theme toggle
+      document.querySelectorAll('.theme-toggle button').forEach(b=>{
+         b.addEventListener('click',()=>{
+            const theme=b.id==='themeLight'?'light':'dark';
+            document.documentElement.setAttribute('data-theme',theme);
+            localStorage.setItem('theme',theme);
+            document.querySelectorAll('.theme-toggle button').forEach(x=>x.classList.toggle('active',x===b));
+         });
+      });
+      const saved=localStorage.getItem('theme')||'light';
+      document.documentElement.setAttribute('data-theme',saved);
+      document.getElementById(saved==='light'?'themeLight':'themeDark').classList.add('active');
+   </script>
+</body>
+</html>
