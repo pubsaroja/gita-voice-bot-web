@@ -598,39 +598,45 @@
   let isContinuousPlaying = false;
   let continuousQueue = [];
   let isShowingMeanings = false;
+  let isLoading = false; // Prevent stack overflow
 
-  // === FETCH SHLOKA TEXT FROM JSON (REAL PATHS) ===
+  // === FETCH SHLOKA TEXT FROM JSON ===
   async function fetchShloka(ch, vs) {
     try {
       const url = `${baseUrl}/shlokas/${ch}.${vs}.json`;
       const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
-      return data;
+      return await response.json();
     } catch (e) {
-      console.error('Shloka fetch failed:', e);
-      return { te: 'Shloka not found.', sa: 'श्लोक नहीं मिला।', en: 'Shloka not found.' };
+      console.warn('Shloka fetch failed:', e);
+      return { te: 'Shloka not available.', sa: 'श्लोक उपलब्ध नहीं।', en: 'Shloka not available.' };
     }
   }
 
   // === UPDATE TEXT DISPLAY ===
   async function updateShlokaText() {
     const s = await fetchShloka(currentChapter, currentVerse);
-    const sgsText = document.getElementById('sgsText');
-    const sringeriText = document.getElementById('sringeriText');
-    sgsText.textContent = s.te || s.sa || 'Loading...';
-    sringeriText.textContent = s.sa || s.te || 'Loading...';
+    document.getElementById('sgsText').textContent = s.te || s.sa || 'Loading...';
+    document.getElementById('sringeriText').textContent = s.sa || s.te || 'Loading...';
   }
 
-  // === SEND COMMAND (AUDIO + TEXT) ===
-  async function sendCommand(cmd) {
+  // === PLAY AUDIO (ONLY) ===
+  function playAudio(url) {
     const audio = document.getElementById('audioPlayer');
+    audio.src = url;
+    audio.play().catch(() => console.log('Audio blocked'));
+  }
+
+  // === MAIN COMMAND (NO RECURSION) ===
+  async function executeCommand(cmd) {
+    if (isLoading) return;
+    isLoading = true;
+
     const stylePath = selectedStyle === 'sgs' ? 'sgs' : 'sringeri';
+    const verseKey = `${currentChapter}.${currentVerse}`;
     let url = '';
 
-    const verseKey = `${currentChapter}.${currentVerse}`;
-
-    if (cmd === 'FullShloka' || cmd === 'PreviousShloka' || cmd === 'NextFullShloka') {
+    if (cmd === 'FullShloka') {
       url = `${baseUrl}/audio/${stylePath}/${verseKey}.mp3`;
     } else if (cmd === 'SGSFirstPaada') {
       url = `${baseUrl}/audio/sgs/${verseKey}_1.mp3`;
@@ -640,16 +646,13 @@
       url = `${baseUrl}/audio/${stylePath}/${verseKey}_3.mp3`;
     }
 
-    if (url) {
-      audio.src = url;
-      audio.play().catch(err => console.log('Audio play failed:', err));
-    }
-
+    if (url) playAudio(url);
     await updateShlokaText();
+    isLoading = false;
   }
 
-  // === NAVIGATION: PREVIOUS / NEXT ===
-  window.sendCommand = async function(cmd) {
+  // === NAVIGATION: PREV/NEXT (NO RECURSIVE CALL) ===
+  function navigate(cmd) {
     if (cmd === 'PreviousShloka') {
       if (currentVerse > 1) currentVerse--;
       else if (currentChapter > 1) { currentChapter--; currentVerse = verseCounts[currentChapter]; }
@@ -657,7 +660,16 @@
       if (currentVerse < verseCounts[currentChapter]) currentVerse++;
       else if (currentChapter < 18) { currentChapter++; currentVerse = 1; }
     }
-    await sendCommand('FullShloka');
+    executeCommand('FullShloka');
+  }
+
+  // === PUBLIC sendCommand ===
+  window.sendCommand = function(cmd) {
+    if (cmd === 'PreviousShloka' || cmd === 'NextFullShloka') {
+      navigate(cmd);
+    } else {
+      executeCommand(cmd);
+    }
   };
 
   // === STYLE SWITCH ===
@@ -672,7 +684,7 @@
     document.getElementById('sringeriText').classList.toggle('hidden', isSGS);
   }
 
-  // === MEANINGS, HELP, MODAL ===
+  // === OTHER FEATURES ===
   function handleMeanings() {
     isShowingMeanings = !isShowingMeanings;
     const panel = document.getElementById('meaningPanel');
@@ -683,7 +695,7 @@
   }
 
   function toggleInstructions() {
-    alert("Click 'Full' to play. Use radio to switch style. 'Selector' opens verse grid. 'Meanings' shows explanation.");
+    alert("Click 'Full' to play. Use radio to switch style. 'Selector' opens verse grid.");
   }
 
   function showVerseTable() { document.getElementById('verseTableModal').style.display = 'flex'; }
@@ -699,10 +711,10 @@
       const btn = document.createElement('button');
       btn.className = 'verse-button';
       btn.textContent = i;
-      btn.onclick = async () => {
+      btn.onclick = () => {
         currentChapter = parseInt(ch);
         currentVerse = i;
-        await sendCommand('FullShloka');
+        sendCommand('FullShloka');
         closeVerseTable();
       };
       container.appendChild(btn);
@@ -714,7 +726,7 @@
     const verse = Math.floor(Math.random() * verseCounts[ch]) + 1;
     currentChapter = parseInt(ch);
     currentVerse = verse;
-    await sendCommand('FullShloka');
+    await executeCommand('FullShloka');
   }
 
   async function handleContinuousPlay(sel) {
@@ -723,7 +735,8 @@
     continuousQueue = Array.from({length: verseCounts[ch]}, (_, i) => ({ch: parseInt(ch), vs: i+1}));
     currentChapter = parseInt(ch);
     currentVerse = 1;
-    await playNextInQueue();
+    await executeCommand('FullShloka');
+    setTimeout(playNextInQueue, 12000);
   }
 
   async function playNextInQueue() {
@@ -731,14 +744,13 @@
     const next = continuousQueue.shift();
     currentChapter = next.ch;
     currentVerse = next.vs;
-    await sendCommand('FullShloka');
-    setTimeout(playNextInQueue, 10000); // ~10 sec per shloka
+    await executeCommand('FullShloka');
+    setTimeout(playNextInQueue, 12000);
   }
 
   function showConfusing() {
     const groups = [['1.24','2.9','11.9'], ['2.10','1.21']];
     const group = groups[Math.floor(Math.random() * groups.length)];
-    alert(`Confusing group: ${group.join(', ')}\nPlaying first: ${group[0]}`);
     const [ch, vs] = group[0].split('.');
     currentChapter = parseInt(ch); currentVerse = parseInt(vs);
     sendCommand('FullShloka');
@@ -746,10 +758,8 @@
 
   function showUvacha() {
     const uvacha = ['1.1', '2.1', '11.1'];
-    const shloka = uvacha[Math.floor(Math.random() * uvacha.length)];
-    const [ch, vs] = shloka.split('.');
+    const [ch, vs] = uvacha[Math.floor(Math.random() * uvacha.length)].split('.');
     currentChapter = parseInt(ch); currentVerse = parseInt(vs);
-    alert(`Playing Uvacha: ${shloka}`);
     sendCommand('FullShloka');
   }
 
@@ -765,9 +775,9 @@
     document.getElementById('lightThemeBtn').classList.remove('active');
   };
 
-  // === INIT: Load 1.1 on startup ===
-  document.addEventListener('DOMContentLoaded', async () => {
-    await sendCommand('FullShloka');
+  // === INIT ===
+  document.addEventListener('DOMContentLoaded', () => {
+    sendCommand('FullShloka');
   });
 </script>
 
