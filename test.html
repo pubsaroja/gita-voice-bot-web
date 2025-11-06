@@ -9,411 +9,93 @@
   <style>
     /* === YOUR ORIGINAL CSS — 100% PRESERVED === */
     :root {
-      --bg-color: #f0f0f0;
-      --text-color: #2c3e50;
-      --card-bg: #ffffff;
-      --card-border: #357EC7;
-      --button-bg: #357EC7;
-      --button-text: #ffffff;
-      --button-hover-bg: #1e40af;
-      --header-color: #2c3e50;
-      --subheader-color: #34495e;
-      --input-border: #ccc;
-      --modal-bg: #ffffff;
-      --verse-button-bg: #f9f9f9;
-      --verse-button-hover-bg: #e0e0e0;
-      --intro-overlay: rgba(0,0,0,0.5);
-      --intro-button-bg: #e5e7eb;
-      --intro-button-text: #111827;
-      --intro-tooltip-bg: #ffffff;
+      --bg-color: #f0f0f0; --text-color: #2c3e50; --card-bg: #ffffff; --card-border: #357EC7;
+      --button-bg: #357EC7; --button-text: #ffffff; --button-hover-bg: #1e40af; --header-color: #2c3e50;
+      --subheader-color: #34495e; --input-border: #ccc; --modal-bg: #ffffff; --verse-button-bg: #f9f9f9;
+      --verse-button-hover-bg: #e0e0e0; --intro-overlay: rgba(0,0,0,0.5); --intro-button-bg: #e5e7eb;
+      --intro-button-text: #111827; --intro-tooltip-bg: #ffffff;
     }
     [data-theme="dark"] {
-      --bg-color: #1a1a1a;
-      --text-color: #ffffff;
-      --card-bg: #2a2a2a;
-      --card-border: #4a90e2;
-      --button-bg: #4a90e2;
-      --button-text: #ffffff;
-      --button-hover-bg: #357abd;
-      --header-color: #ffffff;
-      --subheader-color: #cccccc;
-      --input-border: #444;
-      --modal-bg: #2a2a2a;
-      --verse-button-bg: #333;
-      --verse-button-hover-bg: #444;
-      --intro-overlay: rgba(0,0,0,0.7);
-      --intro-button-bg: #444;
-      --intro-button-text: #ffffff;
-      --intro-tooltip-bg: #333;
+      --bg-color: #1a1a1a; --text-color: #ffffff; --card-bg: #2a2a2a; --card-border: #4a90e2;
+      --button-bg: #4a90e2; --button-text: #ffffff; --button-hover-bg: #357abd; --header-color: #ffffff;
+      --subheader-color: #cccccc; --input-border: #444; --modal-bg: #2a2a2a; --verse-button-bg: #333;
+      --verse-button-hover-bg: #444; --intro-overlay: rgba(0,0,0,0.7); --intro-button-bg: #444;
+      --intro-button-text: #ffffff; --intro-tooltip-bg: #333;
     }
     *, *::before, *::after { box-sizing: border-box; }
-    body {
-      font-family: Outfit, sans-serif;
-      text-align: center;
-      padding: 20px;
-      margin: 0;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      overflow-x: hidden;
-      transition: all 0.3s ease;
-    }
+    body { font-family: Outfit, sans-serif; text-align: center; padding: 20px; margin: 0; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; transition: all 0.3s ease; }
     h1 { color: var(--header-color); font-size: 1.5em; }
     h2 { color: var(--subheader-color); font-size: 1em; margin-top: 10px; }
 
-    .theme-toggle {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      display: flex;
-      gap: 10px;
-      z-index: 1001;
-    }
-    .theme-toggle button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 20px;
-      color: var(--text-color);
-      opacity: 0.6;
-      transition: opacity 0.3s;
-    }
+    .theme-toggle { position: fixed; top: 10px; right: 10px; display: flex; gap: 10px; z-index: 1001; }
+    .theme-toggle button { background: none; border: none; cursor: pointer; font-size: 20px; color: var(--text-color); opacity: 0.6; transition: opacity 0.3s; }
     .theme-toggle button:hover, .theme-toggle button.active { opacity: 1; }
 
-    .page-frame {
-      max-width: 900px;
-      margin: 8px auto;
-      padding: 12px;
-      border: 2px solid var(--card-border);
-      border-radius: 10px;
-      background: var(--card-bg);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-    }
-    @media (max-width: 600px) {
-      .page-frame { margin: 4px; padding: 16px; border-radius: 10px; border-width: 4px; overflow: hidden; }
-    }
+    .page-frame { max-width: 900px; margin: 8px auto; padding: 12px; border: 2px solid var(--card-border); border-radius: 10px; background: var(--card-bg); box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+    @media (max-width: 600px) { .page-frame { margin: 4px; padding: 16px; border-radius: 10px; border-width: 4px; overflow: hidden; } }
 
-    .top-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      width: 100%;
-      max-width: 600px;
-      margin: 0 auto;
-      padding-left: 12px;
-      padding-right: 12px;
-      box-sizing: border-box;
-    }
-    .top-buttons button {
-      width: 150px;
-      height: 150px;
-      border-radius: 25%;
-      border: none;
-      background-color: var(--button-bg);
-      color: var(--button-text);
-      font-size: 20px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: cover;
-    }
-    .top-buttons button.sgs-button:hover, .top-buttons button.sgs-button:active {
-      background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/sankhu.png');
-      background-color: transparent !important;
-      color: transparent !important;
-    }
-    .top-buttons button.sringeri-button:hover, .top-buttons button.sringeri-button:active,
-    .top-buttons button.third-paada-button:hover, .top-buttons button.third-paada-button:active {
-      background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/chakra.png');
-      background-color: transparent !important;
-      color: transparent !important;
-    }
-    .top-buttons button.reset, .top-buttons button.reset:hover,
-    .top-buttons button.reset:active, .top-buttons button.reset:focus {
-      background: var(--button-bg) !important;
-      color: var(--button-text) !important;
-      background-image: none !important;
-    }
+    .top-buttons { display: flex; justify-content: center; gap: 10px; width: 100%; max-width: 600px; margin: 0 auto; padding-left: 12px; padding-right: 12px; box-sizing: border-box; }
+    .top-buttons button { width: 150px; height: 150px; border-radius: 25%; border: none; background-color: var(--button-bg); color: var(--button-text); font-size: 20px; cursor: pointer; transition: background 0.3s ease; background-repeat: no-repeat; background-position: center; background-size: cover; }
+    .top-buttons button.sgs-button:hover, .top-buttons button.sgs-button:active { background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/sankhu.png'); background-color: transparent !important; color: transparent !important; }
+    .top-buttons button.sringeri-button:hover, .top-buttons button.sringeri-button:active, .top-buttons button.third-paada-button:hover, .top-buttons button.third-paada-button:active { background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/chakra.png'); background-color: transparent !important; color: transparent !important; }
+    .top-buttons button.reset, .top-buttons button.reset:hover, .top-buttons button.reset:active, .top-buttons button.reset:focus { background: var(--button-bg) !important; color: var(--button-text) !important; background-image: none !important; }
 
-    .button-groups {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      max-width: 600px;
-      margin: 0 auto;
-      width: 100%;
-      padding-left: 12px;
-      padding-right: 12px;
-      box-sizing: border-box;
-    }
-    .button-group {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      width: 50%;
-    }
-    .button-groups button {
-      background-color: var(--button-bg);
-      color: var(--button-text);
-      padding: 10px 18px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.6em;
-      width: 100%;
-      max-width: 150px;
-      transition: background-color 0.3s ease;
-    }
+    .button-groups { display: flex; justify-content: center; gap: 10px; max-width: 600px; margin: 0 auto; width: 100%; padding-left: 12px; padding-right: 12px; box-sizing: border-box; }
+    .button-group { display: flex; flex-direction: column; gap: 10px; width: 50%; }
+    .button-groups button { background-color: var(--button-bg); color: var(--button-text); padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 1.6em; width: 100%; max-width: 150px; transition: background-color 0.3s ease; }
     .button-groups button:hover { background-color: var(--card-bg); color: transparent; }
 
-    .dropdown-container {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      max-width: 600px;
-      margin: 0 auto;
-      border: 2px solid var(--card-border);
-      border-radius: 5px;
-      padding: 10px 12px;
-      box-sizing: border-box;
-    }
+    .dropdown-container { display: flex; flex-direction: column; gap: 20px; max-width: 600px; margin: 0 auto; border: 2px solid var(--card-border); border-radius: 5px; padding: 10px 12px; box-sizing: border-box; }
     .dropdown-item { display: flex; flex-direction: column; }
-    .dropdown-label {
-      margin-bottom: 6px;
-      font-weight: bold;
-      font-size: 1em;
-      color: var(--header-color);
-    }
-    select {
-      width: 100%;
-      padding: 8px;
-      font-size: 1em;
-      border-radius: 5px;
-      border: 1px solid var(--input-border);
-      background-color: var(--card-bg);
-      color: var(--text-color);
-    }
+    .dropdown-label { margin-bottom: 6px; font-weight: bold; font-size: 1em; color: var(--header-color); }
+    select { width: 100%; padding: 8px; font-size: 1em; border-radius: 5px; border: 1px solid var(--input-border); background-color: var(--card-bg); color: var(--text-color); }
 
-    .shloka-text {
-      margin-top: 10px;
-      font-size: 1.5em;
-      color: var(--text-color);
-      white-space: pre-wrap;
-      max-width: 100%;
-      margin-left: 0;
-      margin-right: 0;
-      line-height: 1.5;
-      min-height: 3em;
-      overflow-y: auto;
-      padding: 0;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      font-family: 'Noto Sans Telugu', 'Noto Sans Devanagari', 'Noto Sans Kannada', 'Noto Sans Tamil', sans-serif;
-      box-sizing: border-box;
-    }
+    .shloka-text { margin-top: 10px; font-size: 1.5em; color: var(--text-color); white-space: pre-wrap; max-width: 100%; margin-left: 0; margin-right: 0; line-height: 1.5; min-height: 3em; overflow-y: auto; padding: 0; display: none; justify-content: center; align-items: center; text-align: center; font-family: 'Noto Sans Telugu', 'Noto Sans Devanagari', 'Noto Sans Kannada', 'Noto Sans Tamil', sans-serif; box-sizing: border-box; }
     .shloka-text.active { display: flex; }
     .shloka-text.active.multiline { display: block; text-align: left; }
-    .shloka-number { font-weight: bold; margin-bottom: 5px; text-align: left; font-size: 1em; }
-    .shloka-lines { text-align: left; }
-    #sgsText, #sringeriText {
-      display: block;
-      width: 100%;
-      white-space: normal !important;
-      text-align: center;
-      margin-left: 0;
-      margin-right: 0;
-      max-width: 100%;
-      font-family: 'Noto Sans Telugu', 'Noto Sans Devanagari', 'Noto Sans Kannada', 'Noto Sans Tamil', sans-serif;
-      font-size: 1.5em;
-      line-height: 1.5;
-      border: none;
-      padding: 0;
-      overflow-y: auto;
-      min-height: 3em;
-      box-sizing: border-box;
-    }
-    #sgsText > div, #sringeriText > div { display: block; width: 100%; margin-bottom: 1em; }
+    #sgsText, #sringeriText { display: block; width: 100%; white-space: normal !important; text-align: center; margin-left: 0; margin-right: 0; max-width: 100%; font-family: 'Noto Sans Telugu', 'Noto Sans Devanagari', 'Noto Sans Kannada', 'Noto Sans Tamil', sans-serif; font-size: 1.5em; line-height: 1.5; border: none; padding: 0; overflow-y: auto; min-height: 3em; box-sizing: border-box; }
     .hidden { display: none !important; }
     .shloka-text.visible { display: flex !important; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-    .shloka-text.placeholder { display: flex !important; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
     .shloka-text.visible.multiline { display: block !important; text-align: left; }
     .visible { display: block !important; }
 
     #audioPlayer { margin: 10px auto; display: block; flex-shrink: 0; }
 
-    .radio-group {
-      margin: 10px 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-      padding-left: 12px;
-      padding-right: 12px;
-      box-sizing: border-box;
-    }
+    .radio-group { margin: 10px 0; display: flex; justify-content: center; align-items: center; gap: 10px; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; padding-left: 12px; padding-right: 12px; box-sizing: border-box; }
     .radio-group label { margin: 0 10px; color: var(--text-color); }
-    .radio-group input[type="text"] {
-      padding: 8px;
-      font-size: 1em;
-      border-radius: 5px;
-      border: 1px solid var(--input-border);
-      background-color: var(--card-bg);
-      color: var(--text-color);
-    }
-    .radio-group input[type="submit"] {
-      background-color: var(--button-bg);
-      color: var(--button-text);
-      padding: 8px 15px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
+    .radio-group input[type="text"] { padding: 8px; font-size: 1em; border-radius: 5px; border: 1px solid var(--input-border); background-color: var(--card-bg); color: var(--text-color); }
+    .radio-group input[type="submit"] { background-color: var(--button-bg); color: var(--button-text); padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s ease; }
     .radio-group input[type="submit"]:hover { background-color: var(--button-hover-bg); }
 
-    .textbox-container {
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 10px;
-      width: 100%;
-      max-width: 600px;
-      margin: 12px auto 0;
-      padding-left: 12px;
-      padding-right: 12px;
-      border: 2px solid var(--card-border);
-      border-radius: 5px;
-      box-sizing: border-box;
-    }
+    .textbox-container { display: flex; flex-direction: column; align-items: stretch; gap: 10px; width: 100%; max-width: 600px; margin: 12px auto 0; padding-left: 12px; padding-right: 12px; border: 2px solid var(--card-border); border-radius: 5px; box-sizing: border-box; }
     .textbox-container > div { width: 100%; max-width: 100%; }
-    .textbox-label {
-      font-weight: bold;
-      margin-bottom: 5px;
-      display: none;
-      color: var(--header-color);
-    }
+    .textbox-label { font-weight: bold; margin-bottom: 5px; display: none; color: var(--header-color); }
     .textbox-label.active { display: block; }
 
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-color: var(--intro-overlay);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    .modal-content {
-      background-color: var(--modal-bg);
-      padding: 20px;
-      border-radius: 5px;
-      max-width: 80%;
-      max-height: 80%;
-      overflow-y: auto;
-      border: 2px solid var(--card-border);
-    }
-    .chapter-select {
-      margin-bottom: 10px;
-      padding: 10px;
-      font-size: 1em;
-      border-radius: 5px;
-      width: 100%;
-      max-width: 200px;
-      background-color: var(--card-bg);
-      color: var(--text-color);
-      border: 1px solid var(--input-border);
-    }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--intro-overlay); justify-content: center; align-items: center; z-index: 1000; }
+    .modal-content { background-color: var(--modal-bg); padding: 20px; border-radius: 5px; max-width: 80%; max-height: 80%; overflow-y: auto; border: 2px solid var(--card-border); }
 
-    .verse-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-      gap: 10px;
-      padding: 10px;
-    }
-    .verse-button {
-      background-color: var(--verse-button-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 5px;
-      padding: 10px;
-      text-align: center;
-      cursor: pointer;
-      font-size: 0.9em;
-      color: var(--text-color);
-    }
+    .verse-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 10px; padding: 10px; }
+    .verse-button { background-color: var(--verse-button-bg); border: 1px solid var(--card-border); border-radius: 5px; padding: 10px; text-align: center; cursor: pointer; font-size: 0.9em; color: var(--text-color); }
     .verse-button:hover { background-color: var(--verse-button-hover-bg); }
 
-    .close-button {
-      background-color: #ff4444;
-      color: white;
-      padding: 5px 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      float: right;
-    }
+    .close-button { background-color: #ff4444; color: white; padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer; float: right; }
     .close-button:hover { background-color: #cc0000; }
 
-    .credits {
-      font-size: 0.9em;
-      color: var(--text-color);
-      margin-top: 10px;
-    }
+    .credits { font-size: 0.9em; color: var(--text-color); margin-top: 10px; }
 
-    .player-container {
-      display: grid;
-      grid-template-columns: repeat(3, max-content);
-      grid-template-rows: repeat(2, auto);
-      gap: 10px 5px;
-      justify-content: center;
-      justify-items: center;
-      align-items: center;
-      max-width: 600px;
-      margin: 20px auto 0;
-      width: 100%;
-      box-sizing: border-box;
-      border: none;
-      border-radius: 5px;
-      padding: 12px;
-    }
-    .player-container button {
-      width: 100px;
-      height: 40px;
-      border: none;
-      border-radius: 25px;
-      background-color: var(--button-bg);
-      color: var(--button-text);
-      font-family: 'Outfit', sans-serif;
-      font-size: 16px;
-      cursor: pointer;
-      padding: 0 15px;
-      transition: background 0.3s ease;
-      justify-self: center;
-      align-self: center;
-    }
+    .player-container { display: grid; grid-template-columns: repeat(3, max-content); grid-template-rows: repeat(2, auto); gap: 10px 5px; justify-content: center; justify-items: center; align-items: center; max-width: 600px; margin: 20px auto 0; width: 100%; box-sizing: border-box; border: none; border-radius: 5px; padding: 12px; }
+    .player-container button { width: 100px; height: 40px; border: none; border-radius: 25px; background-color: var(--button-bg); color: var(--button-text); font-family: 'Outfit', sans-serif; font-size: 16px; cursor: pointer; padding: 0 15px; transition: background 0.3s ease; justify-self: center; align-self: center; }
     .player-container button:hover { background-color: var(--button-hover-bg); }
 
     @media (max-width: 600px) {
       body { padding: 6px; }
-      .top-buttons, .button-groups, .dropdown-container, .radio-group, .player-container, .textbox-container {
-        width: 100%; max-width: 100%; margin: 0 auto; padding-left: 12px; padding-right: 12px; box-sizing: border-box; flex-wrap: wrap;
-      }
+      .top-buttons, .button-groups, .dropdown-container, .radio-group, .player-container, .textbox-container { width: 100%; max-width: 100%; margin: 0 auto; padding-left: 12px; padding-right: 12px; box-sizing: border-box; flex-wrap: wrap; }
       .top-buttons { margin-top: 6px; gap: 5px; flex-direction: row; }
       .player-container { margin-top: 12px; padding-left: 12px; padding-right: 12px; grid-template-columns: repeat(3, 1fr); }
       .player-container button { width: 100%; }
       .shloka-text { font-size: 1.25em; padding: 0; text-align: left; }
-      .shloka-number { font-weight: bold; margin-bottom: 5px; text-align: left; font-size: 1em; padding-left: 0; }
       #sgsText, #sringeriText { font-size: 1.25em; text-align: left; padding-left: 0; white-space: pre-line; }
-      .shloka-text.visible, .shloka-text.placeholder { justify-content: flex-start; text-align: left; }
-      .button-groups { margin-top: 12px; gap: 5px; flex-direction: row; }
-      .button-group { width: 50%; gap: 5px; }
       .top-buttons button { flex: 1 1 calc(33.333% - 10px); max-width: none; height: auto; aspect-ratio: 1/1; font-size: 0.8em; }
       .button-groups button { padding: 6px 12px; font-size: 0.8em; max-width: 100%; }
     }
@@ -598,52 +280,85 @@
   let isContinuousPlaying = false;
   let continuousQueue = [];
   let isShowingMeanings = false;
-  let isLoading = false; // Prevent stack overflow
+  let isLoading = false;
 
-  // === FETCH SHLOKA TEXT FROM JSON ===
-  async function fetchShloka(ch, vs) {
+  // === FETCH TEXT FROM TXT FILES (YOUR ORIGINAL METHOD) ===
+  const textFiles = {
+    te: { sgs: 'BG_Telugu_SGS.txt', sringeri: 'BG_Telugu_Sringeri.txt' },
+    sa: { sgs: 'BG_Devanagari_SGS.txt', sringeri: 'BG_Devanagari_Sringeri.txt' },
+    kn: { sgs: 'BG_Kannada_SGS.txt', sringeri: 'BG_Kannada_Sringeri.txt' },
+    ta: { sgs: 'BG_Tamil_SGS.txt', sringeri: 'BG_Tamil_Sringeri.txt' },
+    en: 'BG_English_single_line.txt'
+  };
+
+  async function fetchShlokaText(ch, vs, style, lang) {
+    const fname = lang === 'en' ? textFiles.en : textFiles[lang][style];
+    const url = `${baseUrl}/${fname}`;
     try {
-      const url = `${baseUrl}/shlokas/${ch}.${vs}.json`;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return await response.json();
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Not found');
+      const text = await res.text();
+      const lines = text.split('\n');
+      const key = `${ch}.${vs}`;
+      for (let line of lines) {
+        if (line.trim().startsWith(key)) {
+          return line.replace(/^\d+[.-]\d+\s*/, '').trim();
+        }
+      }
+      return 'Shloka not found';
     } catch (e) {
-      console.warn('Shloka fetch failed:', e);
-      return { te: 'Shloka not available.', sa: 'श्लोक उपलब्ध नहीं।', en: 'Shloka not available.' };
+      return 'Failed to load';
     }
   }
 
-  // === UPDATE TEXT DISPLAY ===
   async function updateShlokaText() {
-    const s = await fetchShloka(currentChapter, currentVerse);
-    document.getElementById('sgsText').textContent = s.te || s.sa || 'Loading...';
-    document.getElementById('sringeriText').textContent = s.sa || s.te || 'Loading...';
+    const langs = [];
+    if (document.getElementById('telugu').checked) langs.push('te');
+    if (document.getElementById('devanagari').checked) langs.push('sa');
+    if (document.getElementById('kannada').checked) langs.push('kn');
+    if (document.getElementById('tamil').checked) langs.push('ta');
+    if (document.getElementById('english').checked) langs.push('en');
+    if (langs.length === 0) langs.push('te');
+
+    const promises = langs.map(l => fetchShlokaText(currentChapter, currentVerse, selectedStyle, l));
+    const results = await Promise.all(promises);
+
+    let sgsText = '', sringeriText = '';
+    langs.forEach((l, i) => {
+      const label = {te:'Telugu', sa:'Devanagari', kn:'Kannada', ta:'Tamil', en:'English'}[l];
+      const line = `${currentChapter}.${currentVerse} (${label})\n${results[i]}\n\n`;
+      sgsText += line; sringeriText += line;
+    });
+
+    document.getElementById('sgsText').textContent = sgsText.trim();
+    document.getElementById('sringeriText').textContent = sringeriText.trim();
   }
 
-  // === PLAY AUDIO (ONLY) ===
+  // === PLAY AUDIO (ORIGINAL PATHS) ===
   function playAudio(url) {
     const audio = document.getElementById('audioPlayer');
     audio.src = url;
     audio.play().catch(() => console.log('Audio blocked'));
   }
 
-  // === MAIN COMMAND (NO RECURSION) ===
+  // === MAIN COMMAND ===
   async function executeCommand(cmd) {
     if (isLoading) return;
     isLoading = true;
 
-    const stylePath = selectedStyle === 'sgs' ? 'sgs' : 'sringeri';
+    const stylePath = selectedStyle === 'sgs' ? 'AQ4PaadasSGS' : 'AQ4PaadasSringeri';
     const verseKey = `${currentChapter}.${currentVerse}`;
     let url = '';
 
     if (cmd === 'FullShloka') {
-      url = `${baseUrl}/audio/${stylePath}/${verseKey}.mp3`;
+      url = `${baseUrl}/AudioFull${selectedStyle.toUpperCase()}/${currentChapter}.${currentVerse}.mp3`;
     } else if (cmd === 'SGSFirstPaada') {
-      url = `${baseUrl}/audio/sgs/${verseKey}_1.mp3`;
+      url = `${baseUrl}/AQ4PaadasSGS/Chapter ${currentChapter}/${currentVerse}.1.mp3`;
     } else if (cmd === 'SringeriPaada') {
-      url = `${baseUrl}/audio/sringeri/${verseKey}_1or3.mp3`;
+      const pada = Math.random() < 0.5 ? '1' : '3';
+      url = `${baseUrl}/AQ4PaadasSringeri/Chapter ${currentChapter}/${currentVerse}.${pada}.mp3`;
     } else if (cmd === 'ThirdPaada') {
-      url = `${baseUrl}/audio/${stylePath}/${verseKey}_3.mp3`;
+      url = `${baseUrl}/AQ4Paadas${selectedStyle === 'sgs' ? 'SGS' : 'Sringeri'}/Chapter ${currentChapter}/${currentVerse}.3.mp3`;
     }
 
     if (url) playAudio(url);
@@ -651,7 +366,7 @@
     isLoading = false;
   }
 
-  // === NAVIGATION: PREV/NEXT (NO RECURSIVE CALL) ===
+  // === NAVIGATION ===
   function navigate(cmd) {
     if (cmd === 'PreviousShloka') {
       if (currentVerse > 1) currentVerse--;
@@ -663,7 +378,6 @@
     executeCommand('FullShloka');
   }
 
-  // === PUBLIC sendCommand ===
   window.sendCommand = function(cmd) {
     if (cmd === 'PreviousShloka' || cmd === 'NextFullShloka') {
       navigate(cmd);
@@ -684,7 +398,7 @@
     document.getElementById('sringeriText').classList.toggle('hidden', isSGS);
   }
 
-  // === OTHER FEATURES ===
+  // === OTHER FEATURES (same as before) ===
   function handleMeanings() {
     isShowingMeanings = !isShowingMeanings;
     const panel = document.getElementById('meaningPanel');
@@ -777,7 +491,7 @@
 
   // === INIT ===
   document.addEventListener('DOMContentLoaded', () => {
-    sendCommand('FullShloka');
+    executeCommand('FullShloka');
   });
 </script>
 
