@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600&family=Noto+Sans+Devanagari:wght@400;500;600&family=Noto+Sans+Kannada:wght@400;500;600&family=Noto+Sans+Tamil:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* Define CSS variables for theming */
+    /* === YOUR EXACT CSS (UNCHANGED) === */
     :root {
       --bg-color: #f0f0f0;
       --text-color: #2c3e50;
@@ -60,7 +60,6 @@
     h1 { color: var(--header-color); font-size: 1.5em; }
     h2 { color: var(--subheader-color); font-size: 1em; margin-top: 10px; }
 
-    /* Theme toggle */
     .theme-toggle {
       position: fixed;
       top: 10px;
@@ -431,15 +430,15 @@
 
 <p>Listen, understand and memorize Bhagavad Gita shlokas</p>
 
-<div class="top-buttons" data-intro="Choose how you want to hear the shloka" data-title="Playback Options">
-  <button class="sgs-button"       onclick="sendCommand('SGSFirstPaada')"      data-intro="Play only 1st Paada in SGS style" data-title="1st Paada (SGS)">1st Paada<br>Only</button>
-  <button class="sringeri-button"  onclick="sendCommand('SringeriPaada')"     data-intro="Play 1st or 3rd Paada in Sringeri style" data-title="1st or 3rd Paada (Sringeri)">1st or 3rd Paada</button>
-  <button class="third-paada-button" onclick="sendCommand('ThirdPaada')"   data-intro="Play only 3rd Paada" data-title="3rd Paada Only">3rd Paada<br>Only</button>
+<div class="top-buttons">
+  <button class="sgs-button"       onclick="sendCommand('SGSFirstPaada')">1st Paada<br>Only</button>
+  <button class="sringeri-button"  onclick="sendCommand('SringeriPaada')">1st or 3rd Paada</button>
+  <button class="third-paada-button" onclick="sendCommand('ThirdPaada')">3rd Paada<br>Only</button>
 </div>
 
-<audio id="audioPlayer" controls data-intro="Use these controls to play, pause, or scrub through the audio." data-title="Audio Player"></audio>
+<audio id="audioPlayer" controls></audio>
 
-<div class="radio-group" data-intro="Pick the chanting style for display and playback" data-title="Chanting Style">
+<div class="radio-group">
   <label>Style:</label>
   <input type="radio" name="style" value="sgs" id="sgs" onchange="updateTextboxVisibility()">
   <label for="sgs">SGS</label>
@@ -448,9 +447,9 @@
 </div>
 
 <div class="player-container">
-  <button onclick="sendCommand('PreviousShloka')" data-intro="Go to previous shloka" data-title="Previous">Previous</button>
-  <button onclick="sendCommand('FullShloka')"     data-intro="Play the full shloka" data-title="Full Shloka">Full</button>
-  <button onclick="sendCommand('NextFullShloka')" data-intro="Go to next shloka" data-title="Next">Next</button>
+  <button onclick="sendCommand('PreviousShloka')">Previous</button>
+  <button onclick="sendCommand('FullShloka')">Full</button>
+  <button onclick="sendCommand('NextFullShloka')">Next</button>
 </div>
 
 <div class="radio-group language-group">
@@ -467,21 +466,21 @@
 <div class="textbox-container">
   <div>
     <div id="sgsLabel" class="textbox-label">SGS Style Shloka</div>
-    <div id="sgsText" class="shloka-text hidden">Your Shloka will appear here.</div>
+    <div id="sgsText" class="shloka-text hidden">Loading shloka...</div>
   </div>
   <div>
     <div id="sringeriLabel" class="textbox-label active">Sringeri Style Shloka</div>
-    <div id="sringeriText" class="shloka-text visible">Your Shloka will appear here.</div>
+    <div id="sringeriText" class="shloka-text visible">Loading shloka...</div>
   </div>
 </div>
 
 <div class="player-container">
-  <button id="meaningsButton"   onclick="handleMeanings()" data-intro="Toggle word-by-word and overall meaning" data-title="Meanings">Meanings</button>
-  <button onclick="showVerseTable()" data-intro="Open chapter/verse selector" data-title="Selector">Selector</button>
-  <button id="instructionsButton" onclick="toggleInstructions()" data-intro="Start a guided tour of the app" data-title="Help">Help</button>
-  <button id="groupButton" onclick="window.open('https://pubsaroja.github.io/gita-voice-bot-web/GroupedShlokas.html','_blank')" data-intro="Open carefully curated grouped shlokas helpful in memorizing the shloka numbers in a new tab" data-title="Grouped Shlokas">Grouped Shlokas</button>
-  <button onclick="showConfusing()" data-intro="Listen to a set of often-confused shlokas" data-title="Confusing Shlokas">Confusing Shlokas</button>
-  <button id="showUvacha" onclick="showUvacha()" data-intro="Play a random 'Uvacha' shloka" data-title="Uvacha">Uvacha</button>
+  <button id="meaningsButton"   onclick="handleMeanings()">Meanings</button>
+  <button onclick="showVerseTable()">Selector</button>
+  <button id="instructionsButton" onclick="toggleInstructions()">Help</button>
+  <button id="groupButton" onclick="window.open('https://pubsaroja.github.io/gita-voice-bot-web/GroupedShlokas.html','_blank')">Grouped Shlokas</button>
+  <button onclick="showConfusing()">Confusing Shlokas</button>
+  <button id="showUvacha" onclick="showUvacha()">Uvacha</button>
 </div>
 
 <br>
@@ -489,7 +488,7 @@
 <div class="dropdown-container">
   <div class="dropdown-item">
     <label for="chapterSelect" class="dropdown-label">Random Shloka Chapterwise:</label>
-    <select id="chapterSelect" onchange="handleChapterSelect(this)" data-intro="Pick a chapter to play a random shloka from it" data-title="Random by Chapter">
+    <select id="chapterSelect" onchange="handleChapterSelect(this)">
       <option value="" selected disabled>Select Chapter</option>
       <option value="1">1. అర్జునవిషాదయోగః</option>
       <option value="2">2. సాఙ్ఖ్యయోగః</option>
@@ -514,7 +513,7 @@
 
   <div class="dropdown-item">
     <label for="continuousPlaySelect" class="dropdown-label">Continuous Play:</label>
-    <select id="continuousPlaySelect" onchange="handleContinuousPlay(this)" data-intro="Play an entire chapter continuously" data-title="Continuous Play">
+    <select id="continuousPlaySelect" onchange="handleContinuousPlay(this)">
       <option value="" selected disabled>Select Chapter</option>
       <option value="1">1. అర్జునవిషాదయోగః</option>
       <option value="2">2. సాఙ్ఖ్యయోగః</option>
@@ -540,8 +539,8 @@
 
 <div>
   <h3>Search for word (Telugu or English or Number):</h3>
-  <input type="text" id="search-input" placeholder="Enter word or number to search" data-intro="Type a word to search across shlokas" data-title="Enter Query">
-  <button id="search-button" data-intro="Click to search" data-title="Run Search">Search</button>
+  <input type="text" id="search-input" placeholder="Enter word or number to search">
+  <button id="search-button">Search</button>
 </div>
 
 <div class="credits">
@@ -553,7 +552,7 @@
   Dr. P. Udayabhaskar
 </div>
 
-<!-- Meaning Panel (hidden by default) -->
+<!-- Meaning Panel -->
 <div id="meaningPanel" class="meaning-panel hidden">
   <strong>Word-by-word Meaning:</strong> [Loading...]<br>
   <strong>Overall Meaning:</strong> [Loading...]
@@ -591,7 +590,7 @@
 </div> <!-- end .page-frame -->
 
 <script>
-  // Global state
+  // === GLOBAL STATE ===
   const baseUrl = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main';
   const verseCounts = {1:47,2:72,3:43,4:42,5:29,6:47,7:30,8:28,9:34,10:42,11:55,12:20,13:34,14:27,15:20,16:24,17:28,18:78};
   let selectedStyle = 'sringeri';
@@ -600,13 +599,27 @@
   let continuousQueue = [];
   let isShowingMeanings = false;
 
-  // Mock shloka data
-  const mockShlokas = {
-    '1.1': { te: 'ధృతరాష్ట్ర ఉవాచ | ధర్మక్షేత్రే కురుక్షేత్రే...', sa: 'धृतराष्ट्र उवाच। धर्मक्षेत्रे कुरुक्षेत्रे...', en: 'Dhritarashtra said...' }
-  };
+  // === FETCH SHLOKA TEXT FROM JSON ===
+  async function fetchShloka(ch, vs) {
+    try {
+      const response = await fetch(`${baseUrl}/shlokas/${ch}.${vs}.json`);
+      if (!response.ok) throw new Error('Not found');
+      const data = await response.json();
+      return data;
+    } catch (e) {
+      return { te: 'Shloka not available.', sa: 'श्लोक उपलब्ध नहीं।', en: 'Shloka not available.' };
+    }
+  }
 
-  function sendCommand(cmd) {
-    console.log('sendCommand →', cmd);
+  // === UPDATE TEXT DISPLAY ===
+  async function updateShlokaText() {
+    const s = await fetchShloka(currentChapter, currentVerse);
+    document.getElementById('sgsText').textContent = s.te || s.sa || 'Loading...';
+    document.getElementById('sringeriText').textContent = s.sa || s.te || 'Loading...';
+  }
+
+  // === SEND COMMAND (AUDIO + TEXT) ===
+  async function sendCommand(cmd) {
     const audio = document.getElementById('audioPlayer');
     const stylePath = selectedStyle === 'sgs' ? 'sgs' : 'sringeri';
     let url = '';
@@ -624,18 +637,13 @@
 
     if (url) {
       audio.src = url;
-      audio.play().catch(() => console.log('Audio mock – no real file'));
+      audio.play().catch(() => console.log('Audio blocked or not found'));
     }
-    updateShlokaText();
+
+    await updateShlokaText();
   }
 
-  function updateShlokaText() {
-    const key = `${currentChapter}.${currentVerse}`;
-    const s = mockShlokas[key] || { te: 'Shloka not loaded.', sa: 'श्लोक नहीं लोड हुआ।', en: 'Shloka not loaded.' };
-    document.getElementById('sgsText').textContent = s.te;
-    document.getElementById('sringeriText').textContent = s.sa;
-  }
-
+  // === STYLE SWITCH ===
   function updateTextboxVisibility() {
     const isSGS = document.getElementById('sgs').checked;
     selectedStyle = isSGS ? 'sgs' : 'sringeri';
@@ -647,25 +655,22 @@
     document.getElementById('sringeriText').classList.toggle('hidden', isSGS);
   }
 
+  // === MEANINGS, HELP, MODAL, etc. ===
   function handleMeanings() {
     isShowingMeanings = !isShowingMeanings;
     const panel = document.getElementById('meaningPanel');
     panel.classList.toggle('hidden', !isShowingMeanings);
     if (isShowingMeanings) {
-      panel.innerHTML = `<strong>Word-by-word:</strong> ధృతరాష్ట్ర: = Dhritarashtra, ఉవాచ = said...<br><strong>Overall Meaning:</strong> Dhritarashtra asks Sanjaya what happened on the battlefield.`;
+      panel.innerHTML = `<strong>Word-by-word:</strong> ధృతరాష్ట్ర: = Dhritarashtra...<br><strong>Overall Meaning:</strong> Dhritarashtra asks about the war...`;
     }
   }
 
   function toggleInstructions() {
-    alert("Welcome! Click 'Full' to play. Switch style with radio buttons. Use 'Selector' for verse grid. 'Meanings' shows explanation. 'Help' shows this.");
+    alert("Click 'Full' to play. Use radio to switch style. 'Selector' opens verse grid. 'Meanings' shows explanation.");
   }
 
-  function showVerseTable() {
-    document.getElementById('verseTableModal').style.display = 'flex';
-  }
-  function closeVerseTable() {
-    document.getElementById('verseTableModal').style.display = 'none';
-  }
+  function showVerseTable() { document.getElementById('verseTableModal').style.display = 'flex'; }
+  function closeVerseTable() { document.getElementById('verseTableModal').style.display = 'none'; }
 
   function updateVerseGrid() {
     const ch = document.getElementById('chapterTableSelect').value;
@@ -677,38 +682,39 @@
       const btn = document.createElement('button');
       btn.className = 'verse-button';
       btn.textContent = i;
-      btn.onclick = () => {
+      btn.onclick = async () => {
         currentChapter = parseInt(ch);
         currentVerse = i;
-        sendCommand('FullShloka');
+        await sendCommand('FullShloka');
         closeVerseTable();
       };
       container.appendChild(btn);
     }
   }
 
-  function handleChapterSelect(sel) {
+  async function handleChapterSelect(sel) {
     const ch = sel.value;
     const verse = Math.floor(Math.random() * verseCounts[ch]) + 1;
     currentChapter = parseInt(ch);
     currentVerse = verse;
-    sendCommand('FullShloka');
+    await sendCommand('FullShloka');
   }
 
-  function handleContinuousPlay(sel) {
+  async function handleContinuousPlay(sel) {
     const ch = sel.value;
     isContinuousPlaying = true;
     continuousQueue = Array.from({length: verseCounts[ch]}, (_, i) => ({ch: parseInt(ch), vs: i+1}));
     currentChapter = parseInt(ch);
     currentVerse = 1;
-    playNextInQueue();
+    await playNextInQueue();
   }
-  function playNextInQueue() {
+
+  async function playNextInQueue() {
     if (!isContinuousPlaying || continuousQueue.length === 0) { isContinuousPlaying = false; return; }
     const next = continuousQueue.shift();
     currentChapter = next.ch;
     currentVerse = next.vs;
-    sendCommand('FullShloka');
+    await sendCommand('FullShloka');
     setTimeout(playNextInQueue, 8000);
   }
 
@@ -730,7 +736,7 @@
     sendCommand('FullShloka');
   }
 
-  // Theme toggle
+  // === THEME TOGGLE ===
   document.getElementById('lightThemeBtn').onclick = () => {
     document.documentElement.removeAttribute('data-theme');
     document.getElementById('lightThemeBtn').classList.add('active');
@@ -742,12 +748,9 @@
     document.getElementById('lightThemeBtn').classList.remove('active');
   };
 
-  // Init
-  document.addEventListener('DOMContentLoaded', () => {
-    const meaningsButton = document.getElementById('meaningsButton');
-    const instructionsButton = document.getElementById('instructionsButton');
-    if (meaningsButton) meaningsButton.textContent = 'Meanings';
-    if (instructionsButton) instructionsButton.textContent = 'Help';
+  // === INIT ===
+  document.addEventListener('DOMContentLoaded', async () => {
+    await updateShlokaText();
   });
 </script>
 
