@@ -5,51 +5,429 @@
   <title>Bhagavad Gita – Listen, Understand & Memorise</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600&family=Noto+Sans+Devanagari:wght@400;500;600&family=Noto+Sans+Kannada:wght@400;500;600&family=Noto+Sans+Tamil:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* ==== ORIGINAL STYLES – 100% PRESERVED ==== */
-    body {font-family: 'Outfit', sans-serif; margin:0; padding:20px; background:#f8f9fa; color:#333;}
-    p {font-size:1.3em; font-weight:600; margin-bottom:15px;}
-    .top-buttons,.player-container,.radio-group,.textbox-container,.dropdown-container{margin:15px 0;}
-    .top-buttons button,.player-container button{margin:4px; padding:10px 14px; font-size:0.95em;
-      border:1px solid #ccc; border-radius:6px; background:#fff; cursor:pointer; transition:0.2s;}
-    .top-buttons button:hover,.player-container button:hover{background:#f0f0f0;}
-    .sgs-button{background:#e3f2fd;}
-    .sringeri-button{background:#fff3e0;}
-    .third-paada-button{background:#e8f5e9;}
-    audio{width:100%; margin:15px 0;}
-    .radio-group label{margin-right:15px; font-weight:500;}
-    .language-group label{display:block; margin:6px 0;}
-    .textbox-container > div{margin-bottom:20px;}
-    .textbox-label{font-weight:600; font-size:1.15em; margin-bottom:6px; color:#555;}
-    .textbox-label.active{color:#1976d2; border-bottom:2px solid #1976d2; padding-bottom:4px;}
-    .shloka-text{border:1px solid #ddd; padding:14px; background:#fff; min-height:70px;
-      font-size:1.1em; line-height:1.6; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.1);}
-    .hidden{display:none;}
-    .visible{display:block;}
-    .dropdown-container > div{display:inline-block; margin-right:30px; vertical-align:top;}
-    .dropdown-container label{display:block; font-weight:500; margin-bottom:6px;}
-    select{padding:10px; font-size:1em; border:1px solid #ccc; border-radius:6px; width:100%; max-width:300px;}
-    #search-input{padding:10px; width:260px; font-size:1em; border:1px solid #ccc; border-radius:6px;}
-    #search-button{padding:10px 18px; margin-left:8px; font-size:1em;}
-    .credits{margin-top:30px; font-size:0.9em; color:#666; font-style:italic; line-height:1.6;}
-    .modal{display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6);
-      z-index:1000; justify-content:center; align-items:center;}
-    .modal-content{background:#fff; width:90%; max-width:800px; max-height:85vh; overflow-y:auto;
-      padding:20px; border-radius:10px; position:relative; box-shadow:0 4px 20px rgba(0,0,0,0.2);}
-    .close-button{position:absolute; top:10px; right:15px; font-size:1.8em; background:none;
-      border:none; cursor:pointer; color:#aaa;}
-    .close-button:hover{color:#000;}
-    .verse-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(50px,1fr));
-      gap:8px; margin-top:15px;}
-    .verse-grid button{padding:8px; font-size:0.95em; background:#e3f2fd; border:1px solid #90caf9;
-      border-radius:6px;}
-    .verse-grid button:hover{background:#bbdefb;}
-    .meaning-panel{margin-top:20px; padding:15px; background:#f5f9ff; border:1px dashed #90caf9;
-      border-radius:8px; display:none; font-size:1.05em; line-height:1.7;}
-    .meaning-panel.visible{display:block;}
+    /* Define CSS variables for theming */
+    :root {
+      --bg-color: #f0f0f0;
+      --text-color: #2c3e50;
+      --card-bg: #ffffff;
+      --card-border: #357EC7;
+      --button-bg: #357EC7;
+      --button-text: #ffffff;
+      --button-hover-bg: #1e40af;
+      --header-color: #2c3e50;
+      --subheader-color: #34495e;
+      --input-border: #ccc;
+      --modal-bg: #ffffff;
+      --verse-button-bg: #f9f9f9;
+      --verse-button-hover-bg: #e0e0e0;
+      --intro-overlay: rgba(0,0,0,0.5);
+      --intro-button-bg: #e5e7eb;
+      --intro-button-text: #111827;
+      --intro-tooltip-bg: #ffffff;
+    }
+    [data-theme="dark"] {
+      --bg-color: #1a1a1a;
+      --text-color: #ffffff;
+      --card-bg: #2a2a2a;
+      --card-border: #4a90e2;
+      --button-bg: #4a90e2;
+      --button-text: #ffffff;
+      --button-hover-bg: #357abd;
+      --header-color: #ffffff;
+      --subheader-color: #cccccc;
+      --input-border: #444;
+      --modal-bg: #2a2a2a;
+      --verse-button-bg: #333;
+      --verse-button-hover-bg: #444;
+      --intro-overlay: rgba(0,0,0,0.7);
+      --intro-button-bg: #444;
+      --intro-button-text: #ffffff;
+      --intro-tooltip-bg: #333;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: Outfit, sans-serif;
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      overflow-x: hidden;
+      transition: all 0.3s ease;
+    }
+    h1 { color: var(--header-color); font-size: 1.5em; }
+    h2 { color: var(--subheader-color); font-size: 1em; margin-top: 10px; }
+
+    /* Theme toggle */
+    .theme-toggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 10px;
+      z-index: 1001;
+    }
+    .theme-toggle button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+      color: var(--text-color);
+      opacity: 0.6;
+      transition: opacity 0.3s;
+    }
+    .theme-toggle button:hover, .theme-toggle button.active { opacity: 1; }
+
+    .page-frame {
+      max-width: 900px;
+      margin: 8px auto;
+      padding: 12px;
+      border: 2px solid var(--card-border);
+      border-radius: 10px;
+      background: var(--card-bg);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    @media (max-width: 600px) {
+      .page-frame { margin: 4px; padding: 16px; border-radius: 10px; border-width: 4px; overflow: hidden; }
+    }
+
+    .top-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      padding-left: 12px;
+      padding-right: 12px;
+      box-sizing: border-box;
+    }
+    .top-buttons button {
+      width: 150px;
+      height: 150px;
+      border-radius: 25%;
+      border: none;
+      background-color: var(--button-bg);
+      color: var(--button-text);
+      font-size: 20px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+    }
+    .top-buttons button.sgs-button:hover, .top-buttons button.sgs-button:active {
+      background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/sankhu.png');
+      background-color: transparent !important;
+      color: transparent !important;
+    }
+    .top-buttons button.sringeri-button:hover, .top-buttons button.sringeri-button:active,
+    .top-buttons button.third-paada-button:hover, .top-buttons button.third-paada-button:active {
+      background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/chakra.png');
+      background-color: transparent !important;
+      color: transparent !important;
+    }
+    .top-buttons button.reset, .top-buttons button.reset:hover,
+    .top-buttons button.reset:active, .top-buttons button.reset:focus {
+      background: var(--button-bg) !important;
+      color: var(--button-text) !important;
+      background-image: none !important;
+    }
+
+    .button-groups {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
+      padding-left: 12px;
+      padding-right: 12px;
+      box-sizing: border-box;
+    }
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 50%;
+    }
+    .button-groups button {
+      background-color: var(--button-bg);
+      color: var(--button-text);
+      padding: 10px 18px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.6em;
+      width: 100%;
+      max-width: 150px;
+      transition: background-color 0.3s ease;
+    }
+    .button-groups button:hover { background-color: var(--card-bg); color: transparent; }
+
+    .dropdown-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+      border: 2px solid var(--card-border);
+      border-radius: 5px;
+      padding: 10px 12px;
+      box-sizing: border-box;
+    }
+    .dropdown-item { display: flex; flex-direction: column; }
+    .dropdown-label {
+      margin-bottom: 6px;
+      font-weight: bold;
+      font-size: 1em;
+      color: var(--header-color);
+    }
+    select {
+      width: 100%;
+      padding: 8px;
+      font-size: 1em;
+      border-radius: 5px;
+      border: 1px solid var(--input-border);
+      background-color: var(--card-bg);
+      color: var(--text-color);
+    }
+
+    .shloka-text {
+      margin-top: 10px;
+      font-size: 1.5em;
+      color: var(--text-color);
+      white-space: pre-wrap;
+      max-width: 100%;
+      margin-left: 0;
+      margin-right: 0;
+      line-height: 1.5;
+      min-height: 3em;
+      overflow-y: auto;
+      padding: 0;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-family: 'Noto Sans Telugu', 'Noto Sans Devanagari', 'Noto Sans Kannada', 'Noto Sans Tamil', sans-serif;
+      box-sizing: border-box;
+    }
+    .shloka-text.active { display: flex; }
+    .shloka-text.active.multiline { display: block; text-align: left; }
+    .shloka-number { font-weight: bold; margin-bottom: 5px; text-align: left; font-size: 1em; }
+    .shloka-lines { text-align: left; }
+    #sgsText, #sringeriText {
+      display: block;
+      width: 100%;
+      white-space: normal !important;
+      text-align: center;
+      margin-left: 0;
+      margin-right: 0;
+      max-width: 100%;
+      font-family: 'Noto Sans Telugu', 'Noto Sans Devanagari', 'Noto Sans Kannada', 'Noto Sans Tamil', sans-serif;
+      font-size: 1.5em;
+      line-height: 1.5;
+      border: none;
+      padding: 0;
+      overflow-y: auto;
+      min-height: 3em;
+      box-sizing: border-box;
+    }
+    #sgsText > div, #sringeriText > div { display: block; width: 100%; margin-bottom: 1em; }
+    .hidden { display: none !important; }
+    .shloka-text.visible { display: flex !important; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    .shloka-text.placeholder { display: flex !important; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    .shloka-text.visible.multiline { display: block !important; text-align: left; }
+    .visible { display: block !important; }
+
+    #audioPlayer { margin: 10px auto; display: block; flex-shrink: 0; }
+
+    .radio-group {
+      margin: 10px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 12px;
+      padding-right: 12px;
+      box-sizing: border-box;
+    }
+    .radio-group label { margin: 0 10px; color: var(--text-color); }
+    .radio-group input[type="text"] {
+      padding: 8px;
+      font-size: 1em;
+      border-radius: 5px;
+      border: 1px solid var(--input-border);
+      background-color: var(--card-bg);
+      color: var(--text-color);
+    }
+    .radio-group input[type="submit"] {
+      background-color: var(--button-bg);
+      color: var(--button-text);
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .radio-group input[type="submit"]:hover { background-color: var(--button-hover-bg); }
+
+    .textbox-container {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      width: 100%;
+      max-width: 600px;
+      margin: 12px auto 0;
+      padding-left: 12px;
+      padding-right: 12px;
+      border: 2px solid var(--card-border);
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+    .textbox-container > div { width: 100%; max-width: 100%; }
+    .textbox-label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: none;
+      color: var(--header-color);
+    }
+    .textbox-label.active { display: block; }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: var(--intro-overlay);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background-color: var(--modal-bg);
+      padding: 20px;
+      border-radius: 5px;
+      max-width: 80%;
+      max-height: 80%;
+      overflow-y: auto;
+      border: 2px solid var(--card-border);
+    }
+    .chapter-select {
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 1em;
+      border-radius: 5px;
+      width: 100%;
+      max-width: 200px;
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      border: 1px solid var(--input-border);
+    }
+
+    .verse-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+      gap: 10px;
+      padding: 10px;
+    }
+    .verse-button {
+      background-color: var(--verse-button-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 5px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.9em;
+      color: var(--text-color);
+    }
+    .verse-button:hover { background-color: var(--verse-button-hover-bg); }
+
+    .close-button {
+      background-color: #ff4444;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      float: right;
+    }
+    .close-button:hover { background-color: #cc0000; }
+
+    .credits {
+      font-size: 0.9em;
+      color: var(--text-color);
+      margin-top: 10px;
+    }
+
+    .player-container {
+      display: grid;
+      grid-template-columns: repeat(3, max-content);
+      grid-template-rows: repeat(2, auto);
+      gap: 10px 5px;
+      justify-content: center;
+      justify-items: center;
+      align-items: center;
+      max-width: 600px;
+      margin: 20px auto 0;
+      width: 100%;
+      box-sizing: border-box;
+      border: none;
+      border-radius: 5px;
+      padding: 12px;
+    }
+    .player-container button {
+      width: 100px;
+      height: 40px;
+      border: none;
+      border-radius: 25px;
+      background-color: var(--button-bg);
+      color: var(--button-text);
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 0 15px;
+      transition: background 0.3s ease;
+      justify-self: center;
+      align-self: center;
+    }
+    .player-container button:hover { background-color: var(--button-hover-bg); }
+
+    @media (max-width: 600px) {
+      body { padding: 6px; }
+      .top-buttons, .button-groups, .dropdown-container, .radio-group, .player-container, .textbox-container {
+        width: 100%; max-width: 100%; margin: 0 auto; padding-left: 12px; padding-right: 12px; box-sizing: border-box; flex-wrap: wrap;
+      }
+      .top-buttons { margin-top: 6px; gap: 5px; flex-direction: row; }
+      .player-container { margin-top: 12px; padding-left: 12px; padding-right: 12px; grid-template-columns: repeat(3, 1fr); }
+      .player-container button { width: 100%; }
+      .shloka-text { font-size: 1.25em; padding: 0; text-align: left; }
+      .shloka-number { font-weight: bold; margin-bottom: 5px; text-align: left; font-size: 1em; padding-left: 0; }
+      #sgsText, #sringeriText { font-size: 1.25em; text-align: left; padding-left: 0; white-space: pre-line; }
+      .shloka-text.visible, .shloka-text.placeholder { justify-content: flex-start; text-align: left; }
+      .button-groups { margin-top: 12px; gap: 5px; flex-direction: row; }
+      .button-group { width: 50%; gap: 5px; }
+      .top-buttons button { flex: 1 1 calc(33.333% - 10px); max-width: none; height: auto; aspect-ratio: 1/1; font-size: 0.8em; }
+      .button-groups button { padding: 6px 12px; font-size: 0.8em; max-width: 100%; }
+    }
   </style>
 </head>
 <body>
+
+<div class="theme-toggle">
+  <button id="lightThemeBtn" class="active">Light</button>
+  <button id="darkThemeBtn">Dark</button>
+</div>
+
+<div class="page-frame">
 
 <p>Listen, understand and memorize Bhagavad Gita shlokas</p>
 
@@ -109,10 +487,8 @@
 <br>
 
 <div class="dropdown-container">
-  <div>
-    <label for="chapterSelect" style="display:block; font-family:Outfit, sans-serif; font-size:1.1em;">
-      Random Shloka Chapterwise:
-    </label>
+  <div class="dropdown-item">
+    <label for="chapterSelect" class="dropdown-label">Random Shloka Chapterwise:</label>
     <select id="chapterSelect" onchange="handleChapterSelect(this)" data-intro="Pick a chapter to play a random shloka from it" data-title="Random by Chapter">
       <option value="" selected disabled>Select Chapter</option>
       <option value="1">1. అర్జునవిషాదయోగః</option>
@@ -136,8 +512,8 @@
     </select>
   </div>
 
-  <div>
-    <label for="continuousPlaySelect" style="display:block; font-family:Outfit, sans-serif; font-size:1.1em;">Continuous Play:</label>
+  <div class="dropdown-item">
+    <label for="continuousPlaySelect" class="dropdown-label">Continuous Play:</label>
     <select id="continuousPlaySelect" onchange="handleContinuousPlay(this)" data-intro="Play an entire chapter continuously" data-title="Continuous Play">
       <option value="" selected disabled>Select Chapter</option>
       <option value="1">1. అర్జునవిషాదయోగః</option>
@@ -177,8 +553,8 @@
   Dr. P. Udayabhaskar
 </div>
 
-<!-- Meaning Panel -->
-<div id="meaningPanel" class="meaning-panel">
+<!-- Meaning Panel (hidden by default) -->
+<div id="meaningPanel" class="meaning-panel hidden">
   <strong>Word-by-word Meaning:</strong> [Loading...]<br>
   <strong>Overall Meaning:</strong> [Loading...]
 </div>
@@ -212,8 +588,10 @@
   </div>
 </div>
 
+</div> <!-- end .page-frame -->
+
 <script>
-  // ------------------- GLOBAL STATE -------------------
+  // Global state
   const baseUrl = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main';
   const verseCounts = {1:47,2:72,3:43,4:42,5:29,6:47,7:30,8:28,9:34,10:42,11:55,12:20,13:34,14:27,15:20,16:24,17:28,18:78};
   let selectedStyle = 'sringeri';
@@ -222,26 +600,26 @@
   let continuousQueue = [];
   let isShowingMeanings = false;
 
-  // Mock data (replace with real fetch later)
+  // Mock shloka data
   const mockShlokas = {
     '1.1': { te: 'ధృతరాష్ట్ర ఉవాచ | ధర్మక్షేత్రే కురుక్షేత్రే...', sa: 'धृतराष्ट्र उवाच। धर्मक्षेत्रे कुरुक्षेत्रे...', en: 'Dhritarashtra said...' }
   };
 
-  // ------------------- CORE COMMAND -------------------
   function sendCommand(cmd) {
     console.log('sendCommand →', cmd);
     const audio = document.getElementById('audioPlayer');
     const stylePath = selectedStyle === 'sgs' ? 'sgs' : 'sringeri';
     let url = '';
 
+    const verseKey = `${currentChapter}.${currentVerse}`;
     if (cmd === 'FullShloka' || cmd === 'PreviousShloka' || cmd === 'NextFullShloka') {
-      url = `${baseUrl}/audio/${stylePath}/${currentChapter}.${currentVerse}.mp3`;
+      url = `${baseUrl}/audio/${stylePath}/${verseKey}.mp3`;
     } else if (cmd === 'SGSFirstPaada') {
-      url = `${baseUrl}/audio/sgs/${currentChapter}.${currentVerse}_1.mp3`;
+      url = `${baseUrl}/audio/sgs/${verseKey}_1.mp3`;
     } else if (cmd === 'SringeriPaada') {
-      url = `${baseUrl}/audio/sringeri/${currentChapter}.${currentVerse}_1or3.mp3`;
+      url = `${baseUrl}/audio/sringeri/${verseKey}_1or3.mp3`;
     } else if (cmd === 'ThirdPaada') {
-      url = `${baseUrl}/audio/${stylePath}/${currentChapter}.${currentVerse}_3.mp3`;
+      url = `${baseUrl}/audio/${stylePath}/${verseKey}_3.mp3`;
     }
 
     if (url) {
@@ -251,7 +629,6 @@
     updateShlokaText();
   }
 
-  // ------------------- TEXT & STYLE -------------------
   function updateShlokaText() {
     const key = `${currentChapter}.${currentVerse}`;
     const s = mockShlokas[key] || { te: 'Shloka not loaded.', sa: 'श्लोक नहीं लोड हुआ।', en: 'Shloka not loaded.' };
@@ -270,28 +647,26 @@
     document.getElementById('sringeriText').classList.toggle('hidden', isSGS);
   }
 
-  // ------------------- MEANINGS -------------------
   function handleMeanings() {
     isShowingMeanings = !isShowingMeanings;
     const panel = document.getElementById('meaningPanel');
-    panel.classList.toggle('visible', isShowingMeanings);
+    panel.classList.toggle('hidden', !isShowingMeanings);
     if (isShowingMeanings) {
       panel.innerHTML = `<strong>Word-by-word:</strong> ధృతరాష్ట్ర: = Dhritarashtra, ఉవాచ = said...<br><strong>Overall Meaning:</strong> Dhritarashtra asks Sanjaya what happened on the battlefield.`;
     }
   }
 
-  // ------------------- HELP -------------------
   function toggleInstructions() {
     alert("Welcome! Click 'Full' to play. Switch style with radio buttons. Use 'Selector' for verse grid. 'Meanings' shows explanation. 'Help' shows this.");
   }
 
-  // ------------------- MODAL & GRID -------------------
   function showVerseTable() {
     document.getElementById('verseTableModal').style.display = 'flex';
   }
   function closeVerseTable() {
     document.getElementById('verseTableModal').style.display = 'none';
   }
+
   function updateVerseGrid() {
     const ch = document.getElementById('chapterTableSelect').value;
     if (!ch) return;
@@ -300,6 +675,7 @@
     container.innerHTML = '';
     for (let i = 1; i <= count; i++) {
       const btn = document.createElement('button');
+      btn.className = 'verse-button';
       btn.textContent = i;
       btn.onclick = () => {
         currentChapter = parseInt(ch);
@@ -311,7 +687,6 @@
     }
   }
 
-  // ------------------- RANDOM & CONTINUOUS -------------------
   function handleChapterSelect(sel) {
     const ch = sel.value;
     const verse = Math.floor(Math.random() * verseCounts[ch]) + 1;
@@ -337,7 +712,6 @@
     setTimeout(playNextInQueue, 8000);
   }
 
-  // ------------------- CONFUSING & UVACHA -------------------
   function showConfusing() {
     const groups = [['1.24','2.9','11.9'], ['2.10','1.21']];
     const group = groups[Math.floor(Math.random() * groups.length)];
@@ -356,7 +730,19 @@
     sendCommand('FullShloka');
   }
 
-  // ------------------- INIT -------------------
+  // Theme toggle
+  document.getElementById('lightThemeBtn').onclick = () => {
+    document.documentElement.removeAttribute('data-theme');
+    document.getElementById('lightThemeBtn').classList.add('active');
+    document.getElementById('darkThemeBtn').classList.remove('active');
+  };
+  document.getElementById('darkThemeBtn').onclick = () => {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.getElementById('darkThemeBtn').classList.add('active');
+    document.getElementById('lightThemeBtn').classList.remove('active');
+  };
+
+  // Init
   document.addEventListener('DOMContentLoaded', () => {
     const meaningsButton = document.getElementById('meaningsButton');
     const instructionsButton = document.getElementById('instructionsButton');
