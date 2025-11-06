@@ -1370,18 +1370,29 @@
                                           throw new Error(`HTTP error: ${response.status}`);
                                       }
                                       const data = await response.json();
-                                      const key = `${chapter}.${verse}`;
-                                      if (data[key]) {
+                                      const key1 = `${chapter}.${verse}`;
+                                      const key2 = `${chapter}-${verse}`;
+                                      const entry = data[key1] || data[key2];
+                                      if (entry) {
                                           let meaningText = `${chapter}.${verse} Meaning:\n\nప్రతిపదార్థం(Word-to-Word Meaning):\n`;
-                                          const wordToWord = data[key]["ప్రతిపదార్థం"];
+                                          const w2wKeys = ["ప్రతిపదార్థం","ప్రతిపదార్థము","WordToWord","Word-to-Word","WordMeaning"];
+                                          const overallKeys = ["అర్థం","అర్థము","సారాంశం","సారాంశము","Overall","OverallMeaning","Meaning"];
+                                          let wordToWord = null;
+                                          for (const k of w2wKeys) { if (entry[k]) { wordToWord = entry[k]; break; } }
                                           if (wordToWord) {
-                                              for (const [word, meaning] of Object.entries(wordToWord)) {
-                                                  meaningText += `${word}: ${meaning}\n`;
+                                              if (typeof wordToWord === 'object') {
+                                                  for (const [word, meaning] of Object.entries(wordToWord)) {
+                                                      meaningText += `${word}: ${meaning}\n`;
+                                                  }
+                                              } else {
+                                                  meaningText += `${wordToWord}\n`;
                                               }
                                           } else {
                                               meaningText += 'Word-to-word meaning not available\n';
                                           }
-                                          meaningText += `\nఅర్థం (Overall Meaning):\n${data[key]["అర్థం"] || 'Overall meaning not available'}`;
+                                          let overall = null;
+                                          for (const k of overallKeys) { if (entry[k]) { overall = entry[k]; break; } }
+                                          meaningText += `\nఅర్థం (Overall Meaning):\n${overall || 'Overall meaning not available'}`;
                                           return meaningText;
                                       } else {
                                           return `Meaning for ${chapter}.${verse} not found`;
@@ -1783,12 +1794,20 @@
                             adjustTextboxHeight();
                             return;
                         }
-                        audioPlayer.src = audioUrl;
-                        audioPlayer.play().catch(error => {
+                        try {
+                            audioPlayer.pause();
+                            audioPlayer.onended = null;
+                            audioPlayer.src = '';
+                            audioPlayer.currentTime = 0;
+                            audioPlayer.load();
+                            audioPlayer.src = audioUrl;
+                            audioPlayer.load();
+                            await audioPlayer.play();
+                        } catch (error) {
                             sgsText.innerText += `\nError playing audio for ${shloka}: ${error.message}`;
                             sringeriText.innerText += `\nError playing audio for ${shloka}: ${error.message}`;
                             adjustTextboxHeight();
-                        });
+                        }
             
                         currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
                         currentContext.push({
