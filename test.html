@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600&family=Noto+Sans+Devanagari:wght@400;500;600&family=Noto+Sans+Kannada:wght@400;500;600&family=Noto+Sans+Tamil:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* === YOUR EXACT CSS (UNCHANGED) === */
+    /* === YOUR ORIGINAL CSS — 100% PRESERVED === */
     :root {
       --bg-color: #f0f0f0;
       --text-color: #2c3e50;
@@ -466,11 +466,11 @@
 <div class="textbox-container">
   <div>
     <div id="sgsLabel" class="textbox-label">SGS Style Shloka</div>
-    <div id="sgsText" class="shloka-text hidden">Loading shloka...</div>
+    <div id="sgsText" class="shloka-text hidden">Loading...</div>
   </div>
   <div>
     <div id="sringeriLabel" class="textbox-label active">Sringeri Style Shloka</div>
-    <div id="sringeriText" class="shloka-text visible">Loading shloka...</div>
+    <div id="sringeriText" class="shloka-text visible">Loading...</div>
   </div>
 </div>
 
@@ -599,23 +599,27 @@
   let continuousQueue = [];
   let isShowingMeanings = false;
 
-  // === FETCH SHLOKA TEXT FROM JSON ===
+  // === FETCH SHLOKA TEXT FROM JSON (REAL PATHS) ===
   async function fetchShloka(ch, vs) {
     try {
-      const response = await fetch(`${baseUrl}/shlokas/${ch}.${vs}.json`);
-      if (!response.ok) throw new Error('Not found');
+      const url = `${baseUrl}/shlokas/${ch}.${vs}.json`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       return data;
     } catch (e) {
-      return { te: 'Shloka not available.', sa: 'श्लोक उपलब्ध नहीं।', en: 'Shloka not available.' };
+      console.error('Shloka fetch failed:', e);
+      return { te: 'Shloka not found.', sa: 'श्लोक नहीं मिला।', en: 'Shloka not found.' };
     }
   }
 
   // === UPDATE TEXT DISPLAY ===
   async function updateShlokaText() {
     const s = await fetchShloka(currentChapter, currentVerse);
-    document.getElementById('sgsText').textContent = s.te || s.sa || 'Loading...';
-    document.getElementById('sringeriText').textContent = s.sa || s.te || 'Loading...';
+    const sgsText = document.getElementById('sgsText');
+    const sringeriText = document.getElementById('sringeriText');
+    sgsText.textContent = s.te || s.sa || 'Loading...';
+    sringeriText.textContent = s.sa || s.te || 'Loading...';
   }
 
   // === SEND COMMAND (AUDIO + TEXT) ===
@@ -625,6 +629,7 @@
     let url = '';
 
     const verseKey = `${currentChapter}.${currentVerse}`;
+
     if (cmd === 'FullShloka' || cmd === 'PreviousShloka' || cmd === 'NextFullShloka') {
       url = `${baseUrl}/audio/${stylePath}/${verseKey}.mp3`;
     } else if (cmd === 'SGSFirstPaada') {
@@ -637,11 +642,23 @@
 
     if (url) {
       audio.src = url;
-      audio.play().catch(() => console.log('Audio blocked or not found'));
+      audio.play().catch(err => console.log('Audio play failed:', err));
     }
 
     await updateShlokaText();
   }
+
+  // === NAVIGATION: PREVIOUS / NEXT ===
+  window.sendCommand = async function(cmd) {
+    if (cmd === 'PreviousShloka') {
+      if (currentVerse > 1) currentVerse--;
+      else if (currentChapter > 1) { currentChapter--; currentVerse = verseCounts[currentChapter]; }
+    } else if (cmd === 'NextFullShloka') {
+      if (currentVerse < verseCounts[currentChapter]) currentVerse++;
+      else if (currentChapter < 18) { currentChapter++; currentVerse = 1; }
+    }
+    await sendCommand('FullShloka');
+  };
 
   // === STYLE SWITCH ===
   function updateTextboxVisibility() {
@@ -655,7 +672,7 @@
     document.getElementById('sringeriText').classList.toggle('hidden', isSGS);
   }
 
-  // === MEANINGS, HELP, MODAL, etc. ===
+  // === MEANINGS, HELP, MODAL ===
   function handleMeanings() {
     isShowingMeanings = !isShowingMeanings;
     const panel = document.getElementById('meaningPanel');
@@ -715,7 +732,7 @@
     currentChapter = next.ch;
     currentVerse = next.vs;
     await sendCommand('FullShloka');
-    setTimeout(playNextInQueue, 8000);
+    setTimeout(playNextInQueue, 10000); // ~10 sec per shloka
   }
 
   function showConfusing() {
@@ -748,9 +765,9 @@
     document.getElementById('lightThemeBtn').classList.remove('active');
   };
 
-  // === INIT ===
+  // === INIT: Load 1.1 on startup ===
   document.addEventListener('DOMContentLoaded', async () => {
-    await updateShlokaText();
+    await sendCommand('FullShloka');
   });
 </script>
 
