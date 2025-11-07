@@ -792,6 +792,8 @@
             let sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
             let currentContext = [];
             let currentAllShlokas = []; // For Confusing Shlokas
+            let isConfusingPlaying = false;
+            let confusingPlayId = 0;
             let isTourActive = false; // Intro.js tour state
             const baseUrl = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main';
             const verseCounts = {
@@ -1230,6 +1232,9 @@
                                      console.log('toggleInstructions (tour) called');
                                      const instructionsButton = document.getElementById('instructionsButton');
                                      const audioPlayer = document.getElementById('audioPlayer');
+                                     // Cancel any Confusing playback
+                                     isConfusingPlaying = false;
+                                     confusingPlayId++;
                                      // Pause any ongoing playback
                                      if (audioPlayer && !audioPlayer.paused) {
                                          audioPlayer.pause();
@@ -1485,6 +1490,9 @@
                               function showVerseTable() {
                                   try {
                                       console.log('showVerseTable called');
+                                      // Cancel Confusing playback
+                                      isConfusingPlaying = false;
+                                      confusingPlayId++;
                                       isInstructionsVisible = false;
                                       document.getElementById('instructionsButton').textContent = 'Help';
                                       const modal = document.getElementById('verseTableModal');
@@ -1533,6 +1541,9 @@
                               async function selectVerse(chapter, verse) {
                                   try {
                                       console.log(`selectVerse called: chapter=${chapter}, verse=${verse}`);
+                                      // Cancel Confusing playback
+                                      isConfusingPlaying = false;
+                                      confusingPlayId++;
                                       isContinuousPlaying = false;
                                       isInstructionsVisible = false;
                                       document.getElementById('instructionsButton').textContent = 'Help';
@@ -1582,6 +1593,9 @@
                               async function handlePreviousShloka() {
                                   try {
                                       console.log('handlePreviousShloka called');
+                                      // Cancel Confusing playback
+                                      isConfusingPlaying = false;
+                                      confusingPlayId++;
                                       isContinuousPlaying = false;
                                       isInstructionsVisible = false;
                                       document.getElementById('instructionsButton').textContent = 'Help';
@@ -1642,6 +1656,9 @@
                               async function handleMeanings() {
                                   try {
                                       console.log('handleMeanings called');
+                                      // Cancel Confusing playback
+                                      isConfusingPlaying = false;
+                                      confusingPlayId++;
                                       isContinuousPlaying = false;
                                       isInstructionsVisible = false;
                                       const meaningsButton = document.getElementById('meaningsButton');
@@ -1689,6 +1706,9 @@
                 isInstructionsVisible = false;
                 isShowingMeanings = false;
                 currentAllShlokas = [];
+                // Start a new Confusing playback session
+                isConfusingPlaying = true;
+                const playId = ++confusingPlayId;
                 const instructionsButton = document.getElementById('instructionsButton');
                 const meaningsButton = document.getElementById('meaningsButton');
                 if (instructionsButton) instructionsButton.textContent = 'Help';
@@ -1711,6 +1731,8 @@
                     const [bChapter, bVerse] = b.split('.').map(Number);
                     return aChapter === bChapter ? aVerse - bVerse : aChapter - bChapter;
                 });
+                // Keep full list for toggles
+                currentAllShlokas = allShlokas.slice();
             
                 const sgsTexts = await Promise.all(allShlokas.map(async shloka => {
                     const [chapter, verse] = shloka.split('.').map(Number);
@@ -1730,17 +1752,33 @@
                 // Play audio for all related shlokas (including overlaps), not just the initially selected group
                 console.log('showConfusing: Audio play order =', allShlokas.join(', '));
                 for (const shloka of allShlokas) {
+                    if (confusingPlayId !== playId) break;
                     const [chapter, verse] = shloka.split('.').map(Number);
-                    const audioUrl = await fetchAudioUrl(chapter, verse, 'isFull', false);
+
+                    // Update context to the currently playing shloka
+                    currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
+                    currentContext.push({
+                        name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                        lifespanCount: 5,
+                        parameters: { chapter, verse, style: getSelectedStyle(), showingMeaning: false }
+                    });
+                    localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+
+                    const audioUrl = await fetchAudioUrl(chapter, verse, null, true);
                     if (!audioUrl.error) {
                         audioPlayer.src = audioUrl;
                         await new Promise(resolve => {
-                            audioPlayer.onended = resolve;
+                            if (confusingPlayId !== playId) { resolve(); return; }
+                            const cancelCheck = setInterval(() => {
+                                if (confusingPlayId !== playId) { clearInterval(cancelCheck); resolve(); }
+                            }, 100);
+                            audioPlayer.onended = () => { clearInterval(cancelCheck); resolve(); };
                             audioPlayer.play().catch(error => {
                                 console.error(`showConfusing: Error playing audio for ${shloka}: ${error.message}`);
                                 sgsText.innerHTML += `<br>Error playing audio for ${shloka}: ${error.message}`;
                                 sringeriText.innerHTML += `<br>Error playing audio for ${shloka}: ${error.message}`;
                                 adjustTextboxHeight();
+                                clearInterval(cancelCheck);
                                 resolve();
                             });
                         });
@@ -1750,10 +1788,9 @@
                         adjustTextboxHeight();
                     }
                 }
-            
-                const [chapter, verse] = selectedGroup[0].split('.').map(Number);
-                currentContext = [{ name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`, lifespanCount: 5, parameters: { chapter, verse, style: selectedStyle } }];
-                localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+
+                // Mark the confusing playback session as completed
+                isConfusingPlaying = false;
             }
             
             
@@ -1761,6 +1798,9 @@
                 // Show uvacha shlokas
                     async function showUvacha() {
                         console.log('showUvacha: Called');
+                        // Cancel Confusing playback
+                        isConfusingPlaying = false;
+                        confusingPlayId++;
                         isContinuousPlaying = false;
                         isInstructionsVisible = false;
                         isShowingMeanings = false;
@@ -2057,13 +2097,15 @@
               }
             
               adjustTextboxHeight();  // fix heights after toggle
+
+              // Persist chosen style in context
+              const ctx = currentContext.find(c => c && c.name && c.name.includes('shloka-context'));
+              if (ctx && ctx.parameters) {
+                ctx.parameters.style = sgsRadio.checked ? 'sgs' : 'sringeri';
+                localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+              }
             }
-            // After updateTextboxVisibility();
-            const ctx = currentContext.find(c => c && c.name && c.name.includes('shloka-context'));
-            if (ctx && ctx.parameters) {
-            ctx.parameters.style = style; // 'sgs' or 'sringeri'
-            localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-            }        
+                   
             
                               
                               async function sendCommand(intent) {
@@ -2072,6 +2114,9 @@
                                       isContinuousPlaying = false;
                                       isInstructionsVisible = false;
                                       isShowingMeanings = false;
+                                      // Cancel Confusing playback
+                                      isConfusingPlaying = false;
+                                      confusingPlayId++;
                                       document.getElementById('instructionsButton').textContent = 'Help';
                                       document.getElementById('meaningsButton').textContent = 'Meanings';
                                       const sgsText = document.getElementById('sgsText');
@@ -2245,16 +2290,34 @@
                // Add event listeners for language checkboxes to refresh current shloka
                document.querySelectorAll('.language-group input[type="checkbox"]').forEach(checkbox => {
                    checkbox.addEventListener('change', async () => {
-                       const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-                       if (context && context.parameters && context.parameters.chapter && context.parameters.verse) {
-                           const chapter = context.parameters.chapter;
-                           const verse = context.parameters.verse;
-                           const sgsShloka = await fetchCombinedShlokaText(chapter, verse, 'sgs');
-                           const sringeriShloka = await fetchCombinedShlokaText(chapter, verse, 'sringeri');
-                           document.getElementById('sgsText').innerText = sgsShloka;
-                           document.getElementById('sringeriText').innerText = sringeriShloka;
+                       const sgsEl = document.getElementById('sgsText');
+                       const sringeriEl = document.getElementById('sringeriText');
+                       if (Array.isArray(currentAllShlokas) && currentAllShlokas.length > 0) {
+                           // Rebuild the Confusing Shlokas list for current language selection
+                           const sgsTexts = await Promise.all(currentAllShlokas.map(num => {
+                               const [ch, v] = num.split('.').map(Number);
+                               return fetchCombinedShlokaText(ch, v, 'sgs');
+                           }));
+                           const sringeriTexts = await Promise.all(currentAllShlokas.map(num => {
+                               const [ch, v] = num.split('.').map(Number);
+                               return fetchCombinedShlokaText(ch, v, 'sringeri');
+                           }));
+                           sgsEl.innerHTML = sgsTexts.map(t => `<div>${t}</div>`).join('');
+                           sringeriEl.innerHTML = sringeriTexts.map(t => `<div>${t}</div>`).join('');
                            adjustTextboxHeight();
                            updateTextboxVisibility();
+                       } else {
+                           const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+                           if (context && context.parameters && context.parameters.chapter && context.parameters.verse) {
+                               const chapter = context.parameters.chapter;
+                               const verse = context.parameters.verse;
+                               const sgsShloka = await fetchCombinedShlokaText(chapter, verse, 'sgs');
+                               const sringeriShloka = await fetchCombinedShlokaText(chapter, verse, 'sringeri');
+                               sgsEl.innerText = sgsShloka;
+                               sringeriEl.innerText = sringeriShloka;
+                               adjustTextboxHeight();
+                               updateTextboxVisibility();
+                           }
                        }
                    });
                });
