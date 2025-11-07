@@ -1804,6 +1804,8 @@
                         isContinuousPlaying = false;
                         isInstructionsVisible = false;
                         isShowingMeanings = false;
+                        // Ensure we're not in a Confusing list context
+                        currentAllShlokas = [];
                         const instructionsButton = document.getElementById('instructionsButton');
                         const meaningsButton = document.getElementById('meaningsButton');
                         if (instructionsButton) instructionsButton.textContent = 'Help';
@@ -1820,6 +1822,15 @@
                         const randomIndex = Math.floor(Math.random() * uvachaShlokas.length);
                         const shloka = uvachaShlokas[randomIndex];
                         const [chapter, verse] = shloka.split('.').map(Number);
+
+                        // Set context immediately so language toggles reflect the same Uvacha shloka
+                        currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
+                        currentContext.push({
+                            name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+                            lifespanCount: 5,
+                            parameters: { chapter, verse, style: getSelectedStyle(), showingMeaning: false }
+                        });
+                        localStorage.setItem('gitaContext', JSON.stringify(currentContext));
                         const sgsShloka = await fetchCombinedShlokaText(chapter, verse, 'sgs');
                         const sringeriShloka = await fetchCombinedShlokaText(chapter, verse, 'sringeri');
                         sgsText.innerText = sgsShloka || `Shloka ${shloka} not found`;
@@ -1849,13 +1860,7 @@
                             adjustTextboxHeight();
                         }
             
-                        currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
-                        currentContext.push({
-                            name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
-                            lifespanCount: 5,
-                            parameters: { chapter, verse, style: getSelectedStyle(), showingMeaning: false }
-                        });
-                        localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+                        // Context already set above before UI/audio
                     }
             
             
