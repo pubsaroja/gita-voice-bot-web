@@ -5,43 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Bhagavad Gita Voice Bot</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background: #fff8e7; }
-    h1 { color: #b8860b; }
-    .buttons { margin: 20px 0; }
-    button { padding: 15px 20px; margin: 10px; font-size: 16px; background:#ffcc80; border: none; border-radius: 10px; cursor: pointer; }
-    button:hover { background: #ffb74d; }
-    #output { margin: 20px; padding: 15px; background: white; border-radius: 10px; min-height: 100px; font-size: 18px; }
-    #audioPlayer { width: 90%; max-width: 600px; margin: 20px auto; }
-    select, input[type="checkbox"] { margin: 10px; font-size: 16px; }
-    label { font-weight: bold; }
+    body { font-family: Georgia, serif; background: #fdfd96; color: #5a3d00; padding: 20px; }
+    h1 { color: #b8860b; text-align: center; }
+    .container { max-width: 900px; margin: auto; background: #fffef0; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin: 30px 0; }
+    button { padding: 18px; font-size: 18px; background: #ffeb3b; border: 2px solid #f57f17; border-radius: 12px; cursor: pointer; transition: all 0.3s; }
+    button:hover { background: #ffb300; transform: scale(1.05); }
+    #output { margin: 25px 0; padding: 20px; background: white; border-left: 6px solid #ff9800; font-size: 20px; line-height: 1.8; min-height: 120px; border-radius: 8px; }
+    #audioPlayer { width: 100%; margin: 20px 0; }
+    .controls { margin: 20px 0; text-align: center; }
+    select { padding: 10px; font-size: 16px; border-radius: 8px; }
+    .checkbox-label { font-size: 18px; font-weight: bold; color: #d84315; }
   </style>
 </head>
 <body>
-  <h1>🕉️ Bhagavad Gita Voice Bot</h1>
-  
-  <div class="buttons">
-    <button onclick="sendCommand('SGSFirstPaada')">1st Paada Only (SGS)</button>
-    <button onclick="sendCommand('SringeriPaada')">1st or 3rd Paada (Sringeri)</button>
-    <button onclick="sendCommand('ThirdPaada')">3rd Paada Only</button>
-    <button onclick="sendCommand('FullShloka')">Full Shloka (Random Style)</button>
+  <div class="container">
+    <h1>ॐ नमो भगवते वासुदेवाय</h1>
+    <h2 style="text-align:center; color:#d84315;">Bhagavad Gita Voice Bot</h2>
+
+    <div class="controls">
+      <label class="checkbox-label">
+        <input type="checkbox" id="continuousRandomPlay" style="transform:scale(1.5); margin-right:10px;">
+        Continuous Random Play (60 sec gap)
+      </label>
+      <br><br>
+      <label>Chanting Style: 
+        <select id="styleSelect">
+          <option value="sgs">SGS (Standard)</option>
+          <option value="sringeri">Sringeri Sharada Peetham</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="buttons">
+      <button onclick="sendCommand('SGSFirstPaada')">First Pāda Only (SGS)</button>
+      <button onclick="sendCommand('SringeriPaada')">1st or 3rd Pāda (Sringeri)</button>
+      <button onclick="sendCommand('ThirdPaada')">Third Pāda Only</button>
+      <button onclick="sendCommand('FullShloka')">Full Shloka (Auto Style)</button>
+    </div>
+
+    <div id="output">Tap any button above to receive a divine shloka...</div>
+    <audio id="audioPlayer" controls preload="none"></audio>
   </div>
-
-  <div>
-    <label>
-      <input type="checkbox" id="continuousRandomPlay" />
-      Continuous Random Play (1 min gap)
-    </label>
-  </div>
-
-  <label>Style: 
-    <select id="styleSelect">
-      <option value="sgs">SGS</option>
-      <option value="sringeri">Sringeri</option>
-    </select>
-  </label>
-
-  <div id="output">Click a button to begin...</div>
-  <audio id="audioPlayer" controls></audio>
 
   <script>
     const baseUrl = "https://pubsaroja.github.io/gita-voice-bot-web";
@@ -55,31 +60,26 @@
 
     async function fetchCombinedShlokaText(chapter, verse) {
       const langs = ['Telugu', 'English', 'Sanskrit'];
-      if (!langs || langs.length === 0) langs = ['Telugu']; // safety
-
-      let result = `<strong>Chapter ${chapter}, Verse ${verse}</strong><br/><br/>`;
+      let result = `<strong>अध्याय ${chapter}, श्लोक ${verse}</strong><br/><br/>`;
+      
       for (const lang of langs) {
         try {
           const response = await fetch(`${baseUrl}/texts/${lang}/Chapter ${chapter}/${verse}.txt?t=${Date.now()}`);
           if (response.ok) {
             const text = await response.text();
-            result += `<strong>${lang}:</strong><br/>${text.trim()}<br/><br/>`;
+            result += `<strong>${lang}:</strong><br/>${text.trim().replace(/\n/g, '<br/>')}<br/><br/>`;
           }
-        } catch (err) {
-          console.warn(`Failed to load ${lang} text for ${chapter}.${verse}`);
+        } catch (e) {
+          console.warn(`Failed to load ${lang} text`, e);
         }
       }
-      if (result.includes('Chapter')) {
-        return result;
-      } else {
-        return `Shloka ${chapter}.${verse} (Text temporarily unavailable)`;
-      }
+      return result || `श्लोक ${chapter}.${verse} (text loading...)`;
     }
 
     async function fetchAudioUrl(chapter, verse, quarter = null, isFull = false) {
       try {
         const style = getSelectedStyle();
-        let url;
+        let url = '';
 
         if (isFull) {
           const folder = style === 'sringeri' ? 'AudioFullSringeri' : 'AudioFullSGS';
@@ -93,95 +93,71 @@
           const folder = style === 'sringeri' ? 'AQ4PaadasSringeri' : 'AQ4PaadasSGS';
           const pada = Math.random() < 0.5 ? '1' : '3';
           url = `${baseUrl}/${folder}/Chapter ${chapter}/${verse}.${pada}.mp3`;
-        } else {
-          const folder = style === 'sringeri' ? 'AudioFullSringeri' : 'AudioFullSGS';
-          url = `${baseUrl}/${folder}/${chapter}.${verse}.mp3`;
         }
 
         const response = await fetch(url, { method: 'GET' });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const cl = response.headers.get('content-length');
-        if (cl && parseInt(cl) < 1000) throw new Error('File too small');
+        if (!response.ok) throw new Error(`Status ${response.status}`);
+        const length = response.headers.get('content-length');
+        if (length && parseInt(length) === 0) throw new Error('Empty file');
 
-        console.log('Audio found:', url);
         return url;
-      } catch (error) {
-        console.error('Audio fetch failed:', error.message, 'for', `${chapter}.${verse}`);
-        return { error: `Audio not available for ${chapter}.${verse}` };
+      } catch (err) {
+        console.error('Audio fetch failed:', err);
+        return { error: 'Audio not available for this shloka' };
       }
     }
 
     async function sendCommand(intent) {
-      outputDiv.innerHTML = 'Fetching random shloka...';
+      outputDiv.innerHTML = 'ॐ Receiving divine message...';
       audioPlayer.src = '';
       audioPlayer.pause();
 
-      // Random chapter & verse (only existing ones)
       const chapter = Math.floor(Math.random() * 18) + 1;
-      const versesInChapter = {
-        1:47, 2:72, 3:43, 4:42, 5:29, 6:47, 7:30, 8:28, 9:34, 10:42,
-        11:55, 12:20, 13:35, 14:27, 15:20, 16:24, 17:28, 18:78
-      };
-      const verse = Math.floor(Math.random() * versesInChapter[chapter]) + 1;
+      const maxVerses = [0,47,72,43,42,29,47,30,28,34,42,55,20,35,27,20,24,28,78];
+      const verse = Math.floor(Math.random() * maxVerses[chapter]) + 1;
 
-      let audioUrl = null;
       let quarter = null;
       let isFull = false;
 
-      if (intent === 'SGSFirstPaada') {
-        quarter = 'pada1';
-      } else if (intent === 'SringeriPaada') {
-        quarter = 'pada1_or_pada3';
-      } else if (intent === 'ThirdPaada') {
-        quarter = 'pada3';
-      } else if (intent === 'FullShloka') {
-        isFull = true;
-      }
+      if (intent === 'SGSFirstPaada') quarter = 'pada1';
+      else if (intent === 'SringeriPaada') quarter = 'pada1_or_pada3';
+      else if (intent === 'ThirdPaada') quarter = 'pada3';
+      else if (intent === 'FullShloka') isFull = true;
 
-      audioUrl = await fetchAudioUrl(chapter, verse, quarter, isFull);
-
+      const audioUrl = await fetchAudioUrl(chapter, verse, quarter, isFull);
       const text = await fetchCombinedShlokaText(chapter, verse);
       outputDiv.innerHTML = text;
 
       if (audioUrl && !audioUrl.error) {
         audioPlayer.src = audioUrl;
-        audioPlayer.play().catch(e => console.error("Play failed:", e));
+        audioPlayer.play().catch(e => console.error('Play failed:', e));
       } else {
-        outputDiv.innerHTML += `<br/><span style="color:red;">⚠️ ${audioUrl?.error || 'Audio not found'}</span>`;
+        outputDiv.innerHTML += `<br/><span style="color:red;">Audio temporarily unavailable</span>`;
       }
 
-      // === Continuous Play Logic ===
-      audioPlayer.onended = null; // clear previous
-
-      if (['SGSFirstPaada', 'SringeriPaada', 'ThirdPaada', 'FullShloka'].includes(intent)) {
-        const contCheckbox = document.getElementById('continuousRandomPlay');
-        if (contCheckbox && contCheckbox.checked) {
+      // === Continuous Random Play Logic ===
+      audioPlayer.onended = null;
+      if (['SGSFirstPaada','SringeriPaada','ThirdPaada','FullShloka'].includes(intent)) {
+        const cb = document.getElementById('continuousRandomPlay');
+        if (cb?.checked && audioUrl && !audioUrl.error) {
           lastRandomIntent = intent;
-          if (audioUrl && !audioUrl.error) {
-            audioPlayer.onended = async () => {
-              console.log('Continuous play: waiting 60 seconds...');
-              await new Promise(r => setTimeout(r, 60000)); // 1-minute gap
-              const checkbox = document.getElementById('continuousRandomPlay');
-              if (checkbox && checkbox.checked && lastRandomIntent) {
-                console.log('Continuous play: next shloka');
-                sendCommand(lastRandomIntent);
-              }
-            };
-          }
+          audioPlayer.onended = async () => {
+            await new Promise(r => setTimeout(r, 60000)); // 60 sec gap
+            if (document.getElementById('continuousRandomPlay').checked && lastRandomIntent) {
+              sendCommand(lastRandomIntent);
+            }
+          };
         } else {
           lastRandomIntent = null;
         }
-      } else {
-        lastRandomIntent = null;
       }
     }
 
-    // Stop continuous play when checkbox is unchecked
-    document.getElementById('continuousRandomPlay').addEventListener('change', (e) => {
-      if (!e.target.checked) {
+    // Stop continuous play when unchecked
+    document.getElementById('continuousRandomPlay').addEventListener('change', function() {
+      if (!this.checked) {
         audioPlayer.onended = null;
         lastRandomIntent = null;
-        console.log('Continuous play stopped by user');
       }
     });
   </script>
