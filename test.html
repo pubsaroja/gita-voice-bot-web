@@ -2516,31 +2516,7 @@ stopBtn.onclick = () => {
    lastRandomIntent = null;
    waitingForNext = false;
 };
-<!-- KEEP AUDIO PLAYING EVEN WHEN SCREEN IS OFF -->
-<script>
-// Works on Android Chrome + iOS Safari
-let wakeLock = null;
 
-async function requestWakeLock() {
-   if ('wakeLock' in navigator) {
-      try {
-         wakeLock = await navigator.wakeLock.request('screen');
-         console.log('Screen wake lock active – audio will continue');
-      } catch (err) {
-         console.log('Wake lock failed:', err);
-      }
-   }
-}
-
-// Re-request wake lock whenever audio starts
-document.getElementById('audioPlayer').addEventListener('play', requestWakeLock);
-
-// Also re-request when user returns to tab (for extra safety)
-document.addEventListener('visibilitychange', () => {
-   if (document.visibilityState === 'visible') {
-      setTimeout(requestWakeLock, 500);
-   }
-});
 </script>
          </script>
       </div>
