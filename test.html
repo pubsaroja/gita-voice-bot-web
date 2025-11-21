@@ -123,6 +123,11 @@
          overflow: hidden;
          }
          }
+         @media (max-width: 600px) {
+   .top-buttons button {
+      font-size: 1.1em !important;   /* Makes the text clearly readable on phones */
+   }
+}
          /* Top buttons container */
          .top-buttons {
          display: flex;
@@ -142,7 +147,7 @@
          border: none;
          background-color: var(--button-bg);
          color: var(--button-text);
-         font-size: 1.6em;
+         font-size: 20px;
          cursor: pointer;
          transition: background 0.3s ease;
          background-repeat: no-repeat;
@@ -642,20 +647,18 @@
             <button class="sringeri-button" onclick="sendCommand('SringeriPaada')" data-intro="Play 1st or 3rd Paada in Sringeri style" data-title="1st or 3rd Paada (Sringeri)">1st or 3rd Paada</button>
             <button class="third-paada-button" onclick="sendCommand('ThirdPaada')" data-intro="Play only 3rd Paada" data-title="3rd Paada Only">3rd Paada<br>Only</button>
          </div>
-<!-- Continuous Random Play — Perfect Version -->
-<div style="text-align:center;margin:25px 0;padding:18px;background:var(--card-bg);border:2px solid var(--card-border);border-radius:12px;">
+<!-- Continuous Random Play – Smart & Space-Saving -->
+<div style="text-align:center;margin:25px 0;padding:15px;background:var(--card-bg);border:2px solid var(--card-border);border-radius:12px;">
    <strong style="font-size:1.3em;color:var(--header-color);">Continuous Random Play</strong><br><br>
-   <label style="margin:0 5px;cursor:pointer;font-size:1.1em;">
-      <input type="radio" name="continuousGap" id="gap30" value="30"> 30-sec gap
+   <label style="margin:0 20px;cursor:pointer;font-size:1.1em;">
+      <input type="radio" name="continuousGap" id="gap30" value="30"> 30-second gap
    </label>
-   <label style="margin:0 5px;cursor:pointer;font-size:1.1em;">
-      <input type="radio" name="continuousGap" id="gap60" value="60"> 60-sec gap
+   <label style="margin:0 20px;cursor:pointer;font-size:1.1em;">
+      <input type="radio" name="continuousGap" id="gap60" value="60"> 60-second gap
    </label>
    <br><br>
-   <button id="stopContinuousBtn" 
-           style="background:#c62828;color:white;padding:12px 30px;border:none;border-radius:10px;
-                  font-size:1.1em;font-weight:bold;cursor:pointer;box-shadow:0 4px 12px rgba(198,40,40,0.4);">
-      Stop Continuous Play
+   <button id="stopContinuousBtn" style="display:none;background:#c62828;color:white;padding:12px 30px;border:none;border-radius:10px;font-size:1.1em;font-weight:bold;cursor:pointer;">
+      ✕ Stop Continuous Play
    </button>
    <br><br>
    <small style="color:var(--subheader-color);">Applies only to the 3 top buttons • Gap starts after each shloka ends</small>
@@ -2379,69 +2382,76 @@
                    setTheme('system');
                }
             });     
-// ——— PERFECT CONTINUOUS PLAY SYSTEM (Final Version) ———
+// ——— FINAL PERFECT CONTINUOUS PLAY (Exact Gap + No Interrupt + Smart Stop Button) ———
 let lastRandomIntent = null;
 let continuousPlayEnabled = false;
-let continuousDelay = 60000; // default 60s
+let continuousDelay = 60000;
+let isManualPlay = false; // Tracks if Full/Next/Previous was just pressed
 
 const audioPlayer = document.getElementById('audioPlayer');
+const stopBtn = document.getElementById('stopContinuousBtn');
 
-// The ONE AND ONLY onended handler
+// The ONE handler that respects everything
 function continuousPlayHandler() {
-   if (!continuousPlayEnabled) return;
+   if (!continuousPlayEnabled || isManualPlay) {
+      isManualPlay = false; // Reset flag after manual play finishes
+      return;
+   }
 
    setTimeout(() => {
-      if (continuousPlayEnabled && lastRandomIntent) {
+      if (continuousPlayEnabled) {
          sendCommand(lastRandomIntent);
       }
    }, continuousDelay);
 }
 
-// Safely override sendCommand once
-if (!window.continuousPlayPatched) {
-   const originalSendCommand = window.sendCommand;
+// Override sendCommand safely (only once)
+if (!window.cpPatched) {
+   const orig = window.sendCommand;
    window.sendCommand = function(intent) {
-      originalSendCommand(intent);  // Do everything original
+      orig(intent); // Original behavior
 
-      // Only the 3 random buttons turn on continuous mode
-      if (['SGSFirstPaada', 'SringeriPaada', 'ThirdPaada'].includes(intent)) {
+      if (['SGSFirstPaada','SringeriPaada','ThirdPaada'].includes(intent)) {
          lastRandomIntent = intent;
          continuousPlayEnabled = true;
-
-         // Update delay based on current selection
          continuousDelay = document.getElementById('gap30').checked ? 30000 : 60000;
-
-         // Attach the single correct handler
+         stopBtn.style.display = 'inline-block';
          audioPlayer.onended = continuousPlayHandler;
+      } else {
+         // Full / Next / Previous = manual play
+         isManualPlay = true;
+         // Do NOT change onended — continuous handler will run after this finishes
       }
-      // Full / Next / Previous do NOTHING special
-      // → after they finish, continuousPlayHandler() runs automatically with correct gap
    };
-   window.continuousPlayPatched = true;
+   window.cpPatched = true;
 }
 
-// Stop button — instant and total stop
-document.getElementById('stopContinuousBtn').onclick = () => {
-   document.querySelectorAll('input[name="continuousGap"]').forEach(r => r.checked = false);
-   continuousPlayEnabled = false;
-   audioPlayer.onended = null;
-   lastRandomIntent = null;
-};
-
-// Radio buttons — update delay live + stop if both unchecked
-document.querySelectorAll('input[name="continuousGap"]').forEach(radio => {
-   radio.addEventListener('change', () => {
-      if (document.querySelector('input[name="continuousGap"]:checked')) {
-         continuousDelay = document.getElementById('gap30').checked ? 30000 : 60000;
+// Radio buttons — update delay + show/hide Stop button
+document.querySelectorAll('input[name="continuousGap"]').forEach(r => {
+   r.addEventListener('change', () => {
+      const checked = document.querySelector('input[name="continuousGap"]:checked');
+      if (checked) {
+         continuousDelay = checked.value == '30' ? 30000 : 60000;
          continuousPlayEnabled = true;
+         stopBtn.style.display = 'inline-block';
          if (lastRandomIntent) audioPlayer.onended = continuousPlayHandler;
       } else {
          continuousPlayEnabled = false;
+         stopBtn.style.display = 'none';
          audioPlayer.onended = null;
          lastRandomIntent = null;
       }
    });
 });
+
+// Stop button
+stopBtn.onclick = () => {
+   document.querySelectorAll('input[name="continuousGap"]').forEach(r => r.checked = false);
+   continuousPlayEnabled = false;
+   stopBtn.style.display = 'none';
+   audioPlayer.onended = null;
+   lastRandomIntent = null;
+};
          </script>
       </div>
    </body>
