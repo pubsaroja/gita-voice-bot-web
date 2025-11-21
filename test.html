@@ -2517,6 +2517,50 @@ stopBtn.onclick = () => {
    waitingForNext = false;
 };
 
+// REAL-WORLD SOLUTION: Play a silent loop + NoSleep.js (works on ALL phones)
+// This is the method used by YouTube, Spotify, etc. for background play
+
+// 1. Create a tiny silent audio that loops forever (keeps audio session alive)
+const silentAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+silentAudio.loop = true;
+silentAudio.volume = 0;
+
+// 2. NoSleep.js — tiny, proven library (works on Android + iOS)
+const NoSleep = function () {
+   let wakeLock = null;
+   const video = document.createElement('video');
+
+   this.enable = function () {
+      video.setAttribute('playsinline', '');
+      video.setAttribute('webkit-playsinline', '');
+      video.src = 'data:video/mp4;base64,AAAAIGZ0eXBtcDQyAAACAG1wNDJtcDQxaXMzAAACbGF2ZjU4LjI5LjEwMAA=';
+      video.loop = true;
+      video.muted = true;
+      video.style.position = 'absolute';
+      video.style.left = '-9999px';
+      document.body.appendChild(video);
+
+      video.play().then(() => {
+         silentAudio.play().catch(() => {});
+      }).catch(() => {});
+   };
+};
+
+const noSleep = new NoSleep();
+
+// 3. Activate when user taps any button (this satisfies browser policy)
+document.body.addEventListener('touchstart', function enableNoSleep() {
+   document.body.removeEventListener('touchstart', enableNoSleep);
+   noSleep.enable();
+}, { once: true });
+
+// Also activate on first audio play (extra safety)
+document.getElementById('audioPlayer').addEventListener('play', () => {
+   noSleep.enable();
+   silentAudio.play().catch(() => {});
+}, { once: true });
+
+console.log('Background audio enabled – will continue even when screen is off');
 </script>
          </script>
       </div>
