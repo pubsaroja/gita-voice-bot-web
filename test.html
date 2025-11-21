@@ -631,49 +631,56 @@
          font-size: 0.8em;
          max-width: 100%;
          }
-            /* ——— PERFECT LANGUAGE CHECKBOXES ON MOBILE ——— */
-@media (max-width: 600px) {
-   .language-group {
-      display: flex !important;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 14px;
-      padding: 12px 0;
-      font-size: 1.05em;         /* Slightly larger text */
-   }
-   .language-group label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-      margin: 0 !important;
-      padding: 6px 10px;
-      background: var(--card-bg);
-      border-radius: 8px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-   }
-   .language-group input[type="checkbox"] {
-      width: 20px;
-      height: 20px;
-      accent-color: var(--button-bg);   /* Matches your theme color */
-   }
-}
-
-/* Also improve on desktop for consistency (optional but beautiful) */
+/* ——— LANGUAGE CHECKBOXES: BEAUTIFUL + NEVER OVERFLOW ——— */
 .language-group {
    display: flex;
    flex-wrap: wrap;
    justify-content: center;
-   gap: 16px;
-   margin: 15px 0;
+   gap: 12px;
+   margin: 16px auto;
+   padding: 14px 20px !important;     /* Padding keeps content away from edge */
+   max-width: 100%;
+   width: 100%;
+   box-sizing: border-box;
+   background: var(--card-bg);
+   border: 2px solid var(--card-border);
+   border-radius: 12px;
    font-size: 1.1em;
 }
+
 .language-group label {
-   cursor: pointer;
    display: flex;
    align-items: center;
-  澡
    gap: 8px;
+   cursor: pointer;
+   white-space: nowrap;
+   padding: 8px 14px;
+   background: rgba(0,0,0,0.03);
+   border-radius: 10px;
+   transition: all 0.2s;
+   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.language-group input[type="checkbox"] {
+   width: 22px;
+   height: 22px;
+   accent-color: var(--button-bg);
+   cursor: pointer;
+}
+
+/* Mobile — extra safety */
+@media (max-width: 600px) {
+   .language-group {
+      padding: 16px 16px !important;
+      gap: 14px;
+      border-width: 3px;
+      margin: 16px 8px;       /* Small side margin so it never touches screen edge */
+   }
+   .language-group label {
+      padding: 10px 16px;
+      font-size: 1.05em;
+   }
+}
 }
       </style>
    </head>
@@ -727,16 +734,13 @@
             <button onclick="sendCommand('FullShloka')" data-intro="Play the full shloka" data-title="Full Shloka">Full</button>
             <button onclick="sendCommand('NextFullShloka')" data-intro="Go to next shloka" data-title="Next">Next</button>
          </div>
-         <div class="radio-group language-group">
-            <label>Languages:</label>
-            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:8px;">
-               <label><input type="checkbox" name="language" value="te" id="telugu" checked> Telugu</label>
-               <label><input type="checkbox" name="language" value="sa" id="devanagari"> Devanagari</label>
-               <label><input type="checkbox" name="language" value="en" id="english"> English</label>
-               <label><input type="checkbox" name="language" value="kn" id="kannada"> Kannada</label>
-               <label><input type="checkbox" name="language" value="ta" id="tamil"> Tamil</label>
-            </div>
-         </div>
+         <div class="language-group">
+   <label><input type="checkbox" id="telugu" checked> తెలుగు</label>
+   <label><input type="checkbox" id="devanagari"> देवनागरी</label>
+   <label><input type="checkbox" id="english"> English</label>
+   <label><input type="checkbox" id="kannada"> ಕನ್ನಡ</label>
+   <label><input type="checkbox" id="tamil"> தமிழ்</label>
+</div>
          <div class="textbox-container">
             <div>
                <div id="sgsLabel" class="textbox-label">SGS Style Shloka</div>
