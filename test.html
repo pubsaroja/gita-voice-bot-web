@@ -642,8 +642,8 @@
             <button class="sringeri-button" onclick="sendCommand('SringeriPaada')" data-intro="Play 1st or 3rd Paada in Sringeri style" data-title="1st or 3rd Paada (Sringeri)">1st or 3rd Paada</button>
             <button class="third-paada-button" onclick="sendCommand('ThirdPaada')" data-intro="Play only 3rd Paada" data-title="3rd Paada Only">3rd Paada<br>Only</button>
          </div>
-<!-- NEW: Continuous Play Options + Visible Stop Button -->
-<div style="text-align:center;margin:25px 0;padding:15px;background:var(--card-bg);border:2px solid var(--card-border);border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+<!-- Continuous Random Play — Perfect Version -->
+<div style="text-align:center;margin:25px 0;padding:18px;background:var(--card-bg);border:2px solid var(--card-border);border-radius:12px;">
    <strong style="font-size:1.3em;color:var(--header-color);">Continuous Random Play</strong><br><br>
    <label style="margin:0 20px;cursor:pointer;font-size:1.1em;">
       <input type="radio" name="continuousGap" id="gap30" value="30"> 30-second gap
@@ -653,15 +653,12 @@
    </label>
    <br><br>
    <button id="stopContinuousBtn" 
-           style="background:#d32f2f;color:white;padding:12px 28px;border:none;border-radius:10px;
-                  cursor:pointer;font-size:1.1em;font-weight:bold;box-shadow:0 4px 10px rgba(211,47,47,0.4);
-                  transition:all 0.3s;">
-      Stop Continuous Play
+           style="background:#c62828;color:white;padding:12px 30px;border:none;border-radius:10px;
+                  font-size:1.1em;font-weight:bold;cursor:pointer;box-shadow:0 4px 12px rgba(198,40,40,0.4);">
+      ✕ Stop Continuous Play
    </button>
    <br><br>
-   <small style="color:var(--subheader-color);font-style:italic;">
-      Applies only to the 3 top buttons • Gap starts after each shloka ends
-   </small>
+   <small style="color:var(--subheader-color);">Applies only to the 3 top buttons • Gap starts after each shloka ends</small>
 </div>
          <audio id="audioPlayer" controls data-intro="Use these controls to play, pause, or scrub through the audio." data-title="Audio Player"></audio>
          <div class="radio-group" data-intro="Pick the chanting style for display and playback" data-title="Chanting Style">
@@ -2382,60 +2379,65 @@
                    setTheme('system');
                }
             });     
-// ——— FINAL & BULLETPROOF CONTINUOUS PLAY SYSTEM ———
+// ——— PERFECT CONTINUOUS PLAY SYSTEM (Final Version) ———
 let lastRandomIntent = null;
-let isContinuousMode = false;
+let continuousPlayEnabled = false;
+let continuousDelay = 60000; // default 60s
 
-const player = document.getElementById('audioPlayer');
+const audioPlayer = document.getElementById('audioPlayer');
 
-// Master handler: only one onended ever attached
-function handleAudioEnded() {
-   if (!isContinuousMode) return;
+// The ONE AND ONLY onended handler
+function continuousPlayHandler() {
+   if (!continuousPlayEnabled) return;
 
-   const gap30 = document.getElementById('gap30').checked;
-   const gap60 = document.getElementById('gap60').checked;
-   if (!gap30 && !gap60) return;
-
-   const delay = gap30 ? 30000 : 60000;
    setTimeout(() => {
-      if (isContinuousMode && (gap30 || gap60)) {
+      if (continuousPlayEnabled && lastRandomIntent) {
          sendCommand(lastRandomIntent);
       }
-   }, delay);
+   }, continuousDelay);
 }
 
-// Override sendCommand safely (only once)
-if (!window.sendCommandPatched) {
+// Safely override sendCommand once
+if (!window.continuousPlayPatched) {
    const originalSendCommand = window.sendCommand;
    window.sendCommand = function(intent) {
-      originalSendCommand(intent);  // Do everything your original code does
+      originalSendCommand(intent);  // Do everything original
 
-      // Only the 3 random buttons activate continuous mode
+      // Only the 3 random buttons turn on continuous mode
       if (['SGSFirstPaada', 'SringeriPaada', 'ThirdPaada'].includes(intent)) {
          lastRandomIntent = intent;
-         isContinuousMode = true;
-         player.onended = handleAudioEnded;  // Re-attach just in case
+         continuousPlayEnabled = true;
+
+         // Update delay based on current selection
+         continuousDelay = document.getElementById('gap30').checked ? 30000 : 60000;
+
+         // Attach the single correct handler
+         audioPlayer.onended = continuousPlayHandler;
       }
-      // Full / Next / Previous do NOT disable continuous mode
-      // → after they finish, handleAudioEnded() will auto-resume random play
+      // Full / Next / Previous do NOTHING special
+      // → after they finish, continuousPlayHandler() runs automatically with correct gap
    };
-   window.sendCommandPatched = true;
+   window.continuousPlayPatched = true;
 }
 
-// Stop button — instant and complete stop
-document.getElementById('stopContinuousBtn').addEventListener('click', () => {
+// Stop button — instant and total stop
+document.getElementById('stopContinuousBtn').onclick = () => {
    document.querySelectorAll('input[name="continuousGap"]').forEach(r => r.checked = false);
-   isContinuousMode = false;
-   player.onended = null;
+   continuousPlayEnabled = false;
+   audioPlayer.onended = null;
    lastRandomIntent = null;
-});
+};
 
-// Also stop when user manually unchecks both radios
+// Radio buttons — update delay live + stop if both unchecked
 document.querySelectorAll('input[name="continuousGap"]').forEach(radio => {
    radio.addEventListener('change', () => {
-      if (!document.querySelector('input[name="continuousGap"]:checked')) {
-         isContinuousMode = false;
-         player.onended = null;
+      if (document.querySelector('input[name="continuousGap"]:checked')) {
+         continuousDelay = document.getElementById('gap30').checked ? 30000 : 60000;
+         continuousPlayEnabled = true;
+         if (lastRandomIntent) audioPlayer.onended = continuousPlayHandler;
+      } else {
+         continuousPlayEnabled = false;
+         audioPlayer.onended = null;
          lastRandomIntent = null;
       }
    });
