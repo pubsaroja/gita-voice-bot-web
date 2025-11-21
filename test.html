@@ -2353,6 +2353,25 @@
                    document.documentElement.setAttribute('data-theme', systemTheme);
                }
             };
+
+            
+            // Initialize theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+            
+            // Theme button event listeners
+            themeButtons.forEach(button => {
+               button.addEventListener('click', () => {
+                   setTheme(button.dataset.theme);
+               });
+            });
+            
+            // Listen for system theme changes
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+               if (document.documentElement.getAttribute('data-theme') === 'system') {
+                   setTheme('system');
+               }
+            });     
 // === ONLY NEW CODE ADDED BELOW (15 lines) ===
          let lastRandomIntent = null;
 
@@ -2395,25 +2414,6 @@
             }
          });
          // === END OF NEW CODE ===
-            
-            // Initialize theme
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            setTheme(savedTheme);
-            
-            // Theme button event listeners
-            themeButtons.forEach(button => {
-               button.addEventListener('click', () => {
-                   setTheme(button.dataset.theme);
-               });
-            });
-            
-            // Listen for system theme changes
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-               if (document.documentElement.getAttribute('data-theme') === 'system') {
-                   setTheme('system');
-               }
-            });     
-
          </script>
       </div>
    </body>
