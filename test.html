@@ -645,13 +645,21 @@
          <!-- NEW: Continuous Play Options (30s & 60s) -->
          <div style="text-align:center;margin:20px 0;padding:10px;background:var(--card-bg);border-radius:8px;">
             <strong style="font-size:1.2em;">Continuous Random Play</strong><br><br>
-            <label style="margin:0 15px;cursor:pointer;font-size:1em;">
-               <input type="radio" name="continuousGap" id="gap30" value="30"> 30-second gap
-            </label>
-            <label style="margin:0 15px;cursor:pointer;font-size:1em;">
-               <input type="radio" name="continuousGap" id="gap60" value="60"> 60-second gap
-            </label>
-            <br><small style="color:var(--subheader-color);">(Applies only to the 3 buttons above)</small>
+<label style="margin:0 15px;cursor:pointer;font-size:1em;">
+   <input type="radio" name="continuousGap" id="gap30" value="30"> 30-second gap
+</label>
+<label style="margin:0 15px;cursor:pointer;font-size:1em;">
+   <input type="radio" name="continuousGap" id="gap60" value="60"> 60-second gap
+</label>
+<br><br>
+<button id="stopContinuousBtn" 
+        style="background:#d32f2f;color:white;padding:10px 20px;border:none;border-radius:8px;
+               cursor:pointer;font-size:1em;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+   Stop Continuous Play
+</button>
+<br><small style="color:var(--subheader-color);margin-top:8px;display:inline-block;">
+   (Applies only to the 3 buttons above)
+</small>
          </div>
          <audio id="audioPlayer" controls data-intro="Use these controls to play, pause, or scrub through the audio." data-title="Audio Player"></audio>
          <div class="radio-group" data-intro="Pick the chanting style for display and playback" data-title="Chanting Style">
@@ -2414,6 +2422,13 @@
             }
          });
          // === END OF NEW CODE ===
+            // Instant Stop Button for Continuous Play
+document.getElementById('stopContinuousBtn').addEventListener('click', () => {
+   document.querySelectorAll('input[name="continuousGap"]').forEach(r => r.checked = false);
+   document.getElementById('audioPlayer').onended = null;
+   lastRandomIntent = null;
+   alert('Continuous play stopped'); // optional gentle feedback
+});
          </script>
       </div>
    </body>
