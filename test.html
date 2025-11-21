@@ -631,20 +631,22 @@
          font-size: 0.8em;
          max-width: 100%;
          }
-/* ——— LANGUAGE CHECKBOXES: BEAUTIFUL + NEVER OVERFLOW ——— */
+/* ——— LANGUAGE CHECKBOXES: PERFECTLY CENTERED + BEAUTIFUL + NO OVERFLOW ——— */
 .language-group {
    display: flex;
    flex-wrap: wrap;
    justify-content: center;
-   gap: 12px;
-   margin: 16px auto;
-   padding: 14px 20px !important;     /* Padding keeps content away from edge */
-   max-width: 100%;
+   align-items: center;
+   gap: 14px;
+   margin: 20px auto;                 /* Perfect vertical & horizontal centering */
+   padding: 18px 20px;
+   max-width: 600px;                  /* Same width as your other boxes */
    width: 100%;
-   box-sizing: border-box;
    background: var(--card-bg);
    border: 2px solid var(--card-border);
    border-radius: 12px;
+   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+   box-sizing: border-box;
    font-size: 1.1em;
 }
 
@@ -654,11 +656,10 @@
    gap: 8px;
    cursor: pointer;
    white-space: nowrap;
-   padding: 8px 14px;
-   background: rgba(0,0,0,0.03);
+   padding: 8px 16px;
+   background: rgba(0,0,0,0.04);
    border-radius: 10px;
    transition: all 0.2s;
-   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .language-group input[type="checkbox"] {
@@ -668,20 +669,19 @@
    cursor: pointer;
 }
 
-/* Mobile — extra safety */
+/* Mobile — extra polish */
 @media (max-width: 600px) {
    .language-group {
-      padding: 16px 16px !important;
-      gap: 14px;
-      border-width: 3px;
-      margin: 16px 8px;       /* Small side margin so it never touches screen edge */
+      margin: 18px auto;
+      padding: 18px 16px;
+      max-width: 94%;                 /* Slight breathing room on very small phones */
+      gap: 16px;
    }
    .language-group label {
-      padding: 10px 16px;
+      padding: 10px 14px;
       font-size: 1.05em;
    }
-}
-}
+         }
       </style>
    </head>
    <body>
