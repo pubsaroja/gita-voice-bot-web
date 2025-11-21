@@ -631,55 +631,61 @@
          font-size: 0.8em;
          max-width: 100%;
          }
-/* ——— LANGUAGE CHECKBOXES: EXACTLY 3 LINES ON MOBILE + PERFECT CENTERING ——— */
+/* ——— LANGUAGE CHECKBOXES: EXACTLY 3 ROWS ON MOBILE (GUARANTEED) ——— */
 .language-group {
-   display: flex;
-   flex-wrap: wrap;
-   justify-content: center;
-   gap: 16px;
-   margin: 20px auto;
-   padding: 20px;
+   display: grid;
+   grid-template-columns: 1fr 1fr 1fr;   /* Forces exactly 3 columns */
+   gap: 14px;
+   margin: 22px auto;
+   padding: 20px 16px;
    max-width: 600px;
-   width: 100%;
    background: var(--card-bg);
-   border: 2px solid var(--card-border);
-   border-radius: 12px;
-   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+   border: 2.5px solid var(--card-border);
+   border-radius: 14px;
+   box-shadow: 0 4px 14px rgba(0,0,0,0.1);
    box-sizing: border-box;
-   font-size: 1.1em;
 }
 
 .language-group label {
-   flex: 1 1 28%;                    /* Forces 3 per row */
-   min-width: 100px;
    display: flex;
    justify-content: center;
    align-items: center;
-   gap: 8px;
-   padding: 10px 12px;
-   background: rgba(0,0,0,0.04);
-   border-radius: 10px;
-   cursor: pointer;
-   white-space: nowrap;
+   gap: 10px;
+   padding: 12px 8px;
+   background: rgba(0,0,0,0.05);
+   border-radius: 12px;
+   font-size: 1.05em;
    text-align: center;
+   white-space: nowrap;
+   min-height: 52px;
 }
 
 .language-group input[type="checkbox"] {
-   width: 22px;
-   height: 22px;
+   width: 24px;
+   height: 24px;
    accent-color: var(--button-bg);
+   flex-shrink: 0;
 }
 
-/* Mobile: Force 3 lines max */
+/* Mobile – keep 3 columns even on smallest screens */
 @media (max-width: 600px) {
    .language-group {
-      gap: 14px;
+      grid-template-columns: 1fr 1fr 1fr;   /* NEVER changes */
+      gap: 16px;
       padding: 18px 12px;
+      margin: 18px 10px;
    }
    .language-group label {
-      flex: 1 1 30%;
-      font-size: 1.02em;
-      padding: 12px 8px;
+      font-size: 1em;
+      padding: 14px 6px;
+   }
+}
+
+/* Extra safety for very narrow screens <340px */
+@media (max-width: 340px) {
+   .language-group label {
+      font-size: 0.95em;
+      padding: 12px 4px;
    }
 }
       </style>
