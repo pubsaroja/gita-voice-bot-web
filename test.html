@@ -631,16 +631,15 @@
          font-size: 0.8em;
          max-width: 100%;
          }
-/* ——— LANGUAGE CHECKBOXES: PERFECTLY CENTERED + BEAUTIFUL + NO OVERFLOW ——— */
+/* ——— LANGUAGE CHECKBOXES: EXACTLY 3 LINES ON MOBILE + PERFECT CENTERING ——— */
 .language-group {
    display: flex;
    flex-wrap: wrap;
    justify-content: center;
-   align-items: center;
-   gap: 14px;
-   margin: 20px auto;                 /* Perfect vertical & horizontal centering */
-   padding: 18px 20px;
-   max-width: 600px;                  /* Same width as your other boxes */
+   gap: 16px;
+   margin: 20px auto;
+   padding: 20px;
+   max-width: 600px;
    width: 100%;
    background: var(--card-bg);
    border: 2px solid var(--card-border);
@@ -651,37 +650,38 @@
 }
 
 .language-group label {
+   flex: 1 1 28%;                    /* Forces 3 per row */
+   min-width: 100px;
    display: flex;
+   justify-content: center;
    align-items: center;
    gap: 8px;
-   cursor: pointer;
-   white-space: nowrap;
-   padding: 8px 16px;
+   padding: 10px 12px;
    background: rgba(0,0,0,0.04);
    border-radius: 10px;
-   transition: all 0.2s;
+   cursor: pointer;
+   white-space: nowrap;
+   text-align: center;
 }
 
 .language-group input[type="checkbox"] {
    width: 22px;
    height: 22px;
    accent-color: var(--button-bg);
-   cursor: pointer;
 }
 
-/* Mobile — extra polish */
+/* Mobile: Force 3 lines max */
 @media (max-width: 600px) {
    .language-group {
-      margin: 18px auto;
-      padding: 18px 16px;
-      max-width: 94%;                 /* Slight breathing room on very small phones */
-      gap: 16px;
+      gap: 14px;
+      padding: 18px 12px;
    }
    .language-group label {
-      padding: 10px 14px;
-      font-size: 1.05em;
+      flex: 1 1 30%;
+      font-size: 1.02em;
+      padding: 12px 8px;
    }
-         }
+}
       </style>
    </head>
    <body>
@@ -2510,6 +2510,32 @@ stopBtn.onclick = () => {
    lastRandomIntent = null;
    waitingForNext = false;
 };
+<!-- KEEP AUDIO PLAYING EVEN WHEN SCREEN IS OFF -->
+<script>
+// Works on Android Chrome + iOS Safari
+let wakeLock = null;
+
+async function requestWakeLock() {
+   if ('wakeLock' in navigator) {
+      try {
+         wakeLock = await navigator.wakeLock.request('screen');
+         console.log('Screen wake lock active – audio will continue');
+      } catch (err) {
+         console.log('Wake lock failed:', err);
+      }
+   }
+}
+
+// Re-request wake lock whenever audio starts
+document.getElementById('audioPlayer').addEventListener('play', requestWakeLock);
+
+// Also re-request when user returns to tab (for extra safety)
+document.addEventListener('visibilitychange', () => {
+   if (document.visibilityState === 'visible') {
+      setTimeout(requestWakeLock, 500);
+   }
+});
+</script>
          </script>
       </div>
    </body>
