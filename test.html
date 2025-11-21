@@ -355,6 +355,24 @@
          setTheme(button.dataset.theme);
       });
    });
+
+      // Initialize theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+            
+            // Theme button event listeners
+            themeButtons.forEach(button => {
+               button.addEventListener('click', () => {
+                   setTheme(button.dataset.theme);
+               });
+            });
+            
+            // Listen for system theme changes
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+               if (document.documentElement.getAttribute('data-theme') === 'system') {
+                   setTheme('system');
+               }
+            });       
 </script>
    </body>
 </html>
