@@ -2387,48 +2387,76 @@
          document.getElementById('audioPlayer').onended = null;
 
          function triggerContinuousPlay(intent) {
+         let lastRandomIntent = null;
+         let continuousPlayActive = false;
+
+         // NEW IMPROVED: Smart continuous play that respects Full/Next/Previous
+         function setupContinuousPlay(intent) {
             const gap30 = document.getElementById('gap30').checked;
             const gap60 = document.getElementById('gap60').checked;
+
             if (!gap30 && !gap60) {
+               continuousPlayActive = false;
                document.getElementById('audioPlayer').onended = null;
                lastRandomIntent = null;
                return;
             }
+
+            continuousPlayActive = true;
             lastRandomIntent = intent;
             const delay = gap30 ? 30000 : 60000;
-            document.getElementById('audioPlayer').onended = () => {
-               setTimeout(() => {
-                  if (document.getElementById('gap30').checked || document.getElementById('gap60').checked) {
-                     sendCommand(lastRandomIntent);
-                  }
-               }, delay);
-            };
+
+            // Only set onended if not already set (prevents override)
+            const player = document.getElementById('audioPlayer');
+            if (player.onended !== playerOnEndedHandler) {
+               player.onended = playerOnEndedHandler;
+            }
+
+            function playerOnEndedHandler() {
+               if (continuousPlayActive) {
+                  setTimeout(() => {
+                     if (continuousPlayActive) {
+                        sendCommand(lastRandomIntent);
+                     }
+                  }, delay);
+               }
+            }
          }
 
-         // Override only the 3 top random buttons
+         // Override sendCommand only once — safely
          const originalSendCommand = window.sendCommand;
          window.sendCommand = function(intent) {
+            // Always run original behavior first
             originalSendCommand(intent);
+
+            // If it's one of the 3 random buttons → enable continuous play
             if (['SGSFirstPaada','SringeriPaada','ThirdPaada'].includes(intent)) {
-               triggerContinuousPlay(intent);
+               setupContinuousPlay(intent);
+            } else {
+               // If user clicked Full/Next/Previous → temporarily pause continuous loop
+               // It will resume automatically after this shloka ends
+               // (because onended is still active and continuousPlayActive = true)
             }
          };
 
-         // Stop when both are unchecked
-         document.addEventListener('change', (e) => {
-            if (e.target.name === 'continuousGap' && !document.querySelector('input[name="continuousGap"]:checked')) {
-               document.getElementById('audioPlayer').onended = null;
-               lastRandomIntent = null;
-            }
+         // Stop button — now also clears the flag
+         document.getElementById('stopContinuousBtn').addEventListener('click', () => {
+            document.querySelectorAll('input[name="continuousGap"]').forEach(r => r.checked = false);
+            continuousPlayActive = false;
+            document.getElementById('audioPlayer').onended = null;
+            lastRandomIntent = null;
          });
-         // === END OF NEW CODE ===
-            // Instant Stop Button for Continuous Play
-document.getElementById('stopContinuousBtn').addEventListener('click', () => {
-   document.querySelectorAll('input[name="continuousGap"]').forEach(r => r.checked = false);
-   document.getElementById('audioPlayer').onended = null;
-   lastRandomIntent = null;
-   alert('Continuous play stopped'); // optional gentle feedback
-});
+
+         // Also stop when both radios unchecked
+         document.querySelectorAll('input[name="continuousGap"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+               if (!document.querySelector('input[name="continuousGap"]:checked')) {
+                  continuousPlayActive = false;
+                  document.getElementById('audioPlayer').onended = null;
+                  lastRandomIntent = null;
+               }
+            });
+         });
          </script>
       </div>
    </body>
