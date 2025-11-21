@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
    <head>
@@ -124,10 +123,10 @@
          }
          }
          @media (max-width: 600px) {
-   .top-buttons button {
-      font-size: 1.1em !important;   /* Makes the text clearly readable on phones */
-   }
-}
+         .top-buttons button {
+         font-size: 1.1em !important;   /* Makes the text clearly readable on phones */
+         }
+         }
          /* Top buttons container */
          .top-buttons {
          display: flex;
@@ -647,28 +646,25 @@
             <button class="sringeri-button" onclick="sendCommand('SringeriPaada')" data-intro="Play 1st or 3rd Paada in Sringeri style" data-title="1st or 3rd Paada (Sringeri)">1st or 3rd Paada</button>
             <button class="third-paada-button" onclick="sendCommand('ThirdPaada')" data-intro="Play only 3rd Paada" data-title="3rd Paada Only">3rd Paada<br>Only</button>
          </div>
-
-<!-- Continuous Random Play – Fully Responsive Flexbox Version -->
-<div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:5px;margin:25px 0;padding:18px;background:var(--card-bg);border:2px solid var(--card-border);border-radius:12px;text-align:center;">
-   <strong style="flex:1 1 100%;font-size:1.3em;color:var(--header-color);">Continuous Random Play</strong>
-   
-   <label style="cursor:pointer;font-size:1.1em;">
-      <input type="radio" name="continuousGap" id="gap30" value="30"> 30 sec gap
-   </label>
-   <label style="cursor:pointer;font-size:1.1em;">
-      <input type="radio" name="continuousGap" id="gap60" value="60"> 60 sec gap
-   </label>
-   
-   <button id="stopContinuousBtn" 
-           style="display:none;background:#c62828;color:white;padding:10px 24px;border:none;border-radius:10px;font-size:1.1em;font-weight:bold;cursor:pointer;">
-      ✕ Stop Continuous Play
-   </button>
-   
-   <small style="flex:1 1 100%;color:var(--subheader-color);margin-top:8px;font-style:italic;">
-      Applies only to the 3 top buttons 
-   </small>
-</div>
-</div>
+         <!-- Continuous Random Play – Perfect Responsive Flexbox + Border Fixed -->
+         <div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:18px;margin:25px auto;padding:20px;background:var(--card-bg);border:3px solid var(--card-border);border-radius:14px;max-width:680px;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+            <strong style="flex:1 1 100%;font-size:1.35em;color:var(--header-color);text-align:center;">Continuous Random Play</strong>
+            <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;flex:1 1 100%;">
+               <label style="cursor:pointer;font-size:1.15em;white-space:nowrap;">
+               <input type="radio" name="continuousGap" id="gap30" value="30"> 30-second gap
+               </label>
+               <label style="cursor:pointer;font-size:1.15em;white-space:nowrap;">
+               <input type="radio" name="continuousGap" id="gap60" value="60"> 60-second gap
+               </label>
+            </div>
+            <button id="stopContinuousBtn" 
+               style="display:none;background:#d32f2f;color:white;padding:11px 26px;border:none;border-radius:10px;font-size:1.1em;font-weight:bold;cursor:pointer;box-shadow:0 4px 10px rgba(211,47,47,0.4);">
+            Stop Continuous Play
+            </button>
+            <small style="flex:1 1 100%;text-align:center;color:var(--subheader-color);font-style:italic;margin-top:5px;">
+            Applies only to the 3 top buttons
+            </small>
+         </div>
          <audio id="audioPlayer" controls data-intro="Use these controls to play, pause, or scrub through the audio." data-title="Audio Player"></audio>
          <div class="radio-group" data-intro="Pick the chanting style for display and playback" data-title="Chanting Style">
             <label>Style:</label>
@@ -682,16 +678,16 @@
             <button onclick="sendCommand('FullShloka')" data-intro="Play the full shloka" data-title="Full Shloka">Full</button>
             <button onclick="sendCommand('NextFullShloka')" data-intro="Go to next shloka" data-title="Next">Next</button>
          </div>
-<div class="radio-group language-group">
-   <label>Languages:</label>
-   <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:8px;">
-      <label><input type="checkbox" name="language" value="te" id="telugu" checked> Telugu</label>
-      <label><input type="checkbox" name="language" value="sa" id="devanagari"> Devanagari</label>
-      <label><input type="checkbox" name="language" value="en" id="english"> English</label>
-      <label><input type="checkbox" name="language" value="kn" id="kannada"> Kannada</label>
-      <label><input type="checkbox" name="language" value="ta" id="tamil"> Tamil</label>
-   </div>
-</div>
+         <div class="radio-group language-group">
+            <label>Languages:</label>
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:8px;">
+               <label><input type="checkbox" name="language" value="te" id="telugu" checked> Telugu</label>
+               <label><input type="checkbox" name="language" value="sa" id="devanagari"> Devanagari</label>
+               <label><input type="checkbox" name="language" value="en" id="english"> English</label>
+               <label><input type="checkbox" name="language" value="kn" id="kannada"> Kannada</label>
+               <label><input type="checkbox" name="language" value="ta" id="tamil"> Tamil</label>
+            </div>
+         </div>
          <div class="textbox-container">
             <div>
                <div id="sgsLabel" class="textbox-label">SGS Style Shloka</div>
@@ -884,18 +880,18 @@
                     const sringeriTeluguResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Telugu_Sringeri.txt');
                     if (!sringeriTeluguResponse.ok) throw new Error('Failed to load BG_Telugu_Sringeri.txt');
                     sringeriTeluguContent = await sringeriTeluguResponse.text();
-
+            
                     const englishSGSResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_English_SGS.txt');
                     if (!englishSGSResponse.ok) throw new Error('Failed to load BG_English_SGS.txt');
                     englishSGSContent = await englishSGSResponse.text();
-
+            
                     const englishSringeriResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_English_Sringeri.txt');
                     if (!englishSringeriResponse.ok) throw new Error('Failed to load BG_English_Sringeri.txt');
                     englishSringeriContent = await englishSringeriResponse.text();
-
+            
                     // Combined buffer for English search across both styles
                     englishContent = `${englishSGSContent}\n${englishSringeriContent}`;
-
+            
                     console.log('Files loaded:', {
                         sgsTeluguLines: sgsTeluguContent.split('\n').length,
                         sringeriTeluguLines: sringeriTeluguContent.split('\n').length,
@@ -1319,15 +1315,15 @@
                     return { error: `Audio not found for ${chapter}.${verse}` };
                 }
             }
-           function getSelectedLanguages() {
-    const langs = [];
-    if (document.getElementById('telugu').checked) langs.push('Telugu');
-    if (document.getElementById('devanagari').checked) langs.push('Devanagari');
-    if (document.getElementById('english').checked) langs.push('English');
-    if (document.getElementById('kannada').checked) langs.push('Kannada');
-    if (document.getElementById('tamil').checked) langs.push('Tamil');
-    return langs.length > 0 ? langs : ['Telugu'];
-}                   async function fetchCombinedShlokaText(chapter, verse, style) {
+            function getSelectedLanguages() {
+            const langs = [];
+            if (document.getElementById('telugu').checked) langs.push('Telugu');
+            if (document.getElementById('devanagari').checked) langs.push('Devanagari');
+            if (document.getElementById('english').checked) langs.push('English');
+            if (document.getElementById('kannada').checked) langs.push('Kannada');
+            if (document.getElementById('tamil').checked) langs.push('Tamil');
+            return langs.length > 0 ? langs : ['Telugu'];
+            }                   async function fetchCombinedShlokaText(chapter, verse, style) {
                                   try {
                                       console.log(`fetchCombinedShlokaText called: chapter=${chapter}, verse=${verse}, style=${style}`);
                                       const langs = getSelectedLanguages();
@@ -1782,7 +1778,7 @@
                 for (const shloka of allShlokas) {
                     if (confusingPlayId !== playId) break;
                     const [chapter, verse] = shloka.split('.').map(Number);
-
+            
                     // Update context to the currently playing shloka
                     currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
                     currentContext.push({
@@ -1791,7 +1787,7 @@
                         parameters: { chapter, verse, style: getSelectedStyle(), showingMeaning: false }
                     });
                     localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-
+            
                     const audioUrl = await fetchAudioUrl(chapter, verse, null, true);
                     if (!audioUrl.error) {
                         audioPlayer.src = audioUrl;
@@ -1816,7 +1812,7 @@
                         adjustTextboxHeight();
                     }
                 }
-
+            
                 // Mark the confusing playback session as completed
                 isConfusingPlaying = false;
             }
@@ -1850,7 +1846,7 @@
                         const randomIndex = Math.floor(Math.random() * uvachaShlokas.length);
                         const shloka = uvachaShlokas[randomIndex];
                         const [chapter, verse] = shloka.split('.').map(Number);
-
+            
                         // Set context immediately so language toggles reflect the same Uvacha shloka
                         currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
                         currentContext.push({
@@ -1927,15 +1923,15 @@
                     return { error: `Audio not found for ${chapter}.${verse}` };
                 }
             }
-           function getSelectedLanguages() {
-    const langs = [];
-    if (document.getElementById('telugu').checked) langs.push('Telugu');
-    if (document.getElementById('devanagari').checked) langs.push('Devanagari');
-    if (document.getElementById('english').checked) langs.push('English');
-    if (document.getElementById('kannada').checked) langs.push('Kannada');
-    if (document.getElementById('tamil').checked) langs.push('Tamil');
-    return langs.length > 0 ? langs : ['Telugu'];
-}                   async function fetchCombinedShlokaText(chapter, verse, style) {
+            function getSelectedLanguages() {
+            const langs = [];
+            if (document.getElementById('telugu').checked) langs.push('Telugu');
+            if (document.getElementById('devanagari').checked) langs.push('Devanagari');
+            if (document.getElementById('english').checked) langs.push('English');
+            if (document.getElementById('kannada').checked) langs.push('Kannada');
+            if (document.getElementById('tamil').checked) langs.push('Tamil');
+            return langs.length > 0 ? langs : ['Telugu'];
+            }                   async function fetchCombinedShlokaText(chapter, verse, style) {
                                   try {
                                       console.log(`fetchCombinedShlokaText called: chapter=${chapter}, verse=${verse}, style=${style}`);
                                       const langs = getSelectedLanguages();
@@ -2130,7 +2126,7 @@
               }
             
               adjustTextboxHeight();  // fix heights after toggle
-
+            
               // Persist chosen style in context
               const ctx = currentContext.find(c => c && c.name && c.name.includes('shloka-context'));
               if (ctx && ctx.parameters) {
@@ -2369,7 +2365,7 @@
                    document.documentElement.setAttribute('data-theme', systemTheme);
                }
             };
-
+            
             
             // Initialize theme
             const savedTheme = localStorage.getItem('theme') || 'light';
@@ -2388,76 +2384,74 @@
                    setTheme('system');
                }
             });     
-// ——— FINAL PERFECT CONTINUOUS PLAY (Exact Gap + No Interrupt + Smart Stop Button) ———
-let lastRandomIntent = null;
-let continuousPlayEnabled = false;
-let continuousDelay = 60000;
-let isManualPlay = false; // Tracks if Full/Next/Previous was just pressed
-
-const audioPlayer = document.getElementById('audioPlayer');
-const stopBtn = document.getElementById('stopContinuousBtn');
-
-// The ONE handler that respects everything
-function continuousPlayHandler() {
-   if (!continuousPlayEnabled || isManualPlay) {
-      isManualPlay = false; // Reset flag after manual play finishes
-      return;
-   }
-
-   setTimeout(() => {
-      if (continuousPlayEnabled) {
-         sendCommand(lastRandomIntent);
-      }
-   }, continuousDelay);
-}
-
-// Override sendCommand safely (only once)
-if (!window.cpPatched) {
-   const orig = window.sendCommand;
-   window.sendCommand = function(intent) {
-      orig(intent); // Original behavior
-
-      if (['SGSFirstPaada','SringeriPaada','ThirdPaada'].includes(intent)) {
-         lastRandomIntent = intent;
-         continuousPlayEnabled = true;
-         continuousDelay = document.getElementById('gap30').checked ? 30000 : 60000;
-         stopBtn.style.display = 'inline-block';
-         audioPlayer.onended = continuousPlayHandler;
-      } else {
-         // Full / Next / Previous = manual play
-         isManualPlay = true;
-         // Do NOT change onended — continuous handler will run after this finishes
-      }
-   };
-   window.cpPatched = true;
-}
-
-// Radio buttons — update delay + show/hide Stop button
-document.querySelectorAll('input[name="continuousGap"]').forEach(r => {
-   r.addEventListener('change', () => {
-      const checked = document.querySelector('input[name="continuousGap"]:checked');
-      if (checked) {
-         continuousDelay = checked.value == '30' ? 30000 : 60000;
-         continuousPlayEnabled = true;
-         stopBtn.style.display = 'inline-block';
-         if (lastRandomIntent) audioPlayer.onended = continuousPlayHandler;
-      } else {
-         continuousPlayEnabled = false;
-         stopBtn.style.display = 'none';
-         audioPlayer.onended = null;
-         lastRandomIntent = null;
-      }
-   });
-});
-
-// Stop button
-stopBtn.onclick = () => {
-   document.querySelectorAll('input[name="continuousGap"]').forEach(r => r.checked = false);
-   continuousPlayEnabled = false;
-   stopBtn.style.display = 'none';
-   audioPlayer.onended = null;
-   lastRandomIntent = null;
-};
+            // ——— FINAL FIXED CONTINUOUS PLAY (Exact Gap + Stop Button Only When Active + No Early Play) ———
+            let lastRandomIntent = null;
+            let continuousPlayEnabled = false;
+            let continuousDelay = 60000;
+            let waitingForNext = false;  // Critical: prevents early trigger
+            
+            const audioPlayer = document.getElementById('audioPlayer');
+            const stopBtn = document.getElementById('stopContinuousBtn');
+            
+            // The ONLY onended handler – now 100% reliable
+            function scheduleNextRandom() {
+            if (!continuousPlayEnabled || waitingForNext) return;
+            waitingForNext = true;
+            
+            setTimeout(() => {
+            if (continuousPlayEnabled && lastRandomIntent) {
+            sendCommand(lastRandomIntent);
+            }
+            waitingForNext = false;
+            }, continuousDelay);
+            }
+            
+            // Safe sendCommand override (only once)
+            if (!window.cpFixed) {
+            const orig = window.sendCommand;
+            window.sendCommand = function(intent) {
+            orig(intent);
+            
+            if (['SGSFirstPaada','SringeriPaada','ThirdPaada'].includes(intent)) {
+            lastRandomIntent = intent;
+            continuousPlayEnabled = true;
+            continuousDelay = document.getElementById('gap30').checked ? 30000 : 60000;
+            stopBtn.style.display = 'inline-block';
+            audioPlayer.onended = scheduleNextRandom;
+            }
+            // Full/Next/Previous do nothing special → after they end, scheduleNextRandom runs with correct gap
+            };
+            window.cpFixed = true;
+            }
+            
+            // Radio button changes
+            document.querySelectorAll('input[name="continuousGap"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+            const checked = document.querySelector('input[name="continuousGap"]:checked');
+            if (checked) {
+            continuousDelay = checked.value == '30' ? 30000 : 60000;
+            continuousPlayEnabled = true;
+            stopBtn.style.display = 'inline-block';
+            if (lastRandomIntent) audioPlayer.onended = scheduleNextRandom;
+            } else {
+            continuousPlayEnabled = false;
+            stopBtn.style.display = 'none';
+            audioPlayer.onended = null;
+            lastRandomIntent = null;
+            waitingForNext = false;
+            }
+            });
+            });
+            
+            // Stop button
+            stopBtn.onclick = () => {
+            document.querySelectorAll('input[name="continuousGap"]').forEach(r => r.checked = false);
+            continuousPlayEnabled = false;
+            stopBtn.style.display = 'none';
+            audioPlayer.onended = null;
+            lastRandomIntent = null;
+            waitingForNext = false;
+            };
          </script>
       </div>
    </body>
