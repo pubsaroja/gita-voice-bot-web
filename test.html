@@ -631,61 +631,58 @@
          font-size: 0.8em;
          max-width: 100%;
          }
-/* ——— LANGUAGE CHECKBOXES: EXACTLY 3 ROWS ON MOBILE (GUARANTEED) ——— */
+/* ——— LANGUAGE CHECKBOXES: 3+2 LAYOUT + NEVER OVERFLOWS BORDER (FINAL) ——— */
 .language-group {
    display: grid;
-   grid-template-columns: 1fr 1fr 1fr;   /* Forces exactly 3 columns */
+   grid-template-columns: 1fr 1fr 1fr;     /* Exactly 3 columns */
    gap: 14px;
    margin: 22px auto;
-   padding: 20px 16px;
+   padding: 22px 18px;                     /* Generous inner padding */
    max-width: 600px;
+   width: calc(100% - 20px);               /* Never touches screen edge */
    background: var(--card-bg);
-   border: 2.5px solid var(--card-border);
-   border-radius: 14px;
-   box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+   border: 3px solid var(--card-border);
+   border-radius: 16px;
+   box-shadow: 0 5px 16px rgba(0,0,0,0.12);
    box-sizing: border-box;
+   overflow: hidden;                       /* Final safety net */
 }
 
 .language-group label {
    display: flex;
+   flex-direction: column;
    justify-content: center;
    align-items: center;
-   gap: 10px;
-   padding: 12px 8px;
+   gap: 8px;
+   padding: 14px 10px;
    background: rgba(0,0,0,0.05);
-   border-radius: 12px;
-   font-size: 1.05em;
+   border-radius: 14px;
+   font-size: 1.02em;
    text-align: center;
-   white-space: nowrap;
-   min-height: 52px;
+   min-height: 66px;
+   word-break: keep-all;
 }
 
 .language-group input[type="checkbox"] {
-   width: 24px;
-   height: 24px;
+   width: 26px;
+   height: 26px;
    accent-color: var(--button-bg);
    flex-shrink: 0;
 }
 
-/* Mobile – keep 3 columns even on smallest screens */
+/* Mobile – absolute guarantee */
 @media (max-width: 600px) {
    .language-group {
-      grid-template-columns: 1fr 1fr 1fr;   /* NEVER changes */
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 16px;
-      padding: 18px 12px;
-      margin: 18px 10px;
+      padding: 24px 20px !important;
+      margin: 20px 10px;
+      width: calc(100% - 20px);
+      max-width: none;
    }
    .language-group label {
+      padding: 16px 8px;
       font-size: 1em;
-      padding: 14px 6px;
-   }
-}
-
-/* Extra safety for very narrow screens <340px */
-@media (max-width: 340px) {
-   .language-group label {
-      font-size: 0.95em;
-      padding: 12px 4px;
    }
 }
       </style>
@@ -740,12 +737,14 @@
             <button onclick="sendCommand('FullShloka')" data-intro="Play the full shloka" data-title="Full Shloka">Full</button>
             <button onclick="sendCommand('NextFullShloka')" data-intro="Go to next shloka" data-title="Next">Next</button>
          </div>
-         <div class="language-group">
-   <label><input type="checkbox" id="telugu" checked> తెలుగు</label>
-   <label><input type="checkbox" id="devanagari"> देवनागरी</label>
-   <label><input type="checkbox" id="english"> English</label>
-   <label><input type="checkbox" id="kannada"> ಕನ್ನಡ</label>
-   <label><input type="checkbox" id="tamil"> தமிழ்</label>
+<div style="padding:0 8px;box-sizing:border-box;">
+   <div class="language-group">
+      <label><input type="checkbox" id="telugu" checked> తెలుగు</label>
+      <label><input type="checkbox" id="devanagari"> देवनागरी</label>
+      <label><input type="checkbox" id="english"> English</label>
+      <label><input type="checkbox" id="kannada"> ಕನ್ನಡ</label>
+      <label><input type="checkbox" id="tamil"> தமிழ்</label>
+   </div>
 </div>
          <div class="textbox-container">
             <div>
