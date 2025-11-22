@@ -631,55 +631,58 @@
          font-size: 0.8em;
          max-width: 100%;
          }
-/* ——— LANGUAGE BOX: EXACT SAME WIDTH + SUPER COMPACT + PERFECT ——— */
+/* ——— LANGUAGE BOX: EXACT SAME WIDTH + NO OVERFLOW + COMPACT (FINAL) ——— */
 .language-group {
    display: grid;
-   grid-template-columns: 1fr 1fr 1fr;
-   gap: 12px;
-   margin: 18px auto;                    /* Less vertical space */
-   padding: 16px 18px;                   /* Compact padding */
-   max-width: 600px;                     /* EXACT same as shloka box & others */
-   width: calc(100% - 20px);
+   grid-template-columns: repeat(3, 1fr);
+   gap: 10px;
+   margin: 18px auto;
+   padding: 16px 14px;                    /* Tight but safe padding */
+   max-width: 600px;                      /* IDENTICAL to your other boxes */
+   width: 100%;
    background: var(--card-bg);
    border: 2px solid var(--card-border);
    border-radius: 14px;
    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
    box-sizing: border-box;
-   font-size: 0.98em;                    /* Slightly smaller text */
+   overflow: hidden;                      /* Final safety */
 }
 
 .language-group label {
    display: flex;
    align-items: center;
    justify-content: center;
-   gap: 8px;
-   padding: 9px 6px;                     /* Much smaller padding */
+   gap: 7px;
+   padding: 8px 6px;
    background: rgba(0,0,0,0.04);
    border-radius: 10px;
-   min-height: 44px;                     /* Compact height */
+   font-size: 0.94em;                     /* Slightly smaller = no overflow */
    font-weight: 500;
+   text-align: center;
+   min-height: 42px;
+   word-wrap: break-word;
+   overflow: hidden;
 }
 
 .language-group input[type="checkbox"] {
-   width: 19px !important;               /* Smaller, elegant checkboxes */
-   height: 19px !important;
+   width: 18px;
+   height: 18px;
    accent-color: var(--button-bg);
    flex-shrink: 0;
-   margin: 0;
 }
 
-/* Mobile — perfectly compact */
+/* Mobile — absolute perfection */
 @media (max-width: 600px) {
    .language-group {
       margin: 16px auto;
-      padding: 14px 16px;
-      gap: 11px;
+      padding: 14px 12px;
+      gap: 9px;
       max-width: 600px;
-      width: calc(100% - 20px);
+      width: 100%;
    }
    .language-group label {
-      padding: 8px 4px;
-      font-size: 0.96em;
+      font-size: 0.92em;
+      padding: 7px 4px;
    }
 }
       </style>
@@ -734,12 +737,15 @@
             <button onclick="sendCommand('FullShloka')" data-intro="Play the full shloka" data-title="Full Shloka">Full</button>
             <button onclick="sendCommand('NextFullShloka')" data-intro="Go to next shloka" data-title="Next">Next</button>
          </div>
-<div class="language-group">
-   <label><input type="checkbox" id="telugu" checked> తెలుగు</label>
-   <label><input type="checkbox" id="devanagari"> देवनागरी</label>
-   <label><input type="checkbox" id="english"> English</label>
-   <label><input type="checkbox" id="kannada"> ಕನ್ನಡ</label>
-   <label><input type="checkbox" id="tamil"> தமிழ்</label>
+<!-- This wrapper makes it EXACTLY match your other boxes -->
+<div style="max-width:600px;margin:0 auto;padding:0 10px;box-sizing:border-box;">
+   <div class="language-group">
+      <label><input type="checkbox" id="telugu" checked> తెలుగు</label>
+      <label><input type="checkbox" id="devanagari"> देवनागरी</label>
+      <label><input type="checkbox" id="english"> English</label>
+      <label><input type="checkbox" id="kannada"> ಕನ್ನಡ</label>
+      <label><input type="checkbox" id="tamil"> தமிழ்</label>
+   </div>
 </div>
          <div class="textbox-container">
             <div>
