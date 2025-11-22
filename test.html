@@ -631,58 +631,57 @@
          font-size: 0.8em;
          max-width: 100%;
          }
-/* ——— LANGUAGE BOX: EXACT SAME WIDTH & ALIGNMENT AS ALL OTHER BOXES ——— */
+/* ——— LANGUAGE BOX: EXACT SAME WIDTH + SUPER COMPACT + PERFECT ——— */
 .language-group {
    display: grid;
-   grid-template-columns: 1fr 1fr 1fr;           /* 3 columns */
-   gap: 16px;
-   margin: 25px auto;                   /* Same vertical spacing as others */
-   padding: 24px 20px;
-   max-width: 600px;                    /* EXACT same width as your other boxes */
-   width: calc(100% - 20px);            /* Full width minus safe margin */
+   grid-template-columns: 1fr 1fr 1fr;
+   gap: 12px;
+   margin: 18px auto;                    /* Less vertical space */
+   padding: 16px 18px;                   /* Compact padding */
+   max-width: 600px;                     /* EXACT same as shloka box & others */
+   width: calc(100% - 20px);
    background: var(--card-bg);
-   border: 3px solid var(--card-border);
-   border-radius: 16px;
-   box-shadow: 0 5px 16px rgba(0,0,0,0.12);
+   border: 2px solid var(--card-border);
+   border-radius: 14px;
+   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
    box-sizing: border-box;
+   font-size: 0.98em;                    /* Slightly smaller text */
 }
 
 .language-group label {
    display: flex;
-   flex-direction: column;
-   justify-content: center;
    align-items: center;
-   gap: 9px;
-   padding: 15px 10px;
-   background: rgba(0,0,0,0.06);
-   border-radius: 14px;
-   font-size: 1.05em;
-   text-align: center;
-   min-height: 70px;
+   justify-content: center;
+   gap: 8px;
+   padding: 9px 6px;                     /* Much smaller padding */
+   background: rgba(0,0,0,0.04);
+   border-radius: 10px;
+   min-height: 44px;                     /* Compact height */
    font-weight: 500;
 }
 
 .language-group input[type="checkbox"] {
-   width: 27px;
-   height: 27px;
+   width: 19px !important;               /* Smaller, elegant checkboxes */
+   height: 19px !important;
    accent-color: var(--button-bg);
    flex-shrink: 0;
+   margin: 0;
 }
 
-/* Mobile — pixel-perfect */
+/* Mobile — perfectly compact */
 @media (max-width: 600px) {
    .language-group {
+      margin: 16px auto;
+      padding: 14px 16px;
+      gap: 11px;
       max-width: 600px;
       width: calc(100% - 20px);
-      margin: 22px auto;
-      padding: 24px 18px;
-      gap: 18px;
    }
    .language-group label {
-      padding: 16px 8px;
-      font-size: 1.02em;
+      padding: 8px 4px;
+      font-size: 0.96em;
    }
-            }
+}
       </style>
    </head>
    <body>
