@@ -2520,19 +2520,16 @@
 
 
 
-// ——— CACHING PROGRESS BAR + OFFLINE SYSTEM ———
+// ——— AUTO DOWNLOAD ALL 700+ SHLOKAS ON FIRST VISIT ———
 const progressBar = document.getElementById('progressBar');
 const progressText = document.getElementById('progressText');
 const cachingDiv = document.getElementById('cachingProgress');
 
 let allUrls = [];
 
-// Generate all 700+ audio URLs
+// Generate all audio URLs (700+ files)
 for (let ch = 1; ch <= 18; ch++) {
-   const verses = ch === 1 ? 47 : ch === 2 ? 72 : ch === 3 ? 43 : ch === 4 ? 42 : ch === 5 ? 29 :
-                  ch === 6 ? 47 : ch === 7 ? 30 : ch === 8 ? 28 : ch === 9 ? 34 : ch === 10 ? 42 :
-                  ch === 11 ? 55 : ch === 12 ? 20 : ch === 13 ? 34 : ch === 14 ? 27 : ch === 15 ? 20 :
-                  ch === 16 ? 24 : ch === 17 ? 28 : 78;
+   const verses = [47,72,43,42,29,47,30,28,34,42,55,20,34,27,20,24,28,78][ch-1];
    for (let v = 1; v <= verses; v++) {
       allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioFullSGS/${ch}.${v}.mp3`);
       allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioFullSringeri/${ch}.${v}.mp3`);
@@ -2545,31 +2542,41 @@ for (let ch = 1; ch <= 18; ch++) {
 
 if ('serviceWorker' in navigator) {
    navigator.serviceWorker.register('sw.js').then(reg => {
-      console.log('SW registered');
-
-      // THIS IS THE CORRECT WAY — wait until SW is active
-      if (reg.active) {
-         sendTotal(reg.active);
-      } else if (reg.installing) {
-         reg.installing.addEventListener('statechange', () => {
-            if (reg.active) sendTotal(reg.active);
+      reg.addEventListener('updatefound', () => {
+         const newWorker = reg.installing;
+         newWorker?.addEventListener('statechange', () => {
+            if (newWorker.state === 'activated') location.reload();
          });
-      }
+      });
+   });
 
-      // Show progress bar immediately
+   // Wait for SW to be ready, then start full download
+   navigator.serviceWorker.ready.then(reg => {
       cachingDiv.style.display = 'block';
-      progressText.textContent = `Preparing Gita cache... 0% (0/${allUrls.length})`;
+      progressText.textContent = `Downloading Bhagavad Gita... 0% (0/${allUrls.length})`;
+
+      // Send all URLs to SW → it starts downloading immediately
+      navigator.serviceWorker.controller.postMessage({
+         type: 'CACHE_URLS',
+         urls: allUrls
+      });
+   });
+
+   // Listen for progress
+   navigator.serviceWorker.addEventListener('message', event => {
+      if (event.data.type === 'PROGRESS') {
+         const p = event.data.percent;
+         progressBar.style.width = p + '%';
+         progressText.textContent = `Downloading Gita... ${p}% (${event.data.cached}/${event.data.total})`;
+      }
+      if (event.data.type === 'CACHING_COMPLETE') {
+         setTimeout(() => {
+            cachingDiv.style.display = 'none';
+            document.getElementById('offlineStatus').style.display = 'block';
+         }, 1000);
+      }
    });
 }
-
-function sendTotal(worker) {
-   worker.postMessage({
-      type: 'SET_TOTAL',
-      total: allUrls.length,
-      cached: 0
-   });
-}
-
    // Update button
    let newWorker;
    navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
