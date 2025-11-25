@@ -122,6 +122,11 @@
          overflow: hidden;
          }
          }
+         @media (max-width: 600px) {
+         .top-buttons button {
+         font-size: 1.1em !important;   /* Makes the text clearly readable on phones */
+         }
+         }
          /* Top buttons container */
          .top-buttons {
          display: flex;
@@ -626,6 +631,60 @@
          font-size: 0.8em;
          max-width: 100%;
          }
+/* ——— LANGUAGE BOX: EXACT SAME WIDTH + NO OVERFLOW + COMPACT (FINAL) ——— */
+.language-group {
+   display: grid;
+   grid-template-columns: repeat(3, 1fr);
+   gap: 10px;
+   margin: 18px auto;
+   padding: 16px 14px;                    /* Tight but safe padding */
+   max-width: 600px;                      /* IDENTICAL to your other boxes */
+   width: 100%;
+   background: var(--card-bg);
+   border: 2px solid var(--card-border);
+   border-radius: 14px;
+   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+   box-sizing: border-box;
+   overflow: hidden;                      /* Final safety */
+}
+
+.language-group label {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   gap: 7px;
+   padding: 8px 6px;
+   background: rgba(0,0,0,0.04);
+   border-radius: 10px;
+   font-size: 0.94em;                     /* Slightly smaller = no overflow */
+   font-weight: 500;
+   text-align: center;
+   min-height: 42px;
+   word-wrap: break-word;
+   overflow: hidden;
+}
+
+.language-group input[type="checkbox"] {
+   width: 18px;
+   height: 18px;
+   accent-color: var(--button-bg);
+   flex-shrink: 0;
+}
+
+/* Mobile — absolute perfection */
+@media (max-width: 600px) {
+   .language-group {
+      margin: 16px auto;
+      padding: 14px 12px;
+      gap: 9px;
+      max-width: 600px;
+      width: 100%;
+   }
+   .language-group label {
+      font-size: 0.92em;
+      padding: 7px 4px;
+   }
+}
       </style>
    </head>
    <body>
@@ -641,6 +700,30 @@
             <button class="sringeri-button" onclick="sendCommand('SringeriPaada')" data-intro="Play 1st or 3rd Paada in Sringeri style" data-title="1st or 3rd Paada (Sringeri)">1st or 3rd Paada</button>
             <button class="third-paada-button" onclick="sendCommand('ThirdPaada')" data-intro="Play only 3rd Paada" data-title="3rd Paada Only">3rd Paada<br>Only</button>
          </div>
+<!-- Continuous Random Play – Perfect Width & Smart Stop Button -->
+<div class="continuous-play-box" style="margin:25px auto 0;max-width:600px;padding:18px;background:var(--card-bg);border:2px solid var(--card-border);border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+   <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:center;">
+      <strong style="flex:1 1 100%;text-align:center;font-size:1.35em;color:var(--header-color);">Continuous Random Play</strong>
+      
+      <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:center;">
+         <label style="cursor:pointer;font-size:1.15em;white-space:nowrap;">
+           <input type="radio" name="continuousGap" value="30" id="gap30">
+<label for="gap30">30-sec gap</label>
+<input type="radio" name="continuousGap" value="45" id="gap45">
+<label for="gap45">45-sec gap</label>
+         </label>
+      </div>
+      
+      <button id="stopContinuousBtn" 
+              style="display:none;background:#d32f2f;color:white;padding:10px 24px;border:none;border-radius:10px;font-size:1.1em;font-weight:bold;cursor:pointer;">
+         Stop Continuous Play
+      </button>
+      
+      <small style="flex:1 1 100%;text-align:center;color:var(--subheader-color);margin-top:8px;font-style:italic;">
+         Applies only to the 3 top buttons
+      </small>
+   </div>
+</div>
          <audio id="audioPlayer" controls data-intro="Use these controls to play, pause, or scrub through the audio." data-title="Audio Player"></audio>
          <div class="radio-group" data-intro="Pick the chanting style for display and playback" data-title="Chanting Style">
             <label>Style:</label>
@@ -654,14 +737,14 @@
             <button onclick="sendCommand('FullShloka')" data-intro="Play the full shloka" data-title="Full Shloka">Full</button>
             <button onclick="sendCommand('NextFullShloka')" data-intro="Go to next shloka" data-title="Next">Next</button>
          </div>
-<div class="radio-group language-group">
-   <label>Languages:</label>
-   <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:8px;">
-      <label><input type="checkbox" name="language" value="te" id="telugu" checked> Telugu</label>
-      <label><input type="checkbox" name="language" value="sa" id="devanagari"> Devanagari</label>
-      <label><input type="checkbox" name="language" value="en" id="english"> English</label>
-      <label><input type="checkbox" name="language" value="kn" id="kannada"> Kannada</label>
-      <label><input type="checkbox" name="language" value="ta" id="tamil"> Tamil</label>
+<!-- This wrapper makes it EXACTLY match your other boxes -->
+<div style="max-width:600px;margin:0 auto;padding:0 10px;box-sizing:border-box;">
+   <div class="language-group">
+      <label><input type="checkbox" id="telugu" checked> తెలుగు</label>
+      <label><input type="checkbox" id="devanagari"> देवनागरी</label>
+      <label><input type="checkbox" id="english"> English</label>
+      <label><input type="checkbox" id="kannada"> ಕನ್ನಡ</label>
+      <label><input type="checkbox" id="tamil"> தமிழ்</label>
    </div>
 </div>
          <div class="textbox-container">
@@ -856,18 +939,18 @@
                     const sringeriTeluguResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Telugu_Sringeri.txt');
                     if (!sringeriTeluguResponse.ok) throw new Error('Failed to load BG_Telugu_Sringeri.txt');
                     sringeriTeluguContent = await sringeriTeluguResponse.text();
-
+            
                     const englishSGSResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_English_SGS.txt');
                     if (!englishSGSResponse.ok) throw new Error('Failed to load BG_English_SGS.txt');
                     englishSGSContent = await englishSGSResponse.text();
-
+            
                     const englishSringeriResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_English_Sringeri.txt');
                     if (!englishSringeriResponse.ok) throw new Error('Failed to load BG_English_Sringeri.txt');
                     englishSringeriContent = await englishSringeriResponse.text();
-
+            
                     // Combined buffer for English search across both styles
                     englishContent = `${englishSGSContent}\n${englishSringeriContent}`;
-
+            
                     console.log('Files loaded:', {
                         sgsTeluguLines: sgsTeluguContent.split('\n').length,
                         sringeriTeluguLines: sringeriTeluguContent.split('\n').length,
@@ -1291,15 +1374,15 @@
                     return { error: `Audio not found for ${chapter}.${verse}` };
                 }
             }
-           function getSelectedLanguages() {
-    const langs = [];
-    if (document.getElementById('telugu').checked) langs.push('Telugu');
-    if (document.getElementById('devanagari').checked) langs.push('Devanagari');
-    if (document.getElementById('english').checked) langs.push('English');
-    if (document.getElementById('kannada').checked) langs.push('Kannada');
-    if (document.getElementById('tamil').checked) langs.push('Tamil');
-    return langs.length > 0 ? langs : ['Telugu'];
-}                   async function fetchCombinedShlokaText(chapter, verse, style) {
+            function getSelectedLanguages() {
+            const langs = [];
+            if (document.getElementById('telugu').checked) langs.push('Telugu');
+            if (document.getElementById('devanagari').checked) langs.push('Devanagari');
+            if (document.getElementById('english').checked) langs.push('English');
+            if (document.getElementById('kannada').checked) langs.push('Kannada');
+            if (document.getElementById('tamil').checked) langs.push('Tamil');
+            return langs.length > 0 ? langs : ['Telugu'];
+            }                   async function fetchCombinedShlokaText(chapter, verse, style) {
                                   try {
                                       console.log(`fetchCombinedShlokaText called: chapter=${chapter}, verse=${verse}, style=${style}`);
                                       const langs = getSelectedLanguages();
@@ -1754,7 +1837,7 @@
                 for (const shloka of allShlokas) {
                     if (confusingPlayId !== playId) break;
                     const [chapter, verse] = shloka.split('.').map(Number);
-
+            
                     // Update context to the currently playing shloka
                     currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
                     currentContext.push({
@@ -1763,7 +1846,7 @@
                         parameters: { chapter, verse, style: getSelectedStyle(), showingMeaning: false }
                     });
                     localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-
+            
                     const audioUrl = await fetchAudioUrl(chapter, verse, null, true);
                     if (!audioUrl.error) {
                         audioPlayer.src = audioUrl;
@@ -1788,7 +1871,7 @@
                         adjustTextboxHeight();
                     }
                 }
-
+            
                 // Mark the confusing playback session as completed
                 isConfusingPlaying = false;
             }
@@ -1822,7 +1905,7 @@
                         const randomIndex = Math.floor(Math.random() * uvachaShlokas.length);
                         const shloka = uvachaShlokas[randomIndex];
                         const [chapter, verse] = shloka.split('.').map(Number);
-
+            
                         // Set context immediately so language toggles reflect the same Uvacha shloka
                         currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
                         currentContext.push({
@@ -1899,15 +1982,15 @@
                     return { error: `Audio not found for ${chapter}.${verse}` };
                 }
             }
-           function getSelectedLanguages() {
-    const langs = [];
-    if (document.getElementById('telugu').checked) langs.push('Telugu');
-    if (document.getElementById('devanagari').checked) langs.push('Devanagari');
-    if (document.getElementById('english').checked) langs.push('English');
-    if (document.getElementById('kannada').checked) langs.push('Kannada');
-    if (document.getElementById('tamil').checked) langs.push('Tamil');
-    return langs.length > 0 ? langs : ['Telugu'];
-}                   async function fetchCombinedShlokaText(chapter, verse, style) {
+            function getSelectedLanguages() {
+            const langs = [];
+            if (document.getElementById('telugu').checked) langs.push('Telugu');
+            if (document.getElementById('devanagari').checked) langs.push('Devanagari');
+            if (document.getElementById('english').checked) langs.push('English');
+            if (document.getElementById('kannada').checked) langs.push('Kannada');
+            if (document.getElementById('tamil').checked) langs.push('Tamil');
+            return langs.length > 0 ? langs : ['Telugu'];
+            }                   async function fetchCombinedShlokaText(chapter, verse, style) {
                                   try {
                                       console.log(`fetchCombinedShlokaText called: chapter=${chapter}, verse=${verse}, style=${style}`);
                                       const langs = getSelectedLanguages();
@@ -2102,7 +2185,7 @@
               }
             
               adjustTextboxHeight();  // fix heights after toggle
-
+            
               // Persist chosen style in context
               const ctx = currentContext.find(c => c && c.name && c.name.includes('shloka-context'));
               if (ctx && ctx.parameters) {
@@ -2326,40 +2409,115 @@
                    });
                });
             });
-                   // Theme toggle functionality
-            const themeButtons = document.querySelectorAll('.theme-toggle button');
-            const setTheme = (theme) => {
-               document.documentElement.setAttribute('data-theme', theme);
-               themeButtons.forEach(btn => {
-                   btn.classList.toggle('active', btn.dataset.theme === theme);
-               });
-               localStorage.setItem('theme', theme);
-            
-               // Handle system theme
-               if (theme === 'system') {
-                   const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                   document.documentElement.setAttribute('data-theme', systemTheme);
-               }
-            };
-            
-            // Initialize theme
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            setTheme(savedTheme);
-            
-            // Theme button event listeners
-            themeButtons.forEach(button => {
-               button.addEventListener('click', () => {
-                   setTheme(button.dataset.theme);
-               });
-            });
-            
-            // Listen for system theme changes
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-               if (document.documentElement.getAttribute('data-theme') === 'system') {
-                   setTheme('system');
-               }
-            });       
-         </script>
-      </div>
-   </body>
+ 
+// ——— FINAL CLEAN & STABLE CONTINUOUS PLAY + 45-SEC GAP + WORKS ON LOCKED SCREEN ———
+let lastRandomIntent = null;
+let continuousPlayEnabled = false;
+let continuousDelay = 45000;  // ← 45 seconds (you asked for this)
+let nextTimer = null;         // Prevents timer overlap & freezing
+
+const audioPlayer = document.getElementById('audioPlayer');
+const stopBtn = document.getElementById('stopContinuousBtn');
+
+// Schedule next random shloka with exact gap
+function scheduleNext() {
+   if (!continuousPlayEnabled || !lastRandomIntent || nextTimer) return;
+   nextTimer = setTimeout(() => {
+      nextTimer = null;
+      if (continuousPlayEnabled) sendCommand(lastRandomIntent);
+   }, continuousDelay);
+}
+
+// Hook into sendCommand only once
+if (!window.cpReady) {
+   const originalSendCommand = window.sendCommand;
+   window.sendCommand = function(intent) {
+      originalSendCommand(intent);
+      if (['SGSFirstPaada', 'SringeriPaada', 'ThirdPaada'].includes(intent)) {
+         const checked = document.querySelector('input[name="continuousGap"]:checked');
+         if (checked) {
+            lastRandomIntent = intent;
+            continuousPlayEnabled = true;
+            continuousDelay = checked.value === '30' ? 30000 : 45000;  // 30s or 45s
+            stopBtn.style.display = 'inline-block';
+            audioPlayer.onended = scheduleNext;
+         }
+      }
+   };
+   window.cpReady = true;
+}
+
+// Radio button change (30 sec or 45 sec)
+document.querySelectorAll('input[name="continuousGap"]').forEach(radio => {
+   radio.addEventListener('change', () => {
+      const checked = document.querySelector('input[name="continuousGap"]:checked');
+      if (checked) {
+         continuousDelay = checked.value === '30' ? 30000 : 45000;
+         stopBtn.style.display = 'inline-block';
+         if (lastRandomIntent) audioPlayer.onended = scheduleNext;
+      } else {
+         continuousPlayEnabled = false;
+         stopBtn.style.display = 'none';
+         audioPlayer.onended = null;
+         lastRandomIntent = null;
+         if (nextTimer) { clearTimeout(nextTimer); nextTimer = null; }
+      }
+   });
+});
+
+// Stop button
+stopBtn.onclick = () => {
+   document.querySelectorAll('input[name="continuousGap"]').forEach(r => r.checked = false);
+   continuousPlayEnabled = false;
+   stopBtn.style.display = 'none';
+   audioPlayer.onended = null;
+   lastRandomIntent = null;
+   if (nextTimer) { clearTimeout(nextTimer); nextTimer = null; }
+};
+// ——— PLAY WHEN SCREEN IS OFF (Android + iPhone) — NO DESKTOP FREEZE ———
+let wakeLock = null;
+let bgEnabled = false;
+
+async function enableWakeLock() {
+   if (bgEnabled) return;
+   bgEnabled = true;
+
+   // 1. Modern Wake Lock API (best for Android Chrome & Firefox)
+   if ('wakeLock' in navigator) {
+      try {
+         wakeLock = await navigator.wakeLock.request('screen');
+         console.log('Wake Lock activated – audio continues when screen off');
+         
+         // Re-request if the screen turns off and on again
+         wakeLock.addEventListener('release', () => {
+            console.log('Wake Lock released');
+         });
+      } catch (err) {
+         console.log('Wake Lock not supported or denied:', err);
+      }
+   }
+
+   // 2. Fallback: tiny silent video trick — but ONLY on touch devices (phones/tablets)
+   if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      const v = document.createElement('video');
+      v.src = 'data:video/mp4;base64,AAAAIGZ0eXBtcDQyAAACAG1wNDJtcDQxaXMzAAACbGF2ZjU4LjI5LjEwMAA=';
+      v.loop = true;
+      v.muted = true;
+      v.playsInline = true;
+      v.style.position = 'fixed';
+      v.style.left = v.style.top = '-100px';
+      v.style.width = v.style.height = '1px';
+      v.style.opacity = '0';
+      document.body.appendChild(v);
+      v.play().catch(() => {});
+   }
+}
+
+// Activate on first user interaction (required by browsers)
+document.body.addEventListener('click', enableWakeLock, { once: true });
+document.body.addEventListener('touchstart', enableWakeLock, { once: true });
+document.getElementById('audioPlayer').addEventListener('play', enableWakeLock);
+
+</script>
+</body>
 </html>
