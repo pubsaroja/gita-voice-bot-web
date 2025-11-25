@@ -1,53 +1,52 @@
-const CACHE_NAME = 'bhagavad-gita-v11';   // ← Change version when updating
+const CACHE_NAME = 'bhagavad-gita-v12';   // ← Change when you update
 
-let allAudioUrls = [];   // Will be filled by main page
+let urlsToCache = [];
+let cachedCount = 0;
 
-self.addEventListener('message', event => {
-   if (event.data && event.data.type === 'CACHE_URLS') {
-      allAudioUrls = event.data.urls;
-      // Start pre-caching everything
-      event.waitUntil(preCacheAll());
-   }
-   if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
+self.addEventListener('install', e => {
+   e.waitUntil(self.skipWaiting());
 });
 
-async function preCacheAll() {
-   const cache = await caches.open(CACHE_NAME);
-   let cached = 0;
-   const total = allAudioUrls.length;
+self.addEventListener('activate', e => {
+   e.waitUntil(self.clients.claim());
+});
 
-   for (const url of allAudioUrls) {
-      try {
-         const response = await fetch(url, { cache: 'no-cache' });
-         if (response.ok) {
-            await cache.put(url, response);
-            cached++;
-            // Send progress to main page
-            self.clients.matchAll().then(clients => {
-               clients.forEach(client => client.postMessage({
+self.addEventListener('message', async event => {
+   if (event.data?.type === 'START_CACHING' && event.data.urls) {
+      urlsToCache = event.data.urls;
+      cachedCount = 0;
+
+      const cache = await caches.open(CACHE_NAME);
+
+      for (let i = 0; i < urlsToCache.length; i++) {
+         const url = urlsToCache[i];
+         try {
+            const resp = await fetch(url, { cache: 'reload' });
+            if (resp.ok) {
+               await cache.put(url, resp);
+               cachedCount++;
+               const percent = Math.round((cachedCount / urlsToCache.length) * 100);
+
+               // Send progress back to page
+               event.ports[0].postMessage({
                   type: 'PROGRESS',
-                  percent: Math.round((cached / total) * 100),
-                  cached: cached,
-                  total: total
-               }));
-            });
+                  percent: percent,
+                  cached: cachedCount,
+                  total: urlsToCache.length
+               });
+            }
+         } catch (err) {
+            // silently continue on failed file
          }
-      } catch (e) { /* ignore failed files */ }
+      }
+
+      // Finished!
+      event.ports[0].postMessage({ type: 'COMPLETE' });
    }
+});
 
-   // Done!
-   self.clients.matchAll().then(clients => {
-      clients.forEach(client => client.postMessage({ type: 'CACHING_COMPLETE' }));
-   });
-}
-
-// Regular fetch (for normal page use)
-self.addEventListener('fetch', event => {
-   if (event.request.method !== 'GET') return;
-   event.respondWith(
-      caches.match(event.request).then(cached => cached || fetch(event.request))
+self.addEventListener('fetch', e => {
+   e.respondWith(
+      caches.match(e.request).then(r => r || fetch(e.request))
    );
 });
-
-self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', () => self.clients.claim());
