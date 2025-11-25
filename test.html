@@ -2474,7 +2474,49 @@ stopBtn.onclick = () => {
    lastRandomIntent = null;
    if (nextTimer) { clearTimeout(nextTimer); nextTimer = null; }
 };
+// ——— PLAY WHEN SCREEN IS OFF (Android + iPhone) — NO DESKTOP FREEZE ———
+let wakeLock = null;
+let bgEnabled = false;
 
+async function enableWakeLock() {
+   if (bgEnabled) return;
+   bgEnabled = true;
+
+   // 1. Modern Wake Lock API (best for Android Chrome & Firefox)
+   if ('wakeLock' in navigator) {
+      try {
+         wakeLock = await navigator.wakeLock.request('screen');
+         console.log('Wake Lock activated – audio continues when screen off');
+         
+         // Re-request if the screen turns off and on again
+         wakeLock.addEventListener('release', () => {
+            console.log('Wake Lock released');
+         });
+      } catch (err) {
+         console.log('Wake Lock not supported or denied:', err);
+      }
+   }
+
+   // 2. Fallback: tiny silent video trick — but ONLY on touch devices (phones/tablets)
+   if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      const v = document.createElement('video');
+      v.src = 'data:video/mp4;base64,AAAAIGZ0eXBtcDQyAAACAG1wNDJtcDQxaXMzAAACbGF2ZjU4LjI5LjEwMAA=';
+      v.loop = true;
+      v.muted = true;
+      v.playsInline = true;
+      v.style.position = 'fixed';
+      v.style.left = v.style.top = '-100px';
+      v.style.width = v.style.height = '1px';
+      v.style.opacity = '0';
+      document.body.appendChild(v);
+      v.play().catch(() => {});
+   }
+}
+
+// Activate on first user interaction (required by browsers)
+document.body.addEventListener('click', enableWakeLock, { once: true });
+document.body.addEventListener('touchstart', enableWakeLock, { once: true });
+document.getElementById('audioPlayer').addEventListener('play', enableWakeLock);
 
 </script>
 </body>
