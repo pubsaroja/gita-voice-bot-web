@@ -694,6 +694,19 @@
       </style>
    </head>
    <body>
+      <!-- CACHING PROGRESS BAR (Divine & Beautiful) -->
+<div id="cachingProgress" style="position:fixed;top:0;left:0;width:100%;background:#00000088;z-index:99999;display:none;">
+   <div style="background:#28a745;height:8px;width:0%;transition:width 0.4s ease;" id="progressBar"></div>
+   <div style="text-align:center;color:white;padding:20px;font-family:Outfit,sans-serif;">
+      <div style="font-size:1.4em;font-weight:bold;margin-bottom:8px;">
+         Downloading Srimad Bhagavad Gita for Offline Use
+      </div>
+      <div id="progressText" style="font-size:1.2em;">Preparing cache... 0%</div>
+      <div style="font-size:0.9em;margin-top:10px;opacity:0.9;">
+         All 700 shlokas + audio will be available forever — even without internet
+      </div>
+   </div>
+</div>
       <div class="theme-toggle" data-intro="Change the theme Light or Dark" data-title="Theme">
          <button id="themeLight" title="Light Theme" data-theme="light" class="active">☀️</button>
          <button id="themeDark" title="Dark Theme" data-theme="dark">🌙</button>
@@ -2505,103 +2518,66 @@
             Offline Mode (cached)
          </div>
 
-         // ——— OFFLINE BHAGAVAD GITA: FULLY CACHED FOREVER (700 SHLOKAS + AUDIO) ———
-         const CACHE_NAME = 'bhagavad-gita-v1';
-         const OFFLINE_URLS = [
-            // Main page
-            './',
-            'index.html',
-            'test.html',
 
-            // All CSS & fonts (you already use CDN – they auto-cache)
-            'https://fonts.googleapis.com/css2?family=Ramabhadra&family=Outfit:wght@300&family=Noto+Sans+Telugu&display=swap',
-            'https://unpkg.com/intro.js/minified/introjs.min.css',
-            'https://unpkg.com/intro.js/minified/intro.min.js',
+// ——— CACHING PROGRESS BAR + OFFLINE SYSTEM ———
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
+const cachingDiv = document.getElementById('cachingProgress');
 
-            // All 700+ audio files (add your actual paths)
-            // Example pattern — adjust if your files are named differently
-         ];
+let allUrls = [];
 
-         // Generate full audio list (700 shlokas)
-         for (let ch = 1; ch <= 18; ch++) {
-            const verses = ch === 1 ? 47 : ch === 2 ? 72 : ch === 3 ? 43 : ch === 4 ? 42 : ch === 5 ? 29 :
-                           ch === 6 ? 47 : ch === 7 ? 30 : ch === 8 ? 28 : ch === 9 ? 34 : ch === 10 ? 42 :
-                           ch === 11 ? 55 : ch === 12 ? 20 : ch === 13 ? 34 : ch === 14 ? 27 : ch === 15 ? 20 :
-                           ch === 16 ? 24 : ch === 17 ? 28 : 78;
+// Generate all 700+ audio URLs
+for (let ch = 1; ch <= 18; ch++) {
+   const verses = ch === 1 ? 47 : ch === 2 ? 72 : ch === 3 ? 43 : ch === 4 ? 42 : ch === 5 ? 29 :
+                  ch === 6 ? 47 : ch === 7 ? 30 : ch === 8 ? 28 : ch === 9 ? 34 : ch === 10 ? 42 :
+                  ch === 11 ? 55 : ch === 12 ? 20 : ch === 13 ? 34 : ch === 14 ? 27 : ch === 15 ? 20 :
+                  ch === 16 ? 24 : ch === 17 ? 28 : 78;
+   for (let v = 1; v <= verses; v++) {
+      allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioFullSGS/${ch}.${v}.mp3`);
+      allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioFullSringeri/${ch}.${v}.mp3`);
+      allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AQ4PaadasSGS/Chapter ${ch}/${v}.1.mp3`);
+      allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AQ4PaadasSGS/Chapter ${ch}/${v}.3.mp3`);
+      allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AQ4PaadasSringeri/Chapter ${ch}/${v}.1.mp3`);
+      allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AQ4PaadasSringeri/Chapter ${ch}/${v}.3.mp3`);
+   }
+}
 
-            for (let v = 1; v <= verses; v++) {
-               // Full shlokas
-               OFFLINE_URLS.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioFullSGS/${ch}.${v}.mp3`);
-               OFFLINE_URLS.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioFullSringeri/${ch}.${v}.mp3`);
-               
-               // Paada versions
-               OFFLINE_URLS.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AQ4PaadasSGS/Chapter ${ch}/${v}.1.mp3`);
-               OFFLINE_URLS.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AQ4PaadasSGS/Chapter ${ch}/${v}.3.mp3`);
-               OFFLINE_URLS.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AQ4PaadasSringeri/Chapter ${ch}/${v}.1.mp3`);
-               OFFLINE_URLS.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AQ4PaadasSringeri/Chapter ${ch}/${v}.3.mp3`);
+if ('serviceWorker' in navigator) {
+   navigator.serviceWorker.register('sw.js').then(reg => {
+      // Tell SW how many files to expect
+      navigator.serviceWorker.controller?.postMessage({
+         type: 'SET_TOTAL',
+         total: allUrls.length,
+         cached: 0
+      });
+
+      // Show progress bar
+      cachingDiv.style.display = 'block';
+      progressText.textContent = `Downloading Gita... 0% (0/${allUrls.length})`;
+
+      // Listen for progress updates
+      navigator.serviceWorker.addEventListener('message', event => {
+         if (event.data?.type === 'PROGRESS') {
+            const p = event.data.percent;
+            progressBar.style.width = p + '%';
+            progressText.textContent = `Downloading Gita... ${p}% (${event.data.cached}/${event.data.total})`;
+
+            if (p >= 100) {
+               setTimeout(() => {
+                  cachingDiv.style.display = 'none';
+                  document.getElementById('offlineStatus').style.display = 'block';
+               }, 1500);
             }
          }
+      });
+   });
 
-         // Install Service Worker + Cache Everything
-         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-               navigator.serviceWorker.register('sw.js').then(reg => {
-                  console.log('Service Worker registered for offline Gita!', reg);
-               }).catch(err => console.log('SW registration failed:', err));
-            });
-         }
-
-         // Show offline badge
-         navigator.serviceWorker?.addEventListener('message', event => {
-            if (event.data?.type === 'OFFLINE') {
-               document.getElementById('offlineStatus').style.display = 'block';
-            }
-         });
-
-         // ——— CACHE UPDATE: "New Version Available" Button ———
-         let newWorker;
-
-         function showUpdateReady() {
-            const updateBox = document.createElement('div');
-            updateBox.style.cssText = `
-               position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
-               background:#28a745; color:white; padding:12px 24px; border-radius:12px;
-               font-weight:bold; z-index:9999; box-shadow:0 4px 16px rgba(0,0,0,0.3);
-               animation: pulse 2s infinite;
-            `;
-            updateBox.innerHTML = `
-               New Gita version available! 
-               <button onclick="updateApp()" style="margin-left:10px; background:white; color:#28a745; border:none; padding:6px 12px; border-radius:8px; cursor:pointer;">
-                  Update Now
-               </button>
-            `;
-            document.body.appendChild(updateBox);
-         }
-
-         function updateApp() {
-            if (newWorker) {
-               newWorker.postMessage({ type: 'SKIP_WAITING' });
-            }
-         }
-
-         // Check for new service worker
-         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').then(reg => {
-               reg.addEventListener('updatefound', () => {
-                  newWorker = reg.installing;
-                  newWorker.addEventListener('statechange', () => {
-                     if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        showUpdateReady();
-                     }
-                  });
-               });
-            });
-
-            // Listen for controller change (after update)
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-               window.location.reload();
-            });
-         }
-      </script>
+   // Update button
+   let newWorker;
+   navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
+}
+</script>
+  
+   
    </body>
 </html>
