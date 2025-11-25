@@ -2475,39 +2475,7 @@ stopBtn.onclick = () => {
    if (nextTimer) { clearTimeout(nextTimer); nextTimer = null; }
 };
 
-// ——— WORKS WHEN PHONE SCREEN IS OFF (Android + iPhone) ———
-// Safe version: no memory leak, no desktop freeze
-let bgEnabled = false;
 
-function enableBg() {
-   if (bgEnabled) return;
-   bgEnabled = true;
-
-   // Silent audio to keep browser awake
-   const silent = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
-   silent.loop = true;
-   silent.volume = 0;
-   silent.play().catch(() => {});
-
-   // Tiny silent video (only on mobile — prevents desktop freeze)
-   if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-      const v = document.createElement('video');
-      v.src = 'data:video/mp4;base64,AAAAIGZ0eXBtcDQyAAACAG1wNDJtcDQxaXMzAAACbGF2ZjU4LjI5LjEwMAA=';
-      v.loop = v.muted = true;
-      v.style.position = 'absolute';
-      v.style.left = v.style.top = '-9999px';
-      v.style.width = v.style.height = '1px';
-      document.body.appendChild(v);
-      v.play().catch(() => {});
-   }
-}
-
-// Activate on first user interaction
-document.body.addEventListener('click', enableBg, { once: true });
-document.body.addEventListener('touchstart', enableBg, { once: true });
-audioPlayer.addEventListener('play', enableBg);
-
-// ——————————————————————————————————————
 </script>
 </body>
 </html>
