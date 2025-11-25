@@ -1,3 +1,5 @@
+let totalFiles = 0;
+let cachedFiles = 0;
 const CACHE_NAME = 'bhagavad-gita-v10';  // ← Change this number when you update!
 
 const CORE_ASSETS = [
