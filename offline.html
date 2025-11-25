@@ -878,6 +878,10 @@
             </select>
             <div id="verseTableContent" class="verse-grid"></div>
          </div>
+                  // ——— OFFLINE MODE INDICATOR (optional but beautiful) ———
+         <div id="offlineStatus" style="position:fixed;top:10px;left:10px;background:#28a745;color:white;padding:6px 12px;border-radius:8px;font-size:0.9em;z-index:9999;display:none;">
+            Offline Mode (cached)
+         </div>
          <script>
             // Global variables holding text file contents
             let sgsTeluguContent = '';
@@ -2513,10 +2517,7 @@
          document.body.addEventListener('click', enableBg, { once: true });
          audioPlayer.addEventListener('play', enableBg);
 
-         // ——— OFFLINE MODE INDICATOR (optional but beautiful) ———
-         <div id="offlineStatus" style="position:fixed;top:10px;left:10px;background:#28a745;color:white;padding:6px 12px;border-radius:8px;font-size:0.9em;z-index:9999;display:none;">
-            Offline Mode (cached)
-         </div>
+
 
 
 // ——— CACHING PROGRESS BAR + OFFLINE SYSTEM ———
