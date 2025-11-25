@@ -1,80 +1,84 @@
-const CACHE_NAME = 'bhagavad-gita-v9';  // ← Change this number when you update content!
+const CACHE_NAME = 'bhagavad-gita-v10';  // ← Change this number when you update!
 
-// List of files to cache (main page + critical assets)
 const CORE_ASSETS = [
    './',
-   'index.html',
-   'test.html',
+   'offline.html',
    'https://fonts.googleapis.com/css2?family=Ramabhadra&family=Outfit:wght@300&family=Noto+Sans+Telugu&display=swap',
    'https://unpkg.com/intro.js/minified/introjs.min.css',
    'https://unpkg.com/intro.js/minified/intro.min.js'
 ];
 
-// Install + cache core files
+let totalFiles = 0;
+let cachedFiles = 0;
+
 self.addEventListener('install', event => {
    event.waitUntil(
       caches.open(CACHE_NAME).then(cache => {
-         console.log('Bhagavad Gita Bot: Caching core files...');
+         console.log('Caching core files...');
          return cache.addAll(CORE_ASSETS);
+      }).then(() => {
+         // Count total files to cache (main page will send this)
+         self.clients.matchAll().then(clients => {
+            clients.forEach(client => client.postMessage({ type: 'START_CACHING' }));
+         });
       })
    );
    self.skipWaiting();
 });
 
-// Activate: delete old caches
 self.addEventListener('activate', event => {
    event.waitUntil(
-      caches.keys().then(keys => {
-         return Promise.all(
-            keys.filter(key => key !== CACHE_NAME)
-                .map(key => caches.delete(key))
-         );
-      })
+      caches.keys().then(keys => Promise.all(
+         keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+      ))
    );
    self.clients.claim();
 });
 
-// Fetch: serve from cache, update in background
 self.addEventListener('fetch', event => {
-   // Only handle GET requests for our domain or known CDNs
    if (event.request.method !== 'GET') return;
 
    event.respondWith(
-      caches.match(event.request).then(cachedResponse => {
-         // Return cached version if exists
-         if (cachedResponse) {
-            // Update in background for next visit
-            fetch(event.request).then(networkResponse => {
-               if (networkResponse && networkResponse.status === 200) {
-                  caches.open(CACHE_NAME).then(cache => {
-                     cache.put(event.request, networkResponse.clone());
-                  });
-               }
-            }).catch(() => {}); // ignore network errors
-            return cachedResponse;
+      caches.match(event.request).then(cached => {
+         if (cached) {
+            cachedFiles++;
+            updateProgress();
+            return cached;
          }
 
-         // Otherwise fetch from network
-         return fetch(event.request).then(networkResponse => {
-            if (networkResponse && networkResponse.status === 200) {
-               const responseClone = networkResponse.clone();
-               caches.open(CACHE_NAME).then(cache => {
-                  cache.put(event.request, responseClone);
-               });
+         return fetch(event.request).then(response => {
+            if (response && response.status === 200) {
+               cachedFiles++;
+               updateProgress();
+               const clone = response.clone();
+               caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
             }
-            return networkResponse;
+            return response;
          }).catch(() => {
-            return new Response('Offline — Bhagavad Gita is still available', {
-               headers: { 'Content-Type': 'text/plain' }
-            });
+            return new Response('Offline — Gita is available', { headers: { 'Content-Type': 'text/plain' } });
          });
       })
    );
 });
 
-// Listen for update message from main page
+function updateProgress() {
+   if (totalFiles === 0) return;
+   const percent = Math.round((cachedFiles / totalFiles) * 100);
+   self.clients.matchAll().then(clients => {
+      clients.forEach(client => client.postMessage({
+         type: 'PROGRESS',
+         percent: percent,
+         cached: cachedFiles,
+         total: totalFiles
+      }));
+   });
+}
+
 self.addEventListener('message', event => {
-   if (event.data && event.data.type === 'SKIP_WAITING') {
+   if (event.data?.type === 'SET_TOTAL') {
+      totalFiles = event.data.total;
+      cachedFiles = event.data.cached || 0;
+   } else if (event.data?.type === 'SKIP_WAITING') {
       self.skipWaiting();
    }
 });
