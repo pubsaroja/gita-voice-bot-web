@@ -2545,33 +2545,30 @@ for (let ch = 1; ch <= 18; ch++) {
 
 if ('serviceWorker' in navigator) {
    navigator.serviceWorker.register('sw.js').then(reg => {
-      // Tell SW how many files to expect
-      navigator.serviceWorker.controller?.postMessage({
-         type: 'SET_TOTAL',
-         total: allUrls.length,
-         cached: 0
-      });
+      console.log('SW registered');
 
-      // Show progress bar
+      // THIS IS THE CORRECT WAY — wait until SW is active
+      if (reg.active) {
+         sendTotal(reg.active);
+      } else if (reg.installing) {
+         reg.installing.addEventListener('statechange', () => {
+            if (reg.active) sendTotal(reg.active);
+         });
+      }
+
+      // Show progress bar immediately
       cachingDiv.style.display = 'block';
-      progressText.textContent = `Downloading Gita... 0% (0/${allUrls.length})`;
-
-      // Listen for progress updates
-      navigator.serviceWorker.addEventListener('message', event => {
-         if (event.data?.type === 'PROGRESS') {
-            const p = event.data.percent;
-            progressBar.style.width = p + '%';
-            progressText.textContent = `Downloading Gita... ${p}% (${event.data.cached}/${event.data.total})`;
-
-            if (p >= 100) {
-               setTimeout(() => {
-                  cachingDiv.style.display = 'none';
-                  document.getElementById('offlineStatus').style.display = 'block';
-               }, 1500);
-            }
-         }
-      });
+      progressText.textContent = `Preparing Gita cache... 0% (0/${allUrls.length})`;
    });
+}
+
+function sendTotal(worker) {
+   worker.postMessage({
+      type: 'SET_TOTAL',
+      total: allUrls.length,
+      cached: 0
+   });
+}
 
    // Update button
    let newWorker;
