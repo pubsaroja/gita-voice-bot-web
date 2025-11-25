@@ -701,28 +701,23 @@
             <button class="third-paada-button" onclick="sendCommand('ThirdPaada')" data-intro="Play only 3rd Paada" data-title="3rd Paada Only">3rd Paada<br>Only</button>
          </div>
 <!-- Continuous Random Play – Perfect Width & Smart Stop Button -->
-<div class="continuous-play-box" style="margin:25px auto 0;max-width:600px;padding:18px;background:var(--card-bg);border:2px solid var(--card-border);border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
-   <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:center;">
-      <strong style="flex:1 1 100%;text-align:center;font-size:1.35em;color:var(--header-color);">Continuous Random Play</strong>
-      
-      <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:center;">
-         <label style="cursor:pointer;font-size:1.15em;white-space:nowrap;">
-           <input type="radio" name="continuousGap" value="30" id="gap30">
-<label for="gap30">30-sec gap</label>
-<input type="radio" name="continuousGap" value="45" id="gap45">
-<label for="gap45">45-sec gap</label>
-         </label>
-      </div>
-      
-      <button id="stopContinuousBtn" 
-              style="display:none;background:#d32f2f;color:white;padding:10px 24px;border:none;border-radius:10px;font-size:1.1em;font-weight:bold;cursor:pointer;">
-         Stop Continuous Play
-      </button>
-      
-      <small style="flex:1 1 100%;text-align:center;color:var(--subheader-color);margin-top:8px;font-style:italic;">
-         Applies only to the 3 top buttons
-      </small>
+<div class="continuous-play-box" style="text-align:center; padding:12px; border:2px solid var(--primary); border-radius:12px; margin:15px 0;">
+   <strong>Continuous Random Play</strong><br><br>
+   
+   <input type="radio" name="continuousGap" value="30" id="gap30">
+   <label for="gap30">30-sec gap</label> &nbsp;&nbsp;
+   <input type="radio" name="continuousGap" value="45" id="gap45" checked>
+   <label for="gap45">45-sec gap</label>
+
+   <!-- ←←← THIS IS THE NEW TIMER LINE ←←← -->
+   <div id="countdownTimer" style="margin-top:12px; font-size:1.1em; font-weight:bold; color:var(--primary); display:none;">
+      Next shloka in <span id="timerSeconds">45</span> sec
    </div>
+
+   <button id="stopContinuousBtn" class="stop-btn" style="display:none; margin-top:12px; padding:8px 16px; background:red; color:white; border:none; border-radius:8px; cursor:pointer;">
+      Stop Continuous Play
+   </button>
+   <br><small>Applies only to the 3 top buttons</small>
 </div>
          <audio id="audioPlayer" controls data-intro="Use these controls to play, pause, or scrub through the audio." data-title="Audio Player"></audio>
          <div class="radio-group" data-intro="Pick the chanting style for display and playback" data-title="Chanting Style">
@@ -2410,113 +2405,119 @@
                });
             });
  
-// ——— FINAL CLEAN & STABLE CONTINUOUS PLAY + 45-SEC GAP + WORKS ON LOCKED SCREEN ———
+// ——— CONTINUOUS PLAY WITH LIVE COUNTDOWN + WORKS WHEN SCREEN OFF ———
 let lastRandomIntent = null;
 let continuousPlayEnabled = false;
-let continuousDelay = 45000;  // ← 45 seconds (you asked for this)
-let nextTimer = null;         // Prevents timer overlap & freezing
+let continuousDelay = 45000;
+let nextTimer = null;
+let countdownInterval = null;
+let wakeLock = null;
+let bgEnabled = false;
 
 const audioPlayer = document.getElementById('audioPlayer');
 const stopBtn = document.getElementById('stopContinuousBtn');
+const timerDisplay = document.getElementById('timerSeconds');
 
-// Schedule next random shloka with exact gap
+function updateCountdown(seconds) {
+   timerDisplay.textContent = seconds;
+   document.getElementById('countdownTimer').style.color = seconds <= 10 ? 'red' : 'var(--primary)';
+}
+
+function startCountdown() {
+   let secondsLeft = Math.round(continuousDelay / 1000);
+   updateCountdown(secondsLeft);
+   clearInterval(countdownInterval);
+   countdownInterval = setInterval(() => {
+      secondsLeft--;
+      if (secondsLeft <= 0) {
+         updateCountdown(0);
+         clearInterval(countdownInterval);
+      } else {
+         updateCountdown(secondsLeft);
+      }
+   }, 1000);
+}
+
 function scheduleNext() {
    if (!continuousPlayEnabled || !lastRandomIntent || nextTimer) return;
+   startCountdown();
    nextTimer = setTimeout(() => {
       nextTimer = null;
       if (continuousPlayEnabled) sendCommand(lastRandomIntent);
    }, continuousDelay);
 }
 
-// Hook into sendCommand only once
+async function enableWakeLock() {
+   if (bgEnabled) return;
+   bgEnabled = true;
+   if ('wakeLock' in navigator) {
+      try { wakeLock = await navigator.wakeLock.request('screen'); }
+      catch(err) { console.log('Wake Lock failed:', err); }
+   }
+   if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      const v = document.createElement('video');
+      v.src = 'data:video/mp4;base64,AAAAIGZ0eXBtcDQyAAACAG1wNDJtcDQxaXMzAAACbGF2ZjU4LjI5LjEwMAA=';
+      v.loop = v.muted = v.playsInline = true;
+      v.style.position = 'fixed'; v.style.left = v.style.top = '-100px';
+      v.style.width = v.style.height = '1px'; v.style.opacity = '0';
+      document.body.appendChild(v);
+      v.play().catch(() => {});
+   }
+}
+
+// Hook sendCommand
 if (!window.cpReady) {
-   const originalSendCommand = window.sendCommand;
+   const orig = window.sendCommand;
    window.sendCommand = function(intent) {
-      originalSendCommand(intent);
-      if (['SGSFirstPaada', 'SringeriPaada', 'ThirdPaada'].includes(intent)) {
+      orig(intent);
+      if (['SGSFirstPaada','SringeriPaada','ThirdPaada'].includes(intent)) {
          const checked = document.querySelector('input[name="continuousGap"]:checked');
          if (checked) {
             lastRandomIntent = intent;
             continuousPlayEnabled = true;
-            continuousDelay = checked.value === '30' ? 30000 : 45000;  // 30s or 45s
+            continuousDelay = checked.value === '30' ? 30000 : 45000;
             stopBtn.style.display = 'inline-block';
+            document.getElementById('countdownTimer').style.display = 'block';
             audioPlayer.onended = scheduleNext;
+            enableWakeLock();
          }
       }
    };
    window.cpReady = true;
 }
 
-// Radio button change (30 sec or 45 sec)
+// Radio change
 document.querySelectorAll('input[name="continuousGap"]').forEach(radio => {
    radio.addEventListener('change', () => {
       const checked = document.querySelector('input[name="continuousGap"]:checked');
       if (checked) {
          continuousDelay = checked.value === '30' ? 30000 : 45000;
          stopBtn.style.display = 'inline-block';
+         document.getElementById('countdownTimer').style.display = 'block';
          if (lastRandomIntent) audioPlayer.onended = scheduleNext;
       } else {
-         continuousPlayEnabled = false;
-         stopBtn.style.display = 'none';
-         audioPlayer.onended = null;
-         lastRandomIntent = null;
-         if (nextTimer) { clearTimeout(nextTimer); nextTimer = null; }
+         stopContinuousPlay();
       }
    });
 });
 
-// Stop button
-stopBtn.onclick = () => {
-   document.querySelectorAll('input[name="continuousGap"]').forEach(r => r.checked = false);
+function stopContinuousPlay() {
    continuousPlayEnabled = false;
    stopBtn.style.display = 'none';
+   document.getElementById('countdownTimer').style.display = 'none';
    audioPlayer.onended = null;
    lastRandomIntent = null;
    if (nextTimer) { clearTimeout(nextTimer); nextTimer = null; }
-};
-// ——— PLAY WHEN SCREEN IS OFF (Android + iPhone) — NO DESKTOP FREEZE ———
-let wakeLock = null;
-let bgEnabled = false;
-
-async function enableWakeLock() {
-   if (bgEnabled) return;
-   bgEnabled = true;
-
-   // 1. Modern Wake Lock API (best for Android Chrome & Firefox)
-   if ('wakeLock' in navigator) {
-      try {
-         wakeLock = await navigator.wakeLock.request('screen');
-         console.log('Wake Lock activated – audio continues when screen off');
-         
-         // Re-request if the screen turns off and on again
-         wakeLock.addEventListener('release', () => {
-            console.log('Wake Lock released');
-         });
-      } catch (err) {
-         console.log('Wake Lock not supported or denied:', err);
-      }
-   }
-
-   // 2. Fallback: tiny silent video trick — but ONLY on touch devices (phones/tablets)
-   if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-      const v = document.createElement('video');
-      v.src = 'data:video/mp4;base64,AAAAIGZ0eXBtcDQyAAACAG1wNDJtcDQxaXMzAAACbGF2ZjU4LjI5LjEwMAA=';
-      v.loop = true;
-      v.muted = true;
-      v.playsInline = true;
-      v.style.position = 'fixed';
-      v.style.left = v.style.top = '-100px';
-      v.style.width = v.style.height = '1px';
-      v.style.opacity = '0';
-      document.body.appendChild(v);
-      v.play().catch(() => {});
-   }
+   if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+   if (wakeLock) { wakeLock.release(); wakeLock = null; }
+   updateCountdown(45);
 }
 
-// Activate on first user interaction (required by browsers)
+stopBtn.onclick = stopContinuousPlay;
+document.getElementById('countdownTimer').style.display = 'none';
 document.body.addEventListener('click', enableWakeLock, { once: true });
 document.body.addEventListener('touchstart', enableWakeLock, { once: true });
-document.getElementById('audioPlayer').addEventListener('play', enableWakeLock);
+audioPlayer.addEventListener('play', enableWakeLock);
 
 </script>
 </body>
