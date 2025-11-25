@@ -1,86 +1,53 @@
-let totalFiles = 0;
-let cachedFiles = 0;
-const CACHE_NAME = 'bhagavad-gita-v10';  // ← Change this number when you update!
+const CACHE_NAME = 'bhagavad-gita-v11';   // ← Change version when updating
 
-const CORE_ASSETS = [
-   './',
-   'offline.html',
-   'https://fonts.googleapis.com/css2?family=Ramabhadra&family=Outfit:wght@300&family=Noto+Sans+Telugu&display=swap',
-   'https://unpkg.com/intro.js/minified/introjs.min.css',
-   'https://unpkg.com/intro.js/minified/intro.min.js'
-];
+let allAudioUrls = [];   // Will be filled by main page
 
-let totalFiles = 0;
-let cachedFiles = 0;
-
-self.addEventListener('install', event => {
-   event.waitUntil(
-      caches.open(CACHE_NAME).then(cache => {
-         console.log('Caching core files...');
-         return cache.addAll(CORE_ASSETS);
-      }).then(() => {
-         // Count total files to cache (main page will send this)
-         self.clients.matchAll().then(clients => {
-            clients.forEach(client => client.postMessage({ type: 'START_CACHING' }));
-         });
-      })
-   );
-   self.skipWaiting();
+self.addEventListener('message', event => {
+   if (event.data && event.data.type === 'CACHE_URLS') {
+      allAudioUrls = event.data.urls;
+      // Start pre-caching everything
+      event.waitUntil(preCacheAll());
+   }
+   if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
-self.addEventListener('activate', event => {
-   event.waitUntil(
-      caches.keys().then(keys => Promise.all(
-         keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
-      ))
-   );
-   self.clients.claim();
-});
+async function preCacheAll() {
+   const cache = await caches.open(CACHE_NAME);
+   let cached = 0;
+   const total = allAudioUrls.length;
 
-self.addEventListener('fetch', event => {
-   if (event.request.method !== 'GET') return;
-
-   event.respondWith(
-      caches.match(event.request).then(cached => {
-         if (cached) {
-            cachedFiles++;
-            updateProgress();
-            return cached;
+   for (const url of allAudioUrls) {
+      try {
+         const response = await fetch(url, { cache: 'no-cache' });
+         if (response.ok) {
+            await cache.put(url, response);
+            cached++;
+            // Send progress to main page
+            self.clients.matchAll().then(clients => {
+               clients.forEach(client => client.postMessage({
+                  type: 'PROGRESS',
+                  percent: Math.round((cached / total) * 100),
+                  cached: cached,
+                  total: total
+               }));
+            });
          }
+      } catch (e) { /* ignore failed files */ }
+   }
 
-         return fetch(event.request).then(response => {
-            if (response && response.status === 200) {
-               cachedFiles++;
-               updateProgress();
-               const clone = response.clone();
-               caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-            }
-            return response;
-         }).catch(() => {
-            return new Response('Offline — Gita is available', { headers: { 'Content-Type': 'text/plain' } });
-         });
-      })
-   );
-});
-
-function updateProgress() {
-   if (totalFiles === 0) return;
-   const percent = Math.round((cachedFiles / totalFiles) * 100);
+   // Done!
    self.clients.matchAll().then(clients => {
-      clients.forEach(client => client.postMessage({
-         type: 'PROGRESS',
-         percent: percent,
-         cached: cachedFiles,
-         total: totalFiles
-      }));
+      clients.forEach(client => client.postMessage({ type: 'CACHING_COMPLETE' }));
    });
 }
 
-self.addEventListener('message', event => {
-   if (event.data?.type === 'SET_TOTAL') {
-      totalFiles = event.data.total;
-      cachedFiles = event.data.cached || 0;
-   } else if (event.data?.type === 'SKIP_WAITING') {
-      self.skipWaiting();
-   }
+// Regular fetch (for normal page use)
+self.addEventListener('fetch', event => {
+   if (event.request.method !== 'GET') return;
+   event.respondWith(
+      caches.match(event.request).then(cached => cached || fetch(event.request))
+   );
 });
+
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', () => self.clients.claim());
