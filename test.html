@@ -2410,31 +2410,35 @@
                });
             });
  
-// ——— FINAL WORKING CODE: NO FREEZE + 30/60 SEC GAP + WORKS ON LOCKED SCREEN ———
+// ——— FINAL CLEAN & STABLE CONTINUOUS PLAY + 45-SEC GAP + WORKS ON LOCKED SCREEN ———
 let lastRandomIntent = null;
 let continuousPlayEnabled = false;
-let continuousDelay = 60000;
+let continuousDelay = 45000;  // ← 45 seconds (you asked for this)
+let nextTimer = null;         // Prevents timer overlap & freezing
 
 const audioPlayer = document.getElementById('audioPlayer');
 const stopBtn = document.getElementById('stopContinuousBtn');
 
+// Schedule next random shloka with exact gap
 function scheduleNext() {
-   if (!continuousPlayEnabled || !lastRandomIntent) return;
-   setTimeout(() => {
+   if (!continuousPlayEnabled || !lastRandomIntent || nextTimer) return;
+   nextTimer = setTimeout(() => {
+      nextTimer = null;
       if (continuousPlayEnabled) sendCommand(lastRandomIntent);
    }, continuousDelay);
 }
 
+// Hook into sendCommand only once
 if (!window.cpReady) {
-   const orig = window.sendCommand;
+   const originalSendCommand = window.sendCommand;
    window.sendCommand = function(intent) {
-      orig(intent);
-      if (['SGSFirstPaada','SringeriPaada','ThirdPaada'].includes(intent)) {
+      originalSendCommand(intent);
+      if (['SGSFirstPaada', 'SringeriPaada', 'ThirdPaada'].includes(intent)) {
          const checked = document.querySelector('input[name="continuousGap"]:checked');
          if (checked) {
             lastRandomIntent = intent;
             continuousPlayEnabled = true;
-            continuousDelay = checked.value == '30' ? 30000 : 60000;
+            continuousDelay = checked.value === '30' ? 30000 : 45000;  // 30s or 45s
             stopBtn.style.display = 'inline-block';
             audioPlayer.onended = scheduleNext;
          }
@@ -2443,11 +2447,12 @@ if (!window.cpReady) {
    window.cpReady = true;
 }
 
+// Radio button change (30 sec or 45 sec)
 document.querySelectorAll('input[name="continuousGap"]').forEach(radio => {
    radio.addEventListener('change', () => {
       const checked = document.querySelector('input[name="continuousGap"]:checked');
       if (checked) {
-         continuousDelay = checked.value == '30' ? 30000 : 60000;
+         continuousDelay = checked.value === '30' ? 30000 : 45000;
          stopBtn.style.display = 'inline-block';
          if (lastRandomIntent) audioPlayer.onended = scheduleNext;
       } else {
@@ -2455,43 +2460,54 @@ document.querySelectorAll('input[name="continuousGap"]').forEach(radio => {
          stopBtn.style.display = 'none';
          audioPlayer.onended = null;
          lastRandomIntent = null;
+         if (nextTimer) { clearTimeout(nextTimer); nextTimer = null; }
       }
    });
 });
 
+// Stop button
 stopBtn.onclick = () => {
    document.querySelectorAll('input[name="continuousGap"]').forEach(r => r.checked = false);
    continuousPlayEnabled = false;
    stopBtn.style.display = 'none';
    audioPlayer.onended = null;
    lastRandomIntent = null;
+   if (nextTimer) { clearTimeout(nextTimer); nextTimer = null; }
 };
 
-// ——— WORKS WHEN SCREEN IS OFF (Android + iPhone) ———
-// This is the method used by YouTube, Spotify, etc.
+// ——— WORKS WHEN PHONE SCREEN IS OFF (Android + iPhone) ———
+// Safe version: no memory leak, no desktop freeze
 let bgEnabled = false;
-const silent = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
-silent.loop = true;
-silent.volume = 0;
 
 function enableBg() {
    if (bgEnabled) return;
    bgEnabled = true;
+
+   // Silent audio to keep browser awake
+   const silent = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+   silent.loop = true;
+   silent.volume = 0;
    silent.play().catch(() => {});
-   const v = document.createElement('video');
-   v.src = 'data:video/mp4;base64,AAAAIGZ0eXBtcDQyAAACAG1wNDJtcDQxaXMzAAACbGF2ZjU4LjI5LjEwMAA=';
-   v.loop = v.muted = true;
-   v.style.display = 'none';
-   document.body.appendChild(v);
-   v.play().catch(() => {});
+
+   // Tiny silent video (only on mobile — prevents desktop freeze)
+   if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      const v = document.createElement('video');
+      v.src = 'data:video/mp4;base64,AAAAIGZ0eXBtcDQyAAACAG1wNDJtcDQxaXMzAAACbGF2ZjU4LjI5LjEwMAA=';
+      v.loop = v.muted = true;
+      v.style.position = 'absolute';
+      v.style.left = v.style.top = '-9999px';
+      v.style.width = v.style.height = '1px';
+      document.body.appendChild(v);
+      v.play().catch(() => {});
+   }
 }
 
-// Activate on first tap/ LX
+// Activate on first user interaction
 document.body.addEventListener('click', enableBg, { once: true });
 document.body.addEventListener('touchstart', enableBg, { once: true });
+audioPlayer.addEventListener('play', enableBg);
 
-// Also activate when audio plays
-document.getElementById('audioPlayer').addEventListener('play', enableBg);
+// ——————————————————————————————————————
 </script>
 </body>
 </html>
