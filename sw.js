@@ -1,7 +1,7 @@
 const CACHE_NAME = 'bhagavad-gita-v15';
 
 self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
-self.addEventListener('activate', e => e.waitWaiting(self.clients.claim()));
+self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));  // ← FIXED HERE
 
 let urlsToCache = [];
 let total = 0;
@@ -19,13 +19,15 @@ self.addEventListener('message', async event => {
       const url = urlsToCache[i];
       try {
         const res = await fetch(url, { cache: 'reload' });
-        if (res.ok) {
+        if (res && res.ok) {
           await cache.put(url, res.clone());
           cached++;
           const percent = Math.round((cached / total) * 100);
           event.ports[0].postMessage({ type: 'PROGRESS', percent, cached, total });
         }
-      } catch (e) {}
+      } catch (e) {
+        console.log('Failed:', url);
+      }
     }
     event.ports[0].postMessage({ type: 'COMPLETE' });
   }
