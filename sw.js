@@ -1,35 +1,34 @@
-const CACHE_NAME = 'bhagavad-gita-v15';
+const CACHE_NAME = 'bhagavad-gita-v16';
 
 self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
-self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));  // ← FIXED HERE
-
-let urlsToCache = [];
-let total = 0;
-let cached = 0;
+self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 
 self.addEventListener('message', async event => {
-  if (event.data?.type === 'START_USER_CACHING') {
-    urlsToCache = event.data.urls;
-    total = urlsToCache.length;
-    cached = 0;
-
+  if (event.data?.type === 'CACHE_CHUNK') {
+    const { urls, startIdx } = event.data;
     const cache = await caches.open(CACHE_NAME);
+    let success = 0;
 
-    for (let i = 0; i < urlsToCache.length; i++) {
-      const url = urlsToCache[i];
+    // Cache one small batch (50 files max)
+    for (let i = 0; i < urls.length; i++) {
+      const url = urls[i];
       try {
         const res = await fetch(url, { cache: 'reload' });
-        if (res && res.ok) {
+        if (res?.ok) {
           await cache.put(url, res.clone());
-          cached++;
-          const percent = Math.round((cached / total) * 100);
-          event.ports[0].postMessage({ type: 'PROGRESS', percent, cached, total });
+          success++;
         }
-      } catch (e) {
-        console.log('Failed:', url);
-      }
+      } catch (e) {}
+      // Tiny breathing pause every 5 files
+      if (i % 5 === 4) await new Promise(r => setTimeout(r, 50));
     }
-    event.ports[0].postMessage({ type: 'COMPLETE' });
+
+    event.ports[0].postMessage({
+      type: 'CHUNK_DONE',
+      startIdx,
+      success,
+      totalInChunk: urls.length
+    });
   }
 });
 
