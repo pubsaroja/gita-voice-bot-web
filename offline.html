@@ -872,19 +872,26 @@
             </select>
             <div id="verseTableContent" class="verse-grid"></div>
          </div>
-  <!-- OFFLINE STATUS BADGE -->
-<!-- OFFLINE STATUS BADGE -->
-  <div id="offlineStatus" style="position:fixed;top:10px;left:10px;background:#28a745;color:white;padding:8px 16px;border-radius:10px;font-weight:bold;z-index:9999;display:none;">
-    Offline Mode Active
+<!-- OFFLINE STATUS -->
+  <div id="offlineStatus" style="position:fixed;top:10px;left:10px;background:#28a745;color:white;padding:10px 20px;border-radius:12px;font-weight:bold;z-index:9999;display:none;">
+    Fully Offline Ready
   </div>
 
-  <!-- CACHING PROGRESS BAR -->
+  <!-- TRIGGER BUTTON (place this somewhere visible in your page, e.g. below the main buttons) -->
+  <div style="margin:30px auto;text-align:center;">
+    <button id="startOfflineDownload" style="background:#28a745;color:white;padding:15px 30px;font-size:1.3em;border:none;border-radius:12px;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+      Download All Audio for Offline Use (One-Time)
+    </button>
+    <p style="margin-top:10px;color:#666;">After download, works forever without internet</p>
+  </div>
+
+  <!-- PROGRESS BAR (only shows when button is clicked) -->
   <div id="cachingProgress" style="position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:99999;display:none;flex-direction:column;justify-content:center;align-items:center;color:white;font-family:Outfit,sans-serif;">
-    <h2 style="margin-bottom:20px;">Downloading Bhagavad Gita for Offline Use</h2>
-    <div style="width:80%;max-width:600px;background:#333;border-radius:12px;overflow:hidden;">
-      <div id="progressBar" style="width:0%;height:40px;background:#28a745;transition:width 0.6s;"></div>
+    <h2>Downloading All 700+ Shlokas...</h2>
+    <div style="width:80%;max-width:600px;background:#333;border-radius:12px;overflow:hidden;margin:20px 0;">
+      <div id="progressBar" style="width:0%;height:40px;background:#28a745;transition:width 0.5s;"></div>
     </div>
-    <p id="progressText" style="margin-top:20px;font-size:1.4em;font-weight:bold;">0% (0/4218)</p>
+    <p id="progressText" style="font-size:1.5em;font-weight:bold;">0%</p>
   </div>
          
          <script>
@@ -2526,11 +2533,7 @@
 
 
 
-    // FINAL WORKING AUTO-CACHING — NO SYNTAX ERRORS
-    const cachingDiv = document.getElementById('cachingProgress');
-    const progressBar = document.getElementById('progressBar');
-    const progressText = document.getElementById('progressText');
-
+ // Generate all URLs
     const allUrls = [];
     for (let ch = 1; ch <= 18; ch++) {
       const verses = [47,72,43,42,29,47,30,28,34,42,55,20,34,27,20,24,28,78][ch-1];
@@ -2544,32 +2547,54 @@
       }
     }
 
+    document.getElementById('startOfflineDownload').addEventListener('click', () => {
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        const channel = new MessageChannel();
+        const progressDiv = document.getElementById('cachingProgress');
+        const bar = document.getElementById('progressBar');
+        const text = document.getElementById('progressText');
+
+        progressDiv.style.display = 'flex';
+        text.textContent = '0%';
+
+        channel.port1.onmessage = e => {
+          if (e.data.type === 'PROGRESS') {
+            bar.style.width = e.data.percent + '%';
+            text.textContent = `${e.data.percent}% (${e.data.cached}/${e.data.total})`;
+          }
+          if (e.data.type === 'COMPLETE') {
+            setTimeout(() => {
+              progressDiv.style.display = 'none';
+              document.getElementById('offlineStatus').style.display = 'block';
+              document.getElementById('startOfflineDownload').textContent = 'Fully Downloaded & Offline Ready!';
+              document.getElementById('startOfflineDownload').disabled = true;
+            }, 1000);
+          }
+        };
+
+        navigator.serviceWorker.controller.postMessage(
+          { type: 'START_USER_CACHING', urls: allUrls },
+          [channel.port2]
+        );
+      }
+    });
+
+    // Auto-show button only if not fully cached
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js')
-        .then(() => navigator.serviceWorker.ready)
-        .then(reg => {
-          if (!reg.active) return;
-          cachingDiv.style.display = 'flex';
-          progressText.textContent = `0% (0/${allUrls.length})`;
-
-          const channel = new MessageChannel();
-          channel.port1.onmessage = e => {
-            if (e.data.type === 'PROGRESS') {
-              progressBar.style.width = e.data.percent + '%';
-              progressText.textContent = `${e.data.percent}% (${e.data.cached}/${e.data.total})`;
+      navigator.serviceWorker.ready.then(() => {
+        caches.open('bhagavad-gita-v15').then(cache => {
+          cache.keys().then(keys => {
+            if (keys.length > 4000) {
+              document.getElementById('offlineStatus').style.display = 'block';
+              document.getElementById('startOfflineDownload').style.display = 'none';
             }
-            if (e.data.type === 'COMPLETE') {
-              setTimeout(() => {
-                cachingDiv.style.display = 'none';
-                document.getElementById('offlineStatus').style.display = 'block';
-              }, 1500);
-            }
-          };
-
-          reg.active.postMessage({ type: 'START_CACHING', urls: allUrls }, [channel.port2]);
-        })
-        .catch(err => console.error('SW error:', err));
+          });
+        });
+      });
     }
+  </script>
+</body>
+</html>
   </script>
 </body>
 </html>
