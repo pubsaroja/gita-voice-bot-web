@@ -1,22 +1,29 @@
-const CACHE_NAME = 'bhagavad-gita-v14';
+const CACHE_NAME = 'bhagavad-gita-v15';
 
 self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
-self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+self.addEventListener('activate', e => e.waitWaiting(self.clients.claim()));
+
+let urlsToCache = [];
+let total = 0;
+let cached = 0;
 
 self.addEventListener('message', async event => {
-  if (event.data?.type === 'START_CACHING' && event.data.urls) {
-    const urls = event.data.urls;
-    const cache = await caches.open(CACHE_NAME);
-    let cached = 0;
+  if (event.data?.type === 'START_USER_CACHING') {
+    urlsToCache = event.data.urls;
+    total = urlsToCache.length;
+    cached = 0;
 
-    for (const url of urls) {
+    const cache = await caches.open(CACHE_NAME);
+
+    for (let i = 0; i < urlsToCache.length; i++) {
+      const url = urlsToCache[i];
       try {
         const res = await fetch(url, { cache: 'reload' });
         if (res.ok) {
-          await cache.put(url, res);
+          await cache.put(url, res.clone());
           cached++;
-          const percent = Math.round((cached / urls.length) * 100);
-          event.ports[0].postMessage({ type: 'PROGRESS', percent, cached, total: urls.length });
+          const percent = Math.round((cached / total) * 100);
+          event.ports[0].postMessage({ type: 'PROGRESS', percent, cached, total });
         }
       } catch (e) {}
     }
