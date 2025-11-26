@@ -873,9 +873,20 @@
             <div id="verseTableContent" class="verse-grid"></div>
          </div>
   <!-- OFFLINE STATUS BADGE -->
+<!-- OFFLINE STATUS BADGE -->
   <div id="offlineStatus" style="position:fixed;top:10px;left:10px;background:#28a745;color:white;padding:8px 16px;border-radius:10px;font-weight:bold;z-index:9999;display:none;">
     Offline Mode Active
   </div>
+
+  <!-- CACHING PROGRESS BAR -->
+  <div id="cachingProgress" style="position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:99999;display:none;flex-direction:column;justify-content:center;align-items:center;color:white;font-family:Outfit,sans-serif;">
+    <h2 style="margin-bottom:20px;">Downloading Bhagavad Gita for Offline Use</h2>
+    <div style="width:80%;max-width:600px;background:#333;border-radius:12px;overflow:hidden;">
+      <div id="progressBar" style="width:0%;height:40px;background:#28a745;transition:width 0.6s;"></div>
+    </div>
+    <p id="progressText" style="margin-top:20px;font-size:1.4em;font-weight:bold;">0% (0/4218)</p>
+  </div>
+         
          <script>
             // Global variables holding text file contents
             let sgsTeluguContent = '';
@@ -2514,7 +2525,7 @@
 
 
 
-  <script>
+
     // FINAL WORKING AUTO-CACHING — NO SYNTAX ERRORS
     const cachingDiv = document.getElementById('cachingProgress');
     const progressBar = document.getElementById('progressBar');
