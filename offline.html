@@ -2586,6 +2586,11 @@ const allUrls = [];
         document.getElementById('startOfflineDownload').style.display = 'none';
       }
     }));
+
+            if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .catch(err => console.log('SW failed:', err));
+}
   </script>
 </body>
 </html>
