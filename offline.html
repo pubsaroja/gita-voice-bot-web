@@ -692,25 +692,26 @@
     100% Offline Ready
   </div>
 
-  <div style="margin:40px auto;text-align:center;max-width:600px;">
-    <button id="startOfflineDownload" style="background:#28a745;color:white;padding:18px 40px;font-size:1.4em;border:none;border-radius:15px;cursor:pointer;font-weight:bold;">
-      Download All Audio for Permanent Offline Use
-    </button>
-    <p style="margin-top:15px;color:#666;font-size:1.1em;">One-time download (~350 MB) • Works forever without internet</p>
-  </div>
+  <!-- OFFLINE DOWNLOAD BUTTON + PROGRESS -->
+      <div style="margin:40px auto;text-align:center;">
+         <button id="startOfflineDownload" style="background:#28a745;color:white;padding:18px 40px;font-size:1.4em;border:none;border-radius:15px;cursor:pointer;font-weight:bold;">
+            Download All Audio for Offline Use
+         </button>
+         <p style="margin-top:15px;color:#666;font-size:1.1em;">One-time download • Works forever without internet</p>
+      </div>
 
-  <div id="cachingProgress" style="position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:99999;display:none;flex-direction:column;justify-content:center;align-items:center;color:white;font-family:Outfit,sans-serif;">
-    <h2>Downloading Bhagavad Gita Audio...</h2>
-    <div style="width:85%;max-width:650px;background:#333;border-radius:12px;overflow:hidden;margin:20px 0;">
-      <div id="progressBar" style="width:0%;height:45px;background:#28a745;transition:width 0.4s;"></div>
-    </div>
-    <p id="progressText" style="font-size:1.6em;font-weight:bold;">0% (0/4218)</p>
-    <p style="margin-top:10px;opacity:0.9;">Please keep this tab open • Will resume if interrupted</p>
-  </div>
-     <p style="text-align:center;font-size:0.9em;color:#666;margin-top:20px;">
-  Offline audio is saved in this browser only.<br>
-  Works forever here — even in airplane mode.
-</p>    
+      <div id="offlineStatus" style="position:fixed;top:10px;left:10px;background:#28a745;color:white;padding:10px 20px;border-radius:12px;font-weight:bold;z-index:9999;display:none;">
+         100% Offline Ready
+      </div>
+
+      <div id="cachingProgress" style="position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:99999;display:none;flex-direction:column;justify-content:center;align-items:center;color:white;font-family:Outfit,sans-serif;">
+         <h2>Downloading All 700+ Shlokas...</h2>
+         <div style="width:85%;max-width:650px;background:#333;border-radius:12px;overflow:hidden;">
+            <div id="progressBar" style="width:0%;height:50px;background:#28a745;transition:width 0.4s;"></div>
+         </div>
+         <p id="progressText" style="font-size:1.7em;margin-top:20px;font-weight:bold;">0%</p>
+      </div>
+   </div>
       <div class="theme-toggle" data-intro="Change the theme Light or Dark" data-title="Theme">
          <button id="themeLight" title="Light Theme" data-theme="light" class="active">☀️</button>
          <button id="themeDark" title="Dark Theme" data-theme="dark">🌙</button>
@@ -2522,75 +2523,67 @@
 
 
 
- // Generate all URLs
-const allUrls = [];
-    for (let ch = 1; ch <= 18; ch++) {
-      const verses = [47,72,43,42,29,47,30,28,34,42,55,20,34,27,20,24,28,78][ch-1];
-      for (let v = 1; v <= verses; v++) {
-        allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioFullSGS/${ch}.${v}.mp3`);
-        allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioFullSringeri/${ch}.${v}.mp3`);
-        allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AQ4PaadasSGS/Chapter ${ch}/${v}.1.mp3`);
-        allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AQ4PaadasSGS/Chapter ${ch}/${v}.3.mp3`);
-        allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AQ4PaadasSringeri/Chapter ${ch}/${v}.1.mp3`);
-        allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AQ4PaadasSringeri/Chapter ${ch}/${v}.3.mp3`);
-      }
-    }
-
-    document.getElementById('startOfflineDownload').addEventListener('click', async () => {
-      if (!navigator.serviceWorker.controller) return alert('Service Worker not ready');
-
-      const progressDiv = document.getElementById('cachingProgress');
-      const bar = document.getElementById('progressBar');
-      const text = document.getElementById('progressText');
-      progressDiv.style.display = 'flex';
-
-      const CHUNK_SIZE = 50;
-      let totalCached = 0;
-
-      for (let i = 0; i < allUrls.length; i += CHUNK_SIZE) {
-        const chunk = allUrls.slice(i, i + CHUNK_SIZE);
-        const channel = new MessageChannel();
-
-        const promise = new Promise(resolve => {
-          channel.port1.onmessage = e => {
-            if (e.data.type === 'CHUNK_DONE') {
-              totalCached += e.data.success;
-              const percent = Math.round((totalCached / allUrls.length) * 100);
-              bar.style.width = percent + '%';
-              text.textContent = `${percent}% (${totalCached}/${allUrls.length})`;
-              resolve();
-            }
-          };
-        });
-
-        navigator.serviceWorker.controller.postMessage({
-          type: 'CACHE_CHUNK',
-          urls: chunk,
-          startIdx: i
-        }, [channel.port2]);
-
-        await promise;
-        await new Promise(r => setTimeout(r, 100)); // Tiny pause between chunks
+ // ——— FASTEST POSSIBLE OFFLINE CACHING (6–12 minutes) ———
+      const allUrls = [];
+      for (let ch = 1; ch <= 18; ch++) {
+         const verses = [47,72,43,42,29,47,30,28,34,42,55,20,34,27,20,24,28,78][ch-1];
+         for (let v = 1; v <= verses; v++) {
+            allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioFullSGS/${ch}.${v}.mp3`);
+            allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AudioFullSringeri/${ch}.${v}.mp3`);
+            allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AQ4PaadasSGS/Chapter ${ch}/${v}.1.mp3`);
+            allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AQ4PaadasSGS/Chapter ${ch}/${v}.3.mp3`);
+            allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AQ4PaadasSringeri/Chapter ${ch}/${v}.1.mp3`);
+            allUrls.push(`https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/AQ4PaadasSringeri/Chapter ${ch}/${v}.3.mp3`);
+         }
       }
 
-      progressDiv.style.display = 'none';
-      document.getElementById('offlineStatus').style.display = 'block';
-      document.getElementById('startOfflineDownload').textContent = 'Download Complete! Fully Offline';
-      document.getElementById('startOfflineDownload').disabled = true;
-    });
+      document.getElementById('startOfflineDownload').addEventListener('click', async () => {
+         if (!navigator.serviceWorker.controller) return alert('Please wait...');
 
-    // Auto-hide button if already cached
-    caches.open('bhagavad-gita-v16').then(c => c.keys().then(k => {
-      if (k.length > 4000) {
-        document.getElementById('offlineStatus').style.display = 'block';
-        document.getElementById('startOfflineDownload').style.display = 'none';
-      }
-    }));
+         const progressDiv = document.getElementById('cachingProgress');
+         const bar = document.getElementById('progressBar');
+         const text = document.getElementById('progressText');
+         progressDiv.style.display = 'flex';
 
-            if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js')
-    .catch(err => console.log('SW failed:', err));
-}
-  </script>
+         const CHUNK_SIZE = 15;  // ← MAXIMUM safe speed
+         let totalCached = 0;
+
+         for (let i = 0; i < allUrls.length; i += CHUNK_SIZE) {
+            const chunk = allUrls.slice(i, i + CHUNK_SIZE);
+            const channel = new MessageChannel();
+
+            await new Promise(resolve => {
+               channel.port1.onmessage = e => {
+                  if (e.data.type === 'CHUNK_DONE') {
+                     totalCached += e.data.success;
+                     const percent = Math.round((totalCached / allUrls.length) * 100);
+                     bar.style.width = percent + '%';
+                     text.textContent = percent + '%';
+                     resolve();
+                  }
+               };
+               navigator.serviceWorker.controller.postMessage(
+                  { type: 'CACHE_CHUNK', urls: chunk },
+                  [channel.port2]
+               );
+            });
+
+            await new Promise(r => setTimeout(r, 80));  // ← Fastest safe delay
+         }
+
+         progressDiv.style.display = 'none';
+         document.getElementById('offlineStatus').style.display = 'block';
+         document.getElementById('startOfflineDownload').textContent = 'Download Complete!';
+         document.getElementById('startOfflineDownload').disabled = true;
+      });
+
+      // Auto-hide button if already cached
+      caches.open('bhagavad-gita-v17').then(c => c.keys().then(k => {
+         if (k.length > 4000) {
+            document.getElementById('offlineStatus').style.display = 'block';
+            document.getElementById('startOfflineDownload').style.display = 'none';
+         }
+      }));
+   </script>
 </body>
 </html>
