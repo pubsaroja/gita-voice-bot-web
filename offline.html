@@ -688,19 +688,28 @@
       </style>
    </head>
    <body>
-      <!-- CACHING PROGRESS BAR (Divine & Beautiful) -->
-<div id="cachingProgress" style="position:fixed;top:0;left:0;width:100%;background:#00000088;z-index:99999;display:none;">
-   <div style="background:#28a745;height:8px;width:0%;transition:width 0.4s ease;" id="progressBar"></div>
-   <div style="text-align:center;color:white;padding:20px;font-family:Outfit,sans-serif;">
-      <div style="font-size:1.4em;font-weight:bold;margin-bottom:8px;">
-         Downloading Srimad Bhagavad Gita for Offline Use
-      </div>
-      <div id="progressText" style="font-size:1.2em;">Preparing cache... 0%</div>
-      <div style="font-size:0.9em;margin-top:10px;opacity:0.9;">
-         All 700 shlokas + audio will be available forever — even without internet
-      </div>
-   </div>
-</div>
+<!-- OFFLINE STATUS -->
+  <div id="offlineStatus" style="position:fixed;top:10px;left:10px;background:#28a745;color:white;padding:10px 20px;border-radius:12px;font-weight:bold;z-index:9999;display:none;">
+    Fully Offline Ready
+  </div>
+
+  <!-- TRIGGER BUTTON (place this somewhere visible in your page, e.g. below the main buttons) -->
+  <div style="margin:30px auto;text-align:center;">
+    <button id="startOfflineDownload" style="background:#28a745;color:white;padding:15px 30px;font-size:1.3em;border:none;border-radius:12px;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+      Download All Audio for Offline Use (One-Time)
+    </button>
+    <p style="margin-top:10px;color:#666;">After download, works forever without internet</p>
+  </div>
+
+  <!-- PROGRESS BAR (only shows when button is clicked) -->
+  <div id="cachingProgress" style="position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:99999;display:none;flex-direction:column;justify-content:center;align-items:center;color:white;font-family:Outfit,sans-serif;">
+    <h2>Downloading All 700+ Shlokas...</h2>
+    <div style="width:80%;max-width:600px;background:#333;border-radius:12px;overflow:hidden;margin:20px 0;">
+      <div id="progressBar" style="width:0%;height:40px;background:#28a745;transition:width 0.5s;"></div>
+    </div>
+    <p id="progressText" style="font-size:1.5em;font-weight:bold;">0%</p>
+  </div>
+         
       <div class="theme-toggle" data-intro="Change the theme Light or Dark" data-title="Theme">
          <button id="themeLight" title="Light Theme" data-theme="light" class="active">☀️</button>
          <button id="themeDark" title="Dark Theme" data-theme="dark">🌙</button>
@@ -872,28 +881,7 @@
             </select>
             <div id="verseTableContent" class="verse-grid"></div>
          </div>
-<!-- OFFLINE STATUS -->
-  <div id="offlineStatus" style="position:fixed;top:10px;left:10px;background:#28a745;color:white;padding:10px 20px;border-radius:12px;font-weight:bold;z-index:9999;display:none;">
-    Fully Offline Ready
-  </div>
 
-  <!-- TRIGGER BUTTON (place this somewhere visible in your page, e.g. below the main buttons) -->
-  <div style="margin:30px auto;text-align:center;">
-    <button id="startOfflineDownload" style="background:#28a745;color:white;padding:15px 30px;font-size:1.3em;border:none;border-radius:12px;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,0.3);">
-      Download All Audio for Offline Use (One-Time)
-    </button>
-    <p style="margin-top:10px;color:#666;">After download, works forever without internet</p>
-  </div>
-
-  <!-- PROGRESS BAR (only shows when button is clicked) -->
-  <div id="cachingProgress" style="position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:99999;display:none;flex-direction:column;justify-content:center;align-items:center;color:white;font-family:Outfit,sans-serif;">
-    <h2>Downloading All 700+ Shlokas...</h2>
-    <div style="width:80%;max-width:600px;background:#333;border-radius:12px;overflow:hidden;margin:20px 0;">
-      <div id="progressBar" style="width:0%;height:40px;background:#28a745;transition:width 0.5s;"></div>
-    </div>
-    <p id="progressText" style="font-size:1.5em;font-weight:bold;">0%</p>
-  </div>
-         
          <script>
             // Global variables holding text file contents
             let sgsTeluguContent = '';
