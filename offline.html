@@ -688,26 +688,24 @@
       </style>
    </head>
    <body>
-<!-- OFFLINE STATUS -->
-  <div id="offlineStatus" style="position:fixed;top:10px;left:10px;background:#28a745;color:white;padding:10px 20px;border-radius:12px;font-weight:bold;z-index:9999;display:none;">
-    Fully Offline Ready
+<div id="offlineStatus" style="position:fixed;top:10px;left:10px;background:#28a745;color:white;padding:10px 20px;border-radius:12px;font-weight:bold;z-index:9999;display:none;">
+    100% Offline Ready
   </div>
 
-  <!-- TRIGGER BUTTON (place this somewhere visible in your page, e.g. below the main buttons) -->
-  <div style="margin:30px auto;text-align:center;">
-    <button id="startOfflineDownload" style="background:#28a745;color:white;padding:15px 30px;font-size:1.3em;border:none;border-radius:12px;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,0.3);">
-      Download All Audio for Offline Use (One-Time)
+  <div style="margin:40px auto;text-align:center;max-width:600px;">
+    <button id="startOfflineDownload" style="background:#28a745;color:white;padding:18px 40px;font-size:1.4em;border:none;border-radius:15px;cursor:pointer;font-weight:bold;">
+      Download All Audio for Permanent Offline Use
     </button>
-    <p style="margin-top:10px;color:#666;">After download, works forever without internet</p>
+    <p style="margin-top:15px;color:#666;font-size:1.1em;">One-time download (~350 MB) • Works forever without internet</p>
   </div>
 
-  <!-- PROGRESS BAR (only shows when button is clicked) -->
   <div id="cachingProgress" style="position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:99999;display:none;flex-direction:column;justify-content:center;align-items:center;color:white;font-family:Outfit,sans-serif;">
-    <h2>Downloading All 700+ Shlokas...</h2>
-    <div style="width:80%;max-width:600px;background:#333;border-radius:12px;overflow:hidden;margin:20px 0;">
-      <div id="progressBar" style="width:0%;height:40px;background:#28a745;transition:width 0.5s;"></div>
+    <h2>Downloading Bhagavad Gita Audio...</h2>
+    <div style="width:85%;max-width:650px;background:#333;border-radius:12px;overflow:hidden;margin:20px 0;">
+      <div id="progressBar" style="width:0%;height:45px;background:#28a745;transition:width 0.4s;"></div>
     </div>
-    <p id="progressText" style="font-size:1.5em;font-weight:bold;">0%</p>
+    <p id="progressText" style="font-size:1.6em;font-weight:bold;">0% (0/4218)</p>
+    <p style="margin-top:10px;opacity:0.9;">Please keep this tab open • Will resume if interrupted</p>
   </div>
          
       <div class="theme-toggle" data-intro="Change the theme Light or Dark" data-title="Theme">
@@ -2522,7 +2520,7 @@
 
 
  // Generate all URLs
-    const allUrls = [];
+const allUrls = [];
     for (let ch = 1; ch <= 18; ch++) {
       const verses = [47,72,43,42,29,47,30,28,34,42,55,20,34,27,20,24,28,78][ch-1];
       for (let v = 1; v <= verses; v++) {
@@ -2535,54 +2533,56 @@
       }
     }
 
-    document.getElementById('startOfflineDownload').addEventListener('click', () => {
-      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    document.getElementById('startOfflineDownload').addEventListener('click', async () => {
+      if (!navigator.serviceWorker.controller) return alert('Service Worker not ready');
+
+      const progressDiv = document.getElementById('cachingProgress');
+      const bar = document.getElementById('progressBar');
+      const text = document.getElementById('progressText');
+      progressDiv.style.display = 'flex';
+
+      const CHUNK_SIZE = 50;
+      let totalCached = 0;
+
+      for (let i = 0; i < allUrls.length; i += CHUNK_SIZE) {
+        const chunk = allUrls.slice(i, i + CHUNK_SIZE);
         const channel = new MessageChannel();
-        const progressDiv = document.getElementById('cachingProgress');
-        const bar = document.getElementById('progressBar');
-        const text = document.getElementById('progressText');
 
-        progressDiv.style.display = 'flex';
-        text.textContent = '0%';
+        const promise = new Promise(resolve => {
+          channel.port1.onmessage = e => {
+            if (e.data.type === 'CHUNK_DONE') {
+              totalCached += e.data.success;
+              const percent = Math.round((totalCached / allUrls.length) * 100);
+              bar.style.width = percent + '%';
+              text.textContent = `${percent}% (${totalCached}/${allUrls.length})`;
+              resolve();
+            }
+          };
+        });
 
-        channel.port1.onmessage = e => {
-          if (e.data.type === 'PROGRESS') {
-            bar.style.width = e.data.percent + '%';
-            text.textContent = `${e.data.percent}% (${e.data.cached}/${e.data.total})`;
-          }
-          if (e.data.type === 'COMPLETE') {
-            setTimeout(() => {
-              progressDiv.style.display = 'none';
-              document.getElementById('offlineStatus').style.display = 'block';
-              document.getElementById('startOfflineDownload').textContent = 'Fully Downloaded & Offline Ready!';
-              document.getElementById('startOfflineDownload').disabled = true;
-            }, 1000);
-          }
-        };
+        navigator.serviceWorker.controller.postMessage({
+          type: 'CACHE_CHUNK',
+          urls: chunk,
+          startIdx: i
+        }, [channel.port2]);
 
-        navigator.serviceWorker.controller.postMessage(
-          { type: 'START_USER_CACHING', urls: allUrls },
-          [channel.port2]
-        );
+        await promise;
+        await new Promise(r => setTimeout(r, 100)); // Tiny pause between chunks
       }
+
+      progressDiv.style.display = 'none';
+      document.getElementById('offlineStatus').style.display = 'block';
+      document.getElementById('startOfflineDownload').textContent = 'Download Complete! Fully Offline';
+      document.getElementById('startOfflineDownload').disabled = true;
     });
 
-    // Auto-show button only if not fully cached
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then(() => {
-        caches.open('bhagavad-gita-v15').then(cache => {
-          cache.keys().then(keys => {
-            if (keys.length > 4000) {
-              document.getElementById('offlineStatus').style.display = 'block';
-              document.getElementById('startOfflineDownload').style.display = 'none';
-            }
-          });
-        });
-      });
-    }
-  </script>
-</body>
-</html>
+    // Auto-hide button if already cached
+    caches.open('bhagavad-gita-v16').then(c => c.keys().then(k => {
+      if (k.length > 4000) {
+        document.getElementById('offlineStatus').style.display = 'block';
+        document.getElementById('startOfflineDownload').style.display = 'none';
+      }
+    }));
   </script>
 </body>
 </html>
