@@ -1446,7 +1446,7 @@
                               
 async function fetchShlokaMeaning(chapter, verse) {
     try {
-      const response = await fetch('meanings_extended.txt');   // ← new file
+      const response = await fetch('meanings_extended.json');   // ← new file
       const data = await response.json();
       const key = `${chapter}.${verse}`;
       const entry = data[key];
