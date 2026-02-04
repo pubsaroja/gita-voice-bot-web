@@ -1447,7 +1447,7 @@
                               
 async function fetchShlokaMeaning(chapter, verse) {
     try {
-      const response = await fetch('https://github.com/pubsaroja/bhagavad-gita-bot/meanings_extended.json');   // ← new file
+      const response = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/meanings_extended.json');   // ← new file
       const data = await response.json();
       const key = `${chapter}.${verse}`;
       const entry = data[key];
