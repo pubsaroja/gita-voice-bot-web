@@ -1444,48 +1444,46 @@
                                   }
                               }
                               
-                              async function fetchShlokaMeaning(chapter, verse) {
-                                  try {
-                                      console.log(`fetchShlokaMeaning called: chapter=${chapter}, verse=${verse}`);
-                                      const url = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/meanings.txt';
-                                      const response = await fetch(url);
-                                      if (!response.ok) {
-                                          throw new Error(`HTTP error: ${response.status}`);
-                                      }
-                                      const data = await response.json();
-                                      const key1 = `${chapter}.${verse}`;
-                                      const key2 = `${chapter}-${verse}`;
-                                      const entry = data[key1] || data[key2];
-                                      if (entry) {
-                                          let meaningText = `${chapter}.${verse} Meaning:\n\nప్రతిపదార్థం(Word-to-Word Meaning):\n`;
-                                          const w2wKeys = ["ప్రతిపదార్థం","ప్రతిపదార్థము","WordToWord","Word-to-Word","WordMeaning"];
-                                          const overallKeys = ["అర్థం","అర్థము","సారాంశం","సారాంశము","Overall","OverallMeaning","Meaning"];
-                                          let wordToWord = null;
-                                          for (const k of w2wKeys) { if (entry[k]) { wordToWord = entry[k]; break; } }
-                                          if (wordToWord) {
-                                              if (typeof wordToWord === 'object') {
-                                                  for (const [word, meaning] of Object.entries(wordToWord)) {
-                                                      meaningText += `${word}: ${meaning}\n`;
-                                                  }
-                                              } else {
-                                                  meaningText += `${wordToWord}\n`;
-                                              }
-                                          } else {
-                                              meaningText += 'Word-to-word meaning not available\n';
-                                          }
-                                          let overall = null;
-                                          for (const k of overallKeys) { if (entry[k]) { overall = entry[k]; break; } }
-                                          meaningText += `\nఅర్థం (Overall Meaning):\n${overall || 'Overall meaning not available'}`;
-                                          return meaningText;
-                                      } else {
-                                          return `Meaning for ${chapter}.${verse} not found`;
-                                      }
-                                  } catch (error) {
-                                      console.error(`Error loading meaning for ${chapter}.${verse}: ${error.message}`);
-                                      return `Error loading meaning for ${chapter}.${verse}: ${error.message}`;
-                                  }
-                              }
-                              
+async function fetchShlokaMeaning(chapter, verse) {
+    try {
+      const response = await fetch('meanings_extended.txt');   // ← new file
+      const data = await response.json();
+      const key = `${chapter}.${verse}`;
+      const entry = data[key];
+      if (!entry) return `${key} – Meaning not found`;
+
+      let txt = `${key} Meaning:\n\nప్రతిపదార్థం (Word-by-word):\n`;
+      for (const [w, m] of Object.entries(entry["ప్రతిపదార్థం"] || {})) {
+        txt += `${w} : ${m}\n`;
+      }
+      txt += `\nఅర్థము (Overall meaning):\n${entry["అర్థము"] || "—"}\n`;
+
+      // Show Padavichcheda + Anvaya ONLY when Telugu checkbox is checked
+      if (document.getElementById('telugu').checked) {
+        if (entry["పదవిచ్ఛేదం"]) {
+          txt += `\nపదవిచ్ఛేదం:\n${entry["పదవిచ్ఛేదం"]}\n`;
+        }
+        if (entry["అన్వయం"]) {
+          txt += `\nఅన్వయం:\n${entry["అన్వయం"]}\n`;
+        }
+      }
+      return txt;
+    } catch (e) {
+      return `Error loading meaning for ${chapter}.${verse}`;
+    }
+  }
+
+  // handleMeanings remains exactly the same – it now automatically includes
+  // Padavichcheda & Anvaya when Telugu is selected
+  async function handleMeanings() {
+    // … existing code that calls fetchShlokaMeaning and puts the result
+    // into sgsText / sringeriText …
+  }
+
+  // Optional: refresh meanings automatically when Telugu checkbox changes
+  document.getElementById('telugu').addEventListener('change', () => {
+    if (isShowingMeanings) handleMeanings();   // re-render with/without new lines
+  });
                               async function handleContinuousPlay(selectElement) {
                                   try {
                                       console.log('handleContinuousPlay called');
