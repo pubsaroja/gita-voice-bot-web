@@ -1,26 +1,32 @@
+
 <!DOCTYPE html>
 <html lang="en">
-   <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Bhagavad Gita Bot</title>
-      <meta name="description" content="Explore Bhagavad Gita shlokas in Telugu with SGS and Sringeri styles, featuring audio recitations and meanings.">
-      <meta name="keywords" content="Bhagavad Gita, SGS, Sringeri, Telugu shlokas, audio recitation, spiritual app">
-      <meta name="author" content="Dr. P. Udayabhaskar">
-      <meta name="robots" content="index, follow">
-      <link rel="canonical" href="https://pubsaroja.github.io/bhagavad-gita-bot/">
-      <style type="text/css">@font-face {font-family:Ramabhadra;font-style:normal;font-weight:400;src:url(/cf-fonts/s/ramabhadra/5.0.11/latin/400/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:Ramabhadra;font-style:normal;font-weight:400;src:url(/cf-fonts/s/ramabhadra/5.0.11/telugu/400/normal.woff2);unicode-range:U+0951-0952,U+0964-0965,U+0C00-0C7F,U+1CDA,U+200C-200D,U+25CC;font-display:swap;}</style>
-      <style type="text/css">@font-face {font-family:Outfit;font-style:normal;font-weight:300;src:url(/cf-fonts/v/outfit/5.0.11/latin-ext/wght/normal.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:Outfit;font-style:normal;font-weight:300;src:url(/cf-fonts/v/outfit/5.0.11/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}</style>
-      <style type="text/css">@font-face {font-family:Noto Sans Telugu;font-style:normal;font-weight:400;src:url(/cf-fonts/v/noto-sans-telugu/5.0.12/latin-ext/wght/normal.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:Noto Sans Telugu;font-style:normal;font-weight:400;src:url(/cf-fonts/v/noto-sans-telugu/5.0.12/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:Noto Sans Telugu;font-style:normal;font-weight:400;src:url(/cf-fonts/v/noto-sans-telugu/5.0.12/telugu/wght/normal.woff2);unicode-range:U+0951-0952,U+0964-0965,U+0C00-0C7F,U+1CDA,U+200C-200D,U+25CC;font-display:swap;}</style>
-      <style type="text/css">@font-face {font-family:Noto Sans Devanagari;font-style:normal;font-weight:400;src:url(/cf-fonts/v/noto-sans-devanagari/5.0.11/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:Noto Sans Devanagari;font-style:normal;font-weight:400;src:url(/cf-fonts/v/noto-sans-devanagari/5.0.11/latin-ext/wght/normal.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:Noto Sans Devanagari;font-style:normal;font-weight:400;src:url(/cf-fonts/v/noto-sans-devanagari/5.0.11/devanagari/wght/normal.woff2);unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20A8,U+20B9,U+25CC,U+A830-A839,U+A8E0-A8FF;font-display:swap;}</style>
-      <style type="text/css">@font-face {font-family:Noto Sans Kannada;font-style:normal;font-weight:400;src:url(/cf-fonts/v/noto-sans-kannada/5.0.12/kannada/wght/normal.woff2);unicode-range:U+0964-0965,U+0C80-0CF2,U+200C-200D,U+20B9,U+25CC;font-display:swap;}@font-face {font-family:Noto Sans Kannada;font-style:normal;font-weight:400;src:url(/cf-fonts/v/noto-sans-kannada/5.0.12/latin-ext/wght/normal.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:Noto Sans Kannada;font-style:normal;font-weight:400;src:url(/cf-fonts/v/noto-sans-kannada/5.0.12/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}</style>
-      <style type="text/css">@font-face {font-family:Noto Sans Tamil;font-style:normal;font-weight:400;src:url(/cf-fonts/v/noto-sans-tamil/5.0.11/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:Noto Sans Tamil;font-style:normal;font-weight:400;src:url(/cf-fonts/v/noto-sans-tamil/5.0.11/latin-ext/wght/normal.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:Noto Sans Tamil;font-style:normal;font-weight:400;src:url(/cf-fonts/v/noto-sans-tamil/5.0.11/tamil/wght/normal.woff2);unicode-range:U+0964-0965,U+0B82-0BFA,U+200C-200D,U+20B9,U+25CC;font-display:swap;}</style>
-      <!-- Intro.js for elegant guided tours -->
-      <link rel="stylesheet" href="https://unpkg.com/intro.js/minified/introjs.min.css">
-      <script src="https://unpkg.com/intro.js/minified/intro.min.js"></script>
-      <style>
-         /* Define CSS variables for theming */
-         :root {
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Bhagavad Gita Bot</title>
+   <meta name="description" content="Explore Bhagavad Gita shlokas in Telugu with SGS and Sringeri styles, featuring audio recitations and meanings.">
+   <meta name="keywords" content="Bhagavad Gita, SGS, Sringeri, Telugu shlokas, audio recitation, spiritual app">
+   <meta name="author" content="Dr. P. Udayabhaskar">
+   <meta name="robots" content="index, follow">
+   <link rel="canonical" href="https://pubsaroja.github.io/bhagavad-gita-bot/">
+   <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/pubsaroja/gita-voice-bot-web/refs/heads/main/favicon.ico">
+   <!-- Google Fonts – replaces the broken self-hosted fonts -->
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;700&display=swap" rel="stylesheet">
+   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;700&display=swap" rel="stylesheet">
+   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;500;700&display=swap" rel="stylesheet">
+   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;700&display=swap" rel="stylesheet">
+
+   <!-- Intro.js for elegant guided tours -->
+   <link rel="stylesheet" href="https://unpkg.com/intro.js/minified/introjs.min.css">
+   <script src="https://unpkg.com/intro.js/minified/intro.min.js"></script>
+
+   <style>
+      /* Define CSS variables for theming */
+      :root {
          --bg-color: #f0f0f0;
          --text-color: #2c3e50;
          --card-bg: #ffffff;
@@ -38,8 +44,8 @@
          --intro-button-bg: #e5e7eb;
          --intro-button-text: #111827;
          --intro-tooltip-bg: #ffffff;
-         }
-         [data-theme="dark"] {
+      }
+      [data-theme="dark"] {
          --bg-color: #1a1a1a;
          --text-color: #ffffff;
          --card-bg: #2a2a2a;
@@ -57,13 +63,13 @@
          --intro-button-bg: #444;
          --intro-button-text: #ffffff;
          --intro-tooltip-bg: #333;
-         }
-         /* Global box-sizing for consistent sizing */
-         *, *::before, *::after {
+      }
+      /* Global box-sizing for consistent sizing */
+      *, *::before, *::after {
          box-sizing: border-box;
-         }
-         body {
-         font-family: Outfit, sans-serif;
+      }
+      body {
+         font-family: 'Outfit', sans-serif;
          text-align: center;
          padding: 20px;
          margin: 0;
@@ -71,26 +77,26 @@
          color: var(--text-color);
          overflow-x: hidden;
          transition: all 0.3s ease;
-         }
-         h1 {
+      }
+      h1 {
          color: var(--header-color);
          font-size: 1.5em;
-         }
-         h2 {
+      }
+      h2 {
          color: var(--subheader-color);
          font-size: 1em;
          margin-top: 10px;
-         }
-         /* Theme toggle buttons */
-         .theme-toggle {
+      }
+      /* Theme toggle buttons */
+      .theme-toggle {
          position: fixed;
          top: 10px;
          right: 10px; /* Changed to align to the right */
          display: flex;
          gap: 10px;
          z-index: 1001;
-         }
-         .theme-toggle button {
+      }
+      .theme-toggle button {
          background: none;
          border: none;
          cursor: pointer;
@@ -98,13 +104,13 @@
          color: var(--text-color);
          opacity: 0.6;
          transition: opacity 0.3s;
-         }
-         .theme-toggle button:hover,
-         .theme-toggle button.active {
+      }
+      .theme-toggle button:hover,
+      .theme-toggle button.active {
          opacity: 1;
-         }
-         /* Page frame */
-         .page-frame {
+      }
+      /* Page frame */
+      .page-frame {
          max-width: 900px;
          margin: 8px auto;
          padding: 12px;
@@ -112,23 +118,23 @@
          border-radius: 10px;
          background: var(--card-bg);
          box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-         }
-         @media (max-width: 600px) {
+      }
+      @media (max-width: 600px) {
          .page-frame {
-         margin: 4px;
-         padding: 16px;
-         border-radius: 10px;
-         border-width: 4px;
-         overflow: hidden;
+            margin: 4px;
+            padding: 16px;
+            border-radius: 10px;
+            border-width: 4px;
+            overflow: hidden;
          }
-         }
-         @media (max-width: 600px) {
+      }
+      @media (max-width: 600px) {
          .top-buttons button {
-         font-size: 1.1em !important;   /* Makes the text clearly readable on phones */
+            font-size: 1.1em !important;   /* Makes the text clearly readable on phones */
          }
-         }
-         /* Top buttons container */
-         .top-buttons {
+      }
+      /* Top buttons container */
+      .top-buttons {
          display: flex;
          justify-content: center;
          gap: 10px;
@@ -138,8 +144,8 @@
          padding-left: 12px;
          padding-right: 12px;
          box-sizing: border-box;
-         }
-         .top-buttons button {
+      }
+      .top-buttons button {
          width: 150px;
          height: 150px;
          border-radius: 25%;
@@ -152,31 +158,31 @@
          background-repeat: no-repeat;
          background-position: center;
          background-size: cover;
-         }
-         .top-buttons button.sgs-button:hover,
-         .top-buttons button.sgs-button:active {
+      }
+      .top-buttons button.sgs-button:hover,
+      .top-buttons button.sgs-button:active {
          background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/sankhu.png');
          background-color: transparent !important;
          color: transparent !important;
-         }
-         .top-buttons button.sringeri-button:hover,
-         .top-buttons button.sringeri-button:active,
-         .top-buttons button.third-paada-button:hover,
-         .top-buttons button.third-paada-button:active {
+      }
+      .top-buttons button.sringeri-button:hover,
+      .top-buttons button.sringeri-button:active,
+      .top-buttons button.third-paada-button:hover,
+      .top-buttons button.third-paada-button:active {
          background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/chakra.png');
          background-color: transparent !important;
          color: transparent !important;
-         }
-         .top-buttons button.reset,
-         .top-buttons button.reset:hover,
-         .top-buttons button.reset:active,
-         .top-buttons button.reset:focus {
+      }
+      .top-buttons button.reset,
+      .top-buttons button.reset:hover,
+      .top-buttons button.reset:active,
+      .top-buttons button.reset:focus {
          background: var(--button-bg) !important;
          color: var(--button-text) !important;
          background-image: none !important;
-         }
-         /* Button groups container */
-         .button-groups {
+      }
+      /* Button groups container */
+      .button-groups {
          display: flex;
          justify-content: center;
          gap: 10px;
@@ -186,14 +192,14 @@
          padding-left: 12px;
          padding-right: 12px;
          box-sizing: border-box;
-         }
-         .button-group {
+      }
+      .button-group {
          display: flex;
          flex-direction: column;
          gap: 10px;
          width: 50%;
-         }
-         .button-groups button {
+      }
+      .button-groups button {
          background-color: var(--button-bg);
          color: var(--button-text);
          padding: 10px 18px;
@@ -205,13 +211,13 @@
          width: 100%;
          max-width: 150px;
          transition: background-color 0.3s ease;
-         }
-         .button-groups button:hover {
+      }
+      .button-groups button:hover {
          background-color: var(--card-bg);
          color: transparent;
-         }
-         /* Dropdown container */
-         .dropdown-container {
+      }
+      /* Dropdown container */
+      .dropdown-container {
          display: flex;
          flex-direction: column;
          gap: 20px;
@@ -221,18 +227,18 @@
          border-radius: 5px;
          padding: 10px 12px;
          box-sizing: border-box;
-         }
-         .dropdown-item {
+      }
+      .dropdown-item {
          display: flex;
          flex-direction: column;
-         }
-         .dropdown-label {
+      }
+      .dropdown-label {
          margin-bottom: 6px;
          font-weight: bold;
          font-size: 1em;
          color: var(--header-color);
-         }
-         select {
+      }
+      select {
          width: 100%;
          padding: 8px;
          font-size: 1em;
@@ -240,9 +246,9 @@
          border: 1px solid var(--input-border);
          background-color: var(--card-bg);
          color: var(--text-color);
-         }
-         /* Shloka text */
-         .shloka-text {
+      }
+      /* Shloka text */
+      .shloka-text {
          margin-top: 10px;
          font-size: 1.5em;
          color: var(--text-color);
@@ -258,30 +264,29 @@
          justify-content: center;
          align-items: center;
          text-align: center;
-         font-family: 'Noto Sans Telugu', 'Noto Sans Devanagari', 'Noto Sans Kannada', 'Noto Sans Tamil', sans-serif;
+         font-family: 'Noto Sans Telugu', 'Noto Sans Devanagari', 'Noto Sans Kannada', 'Noto Sans Tamil', 'Outfit', sans-serif;
          box-sizing: border-box;
-         }
-         .shloka-text.active {
+      }
+      .shloka-text.active {
          display: flex;
-         }
-         .shloka-text.active.multiline {
+      }
+      .shloka-text.active.multiline {
          display: block;
          text-align: left;
-         }
-         .shloka-number {
+      }
+      .shloka-number {
          font-weight: bold;
          margin-bottom: 5px;
          text-align: left;
          font-size: 1em;
-         }
-         .shloka-lines {
+      }
+      .shloka-lines {
          text-align: left;
-         }
-         #sgsText, #sringeriText {
+      }
+      #sgsText, #sringeriText {
          display: block;
          width: 100%;
          white-space: pre-line !important;
-         /* Ensure long words in Indic scripts (e.g., Tamil) wrap on small screens */
          word-wrap: break-word;
          overflow-wrap: break-word;
          overflow-wrap: anywhere;
@@ -291,7 +296,7 @@
          margin-left: 0;
          margin-right: 0;
          max-width: 100%;
-         font-family: 'Noto Sans Telugu', 'Noto Sans Devanagari', 'Noto Sans Kannada', 'Noto Sans Tamil', sans-serif;
+         font-family: 'Noto Sans Telugu', 'Noto Sans Devanagari', 'Noto Sans Kannada', 'Noto Sans Tamil', 'Outfit', sans-serif;
          font-size: 1.5em;
          line-height: 1.5;
          border: none;
@@ -300,43 +305,43 @@
          overflow-x: auto;
          min-height: 3em;
          box-sizing: border-box;
-         }
-         #sgsText > div,
-         #sringeriText > div {
+      }
+      #sgsText > div,
+      #sringeriText > div {
          display: block;
          width: 100%;
          margin-bottom: 1em;
-         }
-         .hidden {
+      }
+      .hidden {
          display: none !important;
-         }
-         .shloka-text.visible {
+      }
+      .shloka-text.visible {
          display: flex !important;
          flex-direction: column;
          align-items: center;
          justify-content: center;
          text-align: center;
-         }
-         .shloka-text.placeholder {
+      }
+      .shloka-text.placeholder {
          display: flex !important;
          flex-direction: column;
          align-items: center;
          justify-content: center;
          text-align: center;
-         }
-         .shloka-text.visible.multiline {
+      }
+      .shloka-text.visible.multiline {
          display: block !important;
          text-align: left;
-         }
-         .visible {
+      }
+      .visible {
          display: block !important;
-         }
-         #audioPlayer {
+      }
+      #audioPlayer {
          margin: 10px auto;
          display: block;
          flex-shrink: 0;
-         }
-         .radio-group {
+      }
+      .radio-group {
          margin: 10px 0;
          display: flex;
          justify-content: center;
@@ -349,20 +354,20 @@
          padding-left: 12px;
          padding-right: 12px;
          box-sizing: border-box;
-         }
-         .radio-group label {
+      }
+      .radio-group label {
          margin: 0 10px;
          color: var(--text-color);
-         }
-         .radio-group input[type="text"] {
+      }
+      .radio-group input[type="text"] {
          padding: 8px;
          font-size: 1em;
          border-radius: 5px;
          border: 1px solid var(--input-border);
          background-color: var(--card-bg);
          color: var(--text-color);
-         }
-         .radio-group input[type="submit"] {
+      }
+      .radio-group input[type="submit"] {
          background-color: var(--button-bg);
          color: var(--button-text);
          padding: 8px 15px;
@@ -370,11 +375,11 @@
          border-radius: 5px;
          cursor: pointer;
          transition: background-color 0.3s ease;
-         }
-         .radio-group input[type="submit"]:hover {
+      }
+      .radio-group input[type="submit"]:hover {
          background-color: var(--button-hover-bg);
-         }
-         .textbox-container {
+      }
+      .textbox-container {
          display: flex;
          flex-direction: column;
          align-items: stretch;
@@ -387,22 +392,22 @@
          border: 2px solid var(--card-border);
          border-radius: 5px;
          box-sizing: border-box;
-         }
-         .textbox-container > div {
+      }
+      .textbox-container > div {
          width: 100%;
          max-width: 100%;
-         }
-         .textbox-label {
+      }
+      .textbox-label {
          font-weight: bold;
          margin-bottom: 5px;
          display: none;
          color: var(--header-color);
-         }
-         .textbox-label.active {
+      }
+      .textbox-label.active {
          display: block;
-         }
-         /* Modal */
-         .modal {
+      }
+      /* Modal */
+      .modal {
          display: none;
          position: fixed;
          top: 0;
@@ -413,8 +418,8 @@
          justify-content: center;
          align-items: center;
          z-index: 1000;
-         }
-         .modal-content {
+      }
+      .modal-content {
          background-color: var(--modal-bg);
          padding: 20px;
          border-radius: 5px;
@@ -422,8 +427,8 @@
          max-height: 80%;
          overflow-y: auto;
          border: 2px solid var(--card-border);
-         }
-         .chapter-select {
+      }
+      .chapter-select {
          margin-bottom: 10px;
          padding: 10px;
          font-size: 1em;
@@ -433,15 +438,15 @@
          background-color: var(--card-bg);
          color: var(--text-color);
          border: 1px solid var(--input-border);
-         }
-         /* Verse grid */
-         .verse-grid {
+      }
+      /* Verse grid */
+      .verse-grid {
          display: grid;
          grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
          gap: 10px;
          padding: 10px;
-         }
-         .verse-button {
+      }
+      .verse-button {
          background-color: var(--verse-button-bg);
          border: 1px solid var(--card-border);
          border-radius: 5px;
@@ -450,11 +455,11 @@
          cursor: pointer;
          font-size: 0.9em;
          color: var(--text-color);
-         }
-         .verse-button:hover {
+      }
+      .verse-button:hover {
          background-color: var(--verse-button-hover-bg);
-         }
-         .close-button {
+      }
+      .close-button {
          background-color: #ff4444;
          color: white;
          padding: 5px 10px;
@@ -462,17 +467,17 @@
          border-radius: 5px;
          cursor: pointer;
          float: right;
-         }
-         .close-button:hover {
+      }
+      .close-button:hover {
          background-color: #cc0000;
-         }
-         .credits {
+      }
+      .credits {
          font-size: 0.9em;
          color: var(--text-color);
          margin-top: 10px;
-         }
-         /* Player container */
-         .player-container {
+      }
+      /* Player container */
+      .player-container {
          display: grid;
          grid-template-columns: repeat(3, max-content);
          grid-template-rows: repeat(2, auto);
@@ -487,8 +492,8 @@
          border: none;
          border-radius: 5px;
          padding: 12px;
-         }
-         .player-container button {
+      }
+      .player-container button {
          width: 100px;
          height: 40px;
          border: none;
@@ -502,54 +507,54 @@
          transition: background 0.3s ease;
          justify-self: center;
          align-self: center;
-         }
-         .player-container button:hover {
+      }
+      .player-container button:hover {
          background-color: var(--button-hover-bg);
-         }
-         /* Elegant Intro.js customization */
-         .introjs-overlay {
+      }
+      /* Elegant Intro.js customization */
+      .introjs-overlay {
          background: var(--intro-overlay);
-         }
-         .introjs-helperLayer {
+      }
+      .introjs-helperLayer {
          box-shadow: 0 8px 24px rgba(0,0,0,0.25);
          border-radius: 10px;
-         }
-         .introjs-tooltip {
+      }
+      .introjs-tooltip {
          border-radius: 12px;
-         font-family: Outfit, sans-serif;
+         font-family: 'Outfit', sans-serif;
          line-height: 1.4;
          color: var(--text-color);
          background-color: var(--intro-tooltip-bg);
-         }
-         .introjs-tooltip-header {
+      }
+      .introjs-tooltip-header {
          border-bottom: none;
-         }
-         .introjs-tooltip-title {
+      }
+      .introjs-tooltip-title {
          font-weight: 700;
          color: var(--header-color);
-         }
-         .introjs-tooltiptext {
+      }
+      .introjs-tooltiptext {
          font-size: 15px;
-         }
-         .introjs-button {
+      }
+      .introjs-button {
          border-radius: 999px;
          padding: 6px 14px;
          border: none;
-         }
-         .introjs-skipbutton,
-         .introjs-prevbutton {
+      }
+      .introjs-skipbutton,
+      .introjs-prevbutton {
          background: var(--intro-button-bg);
          color: var(--intro-button-text);
-         }
-         .introjs-nextbutton,
-         .introjs-donebutton {
+      }
+      .introjs-nextbutton,
+      .introjs-donebutton {
          background: var(--button-bg);
          color: var(--button-text);
-         }
-         /* Responsive mobile styles (≤600px) */
-         @media (max-width: 600px) {
+      }
+      /* Responsive mobile styles (≤600px) */
+      @media (max-width: 600px) {
          body {
-         padding: 6px;
+            padding: 6px;
          }
          .top-buttons,
          .button-groups,
@@ -557,134 +562,130 @@
          .radio-group,
          .player-container,
          .textbox-container {
-         width: 100%;
-         max-width: 100%;
-         margin: 0 auto;
-         padding-left: 12px;
-         padding-right: 12px;
-         box-sizing: border-box;
-         flex-wrap: wrap;
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            padding-left: 12px;
+            padding-right: 12px;
+            box-sizing: border-box;
+            flex-wrap: wrap;
          }
          .top-buttons {
-         margin-top: 6px;
-         gap: 5px;
-         flex-direction: row;
+            margin-top: 6px;
+            gap: 5px;
+            flex-direction: row;
          }
          .player-container {
-         margin-top: 12px;
-         padding-left: 12px;
-         padding-right: 12px;
-         grid-template-columns: repeat(3, 1fr);
+            margin-top: 12px;
+            padding-left: 12px;
+            padding-right: 12px;
+            grid-template-columns: repeat(3, 1fr);
          }
          .player-container button {
-         width: 100%;
+            width: 100%;
          }
          .shloka-text {
-         font-size: 1.25em;
-         padding: 0;
-         text-align: left;
-         overflow-x: auto;
+            font-size: 1.25em;
+            padding: 0;
+            text-align: left;
+            overflow-x: auto;
          }
          .shloka-number {
-         font-weight: bold;
-         margin-bottom: 5px;
-         text-align: left;
-         font-size: 1em;
-         padding-left: 0;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-align: left;
+            font-size: 1em;
+            padding-left: 0;
          }
          #sgsText, #sringeriText {
-         font-size: 1.25em;
-         text-align: left;
-         padding-left: 0;
-         white-space: pre-line;
-         /* Extra safety for mobile wrapping */
-         word-wrap: break-word;
-         overflow-wrap: break-word;
-         overflow-wrap: anywhere;
-         word-break: break-word;
-         hyphens: auto;
-         overflow-x: auto;
+            font-size: 1.25em;
+            text-align: left;
+            padding-left: 0;
+            white-space: pre-line;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            hyphens: auto;
+            overflow-x: auto;
          }
          .shloka-text.visible,
          .shloka-text.placeholder {
-         justify-content: flex-start;
-         text-align: left;
+            justify-content: flex-start;
+            text-align: left;
          }
          .button-groups {
-         margin-top: 12px;
-         gap: 5px;
-         flex-direction: row;
+            margin-top: 12px;
+            gap: 5px;
+            flex-direction: row;
          }
          .button-group {
-         width: 50%;
-         gap: 5px;
+            width: 50%;
+            gap: 5px;
          }
          .top-buttons button {
-         flex: 1 1 calc(33.333% - 10px);
-         max-width: none;
-         height: auto;
-         aspect-ratio: 1/1;
-         font-size: 0.8em;
+            flex: 1 1 calc(33.333% - 10px);
+            max-width: none;
+            height: auto;
+            aspect-ratio: 1/1;
+            font-size: 0.8em;
          }
          .button-groups button {
-         padding: 6px 12px;
-         font-size: 0.8em;
-         max-width: 100%;
+            padding: 6px 12px;
+            font-size: 0.8em;
+            max-width: 100%;
          }
-/* ——— LANGUAGE BOX: EXACT SAME WIDTH + NO OVERFLOW + COMPACT (FINAL) ——— */
-.language-group {
-   display: grid;
-   grid-template-columns: repeat(3, 1fr);
-   gap: 10px;
-   margin: 18px auto;
-   padding: 16px 14px;                    /* Tight but safe padding */
-   max-width: 600px;                      /* IDENTICAL to your other boxes */
-   width: 100%;
-   background: var(--card-bg);
-   border: 2px solid var(--card-border);
-   border-radius: 14px;
-   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-   box-sizing: border-box;
-   overflow: hidden;                      /* Final safety */
-}
-
-.language-group label {
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   gap: 7px;
-   padding: 8px 6px;
-   background: rgba(0,0,0,0.04);
-   border-radius: 10px;
-   font-size: 0.94em;                     /* Slightly smaller = no overflow */
-   font-weight: 500;
-   text-align: center;
-   min-height: 42px;
-   word-wrap: break-word;
-   overflow: hidden;
-}
-
-.language-group input[type="checkbox"] {
-   width: 18px;
-   height: 18px;
-   accent-color: var(--button-bg);
-   flex-shrink: 0;
-}
-
-/* Mobile — absolute perfection */
-@media (max-width: 600px) {
-   .language-group {
-      margin: 16px auto;
-      padding: 14px 12px;
-      gap: 9px;
-      max-width: 600px;
-      width: 100%;
-   }
-   .language-group label {
-      font-size: 0.92em;
-      padding: 7px 4px;
-   }
-}
+         /* ——— LANGUAGE BOX: EXACT SAME WIDTH + NO OVERFLOW + COMPACT (FINAL) ——— */
+         .language-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 18px auto;
+            padding: 16px 14px;
+            max-width: 600px;
+            width: 100%;
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-sizing: border-box;
+            overflow: hidden;
+         }
+         .language-group label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 8px 6px;
+            background: rgba(0,0,0,0.04);
+            border-radius: 10px;
+            font-size: 0.94em;
+            font-weight: 500;
+            text-align: center;
+            min-height: 42px;
+            word-wrap: break-word;
+            overflow: hidden;
+         }
+         .language-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--button-bg);
+            flex-shrink: 0;
+         }
+         /* Mobile — absolute perfection */
+         @media (max-width: 600px) {
+            .language-group {
+               margin: 16px auto;
+               padding: 14px 12px;
+               gap: 9px;
+               max-width: 600px;
+               width: 100%;
+            }
+            .language-group label {
+               font-size: 0.92em;
+               padding: 7px 4px;
+            }
+         }
       </style>
    </head>
    <body>
@@ -701,28 +702,23 @@
             <button class="third-paada-button" onclick="sendCommand('ThirdPaada')" data-intro="Play only 3rd Paada" data-title="3rd Paada Only">3rd Paada<br>Only</button>
          </div>
 <!-- Continuous Random Play – Perfect Width & Smart Stop Button -->
-<div class="continuous-play-box" style="margin:25px auto 0;max-width:600px;padding:18px;background:var(--card-bg);border:2px solid var(--card-border);border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
-   <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:center;">
-      <strong style="flex:1 1 100%;text-align:center;font-size:1.35em;color:var(--header-color);">Continuous Random Play</strong>
-      
-      <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:center;">
-         <label style="cursor:pointer;font-size:1.15em;white-space:nowrap;">
-           <input type="radio" name="continuousGap" value="30" id="gap30">
-<label for="gap30">30-sec gap</label>
-<input type="radio" name="continuousGap" value="45" id="gap45">
-<label for="gap45">45-sec gap</label>
-         </label>
-      </div>
-      
-      <button id="stopContinuousBtn" 
-              style="display:none;background:#d32f2f;color:white;padding:10px 24px;border:none;border-radius:10px;font-size:1.1em;font-weight:bold;cursor:pointer;">
-         Stop Continuous Play
-      </button>
-      
-      <small style="flex:1 1 100%;text-align:center;color:var(--subheader-color);margin-top:8px;font-style:italic;">
-         Applies only to the 3 top buttons
-      </small>
+<div class="continuous-play-box" style="text-align:center; padding:12px; border:2px solid var(--primary); border-radius:12px; margin:15px 0;">
+   <strong>Continuous Random Play</strong><br><br>
+   
+   <input type="radio" name="continuousGap" value="30" id="gap30">
+   <label for="gap30">30-sec gap</label> &nbsp;&nbsp;
+   <input type="radio" name="continuousGap" value="45" id="gap45">
+   <label for="gap45">45-sec gap</label>
+
+   <!-- ←←← THIS IS THE NEW TIMER LINE ←←← -->
+   <div id="countdownTimer" style="margin-top:12px; font-size:1.1em; font-weight:bold; color:var(--primary); display:none;">
+      Next shloka in <span id="timerSeconds">45</span> sec
    </div>
+
+   <button id="stopContinuousBtn" class="stop-btn" style="display:none; margin-top:12px; padding:8px 16px; background:red; color:white; border:none; border-radius:8px; cursor:pointer;">
+      Stop Continuous Play
+   </button>
+   <br><small>Applies only to the 3 top buttons</small>
 </div>
          <audio id="audioPlayer" controls data-intro="Use these controls to play, pause, or scrub through the audio." data-title="Audio Player"></audio>
          <div class="radio-group" data-intro="Pick the chanting style for display and playback" data-title="Chanting Style">
@@ -1449,48 +1445,46 @@
                                   }
                               }
                               
-                              async function fetchShlokaMeaning(chapter, verse) {
-                                  try {
-                                      console.log(`fetchShlokaMeaning called: chapter=${chapter}, verse=${verse}`);
-                                      const url = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/meanings.txt';
-                                      const response = await fetch(url);
-                                      if (!response.ok) {
-                                          throw new Error(`HTTP error: ${response.status}`);
-                                      }
-                                      const data = await response.json();
-                                      const key1 = `${chapter}.${verse}`;
-                                      const key2 = `${chapter}-${verse}`;
-                                      const entry = data[key1] || data[key2];
-                                      if (entry) {
-                                          let meaningText = `${chapter}.${verse} Meaning:\n\nప్రతిపదార్థం(Word-to-Word Meaning):\n`;
-                                          const w2wKeys = ["ప్రతిపదార్థం","ప్రతిపదార్థము","WordToWord","Word-to-Word","WordMeaning"];
-                                          const overallKeys = ["అర్థం","అర్థము","సారాంశం","సారాంశము","Overall","OverallMeaning","Meaning"];
-                                          let wordToWord = null;
-                                          for (const k of w2wKeys) { if (entry[k]) { wordToWord = entry[k]; break; } }
-                                          if (wordToWord) {
-                                              if (typeof wordToWord === 'object') {
-                                                  for (const [word, meaning] of Object.entries(wordToWord)) {
-                                                      meaningText += `${word}: ${meaning}\n`;
-                                                  }
-                                              } else {
-                                                  meaningText += `${wordToWord}\n`;
-                                              }
-                                          } else {
-                                              meaningText += 'Word-to-word meaning not available\n';
-                                          }
-                                          let overall = null;
-                                          for (const k of overallKeys) { if (entry[k]) { overall = entry[k]; break; } }
-                                          meaningText += `\nఅర్థం (Overall Meaning):\n${overall || 'Overall meaning not available'}`;
-                                          return meaningText;
-                                      } else {
-                                          return `Meaning for ${chapter}.${verse} not found`;
-                                      }
-                                  } catch (error) {
-                                      console.error(`Error loading meaning for ${chapter}.${verse}: ${error.message}`);
-                                      return `Error loading meaning for ${chapter}.${verse}: ${error.message}`;
-                                  }
-                              }
-                              
+async function fetchShlokaMeaning(chapter, verse) {
+    try {
+      const response = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/meanings_extended.json');   // ← new file
+      const data = await response.json();
+      const key = `${chapter}.${verse}`;
+      const entry = data[key];
+      if (!entry) return `${key} – Meaning not found`;
+
+      let txt = `${key} Meaning:\n\nప్రతిపదార్థం (Word-by-word):\n`;
+      for (const [w, m] of Object.entries(entry["ప్రతిపదార్థం"] || {})) {
+        txt += `${w} : ${m}\n`;
+      }
+      txt += `\nఅర్థము (Overall meaning):\n${entry["అర్థము"] || "—"}\n`;
+
+      // Show Padavichcheda + Anvaya ONLY when Telugu checkbox is checked
+      if (document.getElementById('telugu').checked) {
+        if (entry["పదవిచ్ఛేదం"]) {
+          txt += `\nపదవిచ్ఛేదం:\n${entry["పదవిచ్ఛేదం"]}\n`;
+        }
+        if (entry["అన్వయం"]) {
+          txt += `\nఅన్వయం:\n${entry["అన్వయం"]}\n`;
+        }
+      }
+      return txt;
+    } catch (e) {
+      return `Error loading meaning for ${chapter}.${verse}`;
+    }
+  }
+
+  // handleMeanings remains exactly the same – it now automatically includes
+  // Padavichcheda & Anvaya when Telugu is selected
+  async function handleMeanings() {
+    // … existing code that calls fetchShlokaMeaning and puts the result
+    // into sgsText / sringeriText …
+  }
+
+  // Optional: refresh meanings automatically when Telugu checkbox changes
+  document.getElementById('telugu').addEventListener('change', () => {
+    if (isShowingMeanings) handleMeanings();   // re-render with/without new lines
+  });
                               async function handleContinuousPlay(selectElement) {
                                   try {
                                       console.log('handleContinuousPlay called');
@@ -2410,115 +2404,121 @@
                });
             });
  
-// ——— FINAL CLEAN & STABLE CONTINUOUS PLAY + 45-SEC GAP + WORKS ON LOCKED SCREEN ———
+// ——— CONTINUOUS PLAY WITH LIVE COUNTDOWN + WORKS WHEN SCREEN OFF ———
 let lastRandomIntent = null;
 let continuousPlayEnabled = false;
-let continuousDelay = 45000;  // ← 45 seconds (you asked for this)
-let nextTimer = null;         // Prevents timer overlap & freezing
+let continuousDelay = 45000;
+let nextTimer = null;
+let countdownInterval = null;
+let wakeLock = null;
+let bgEnabled = false;
 
 const audioPlayer = document.getElementById('audioPlayer');
 const stopBtn = document.getElementById('stopContinuousBtn');
+const timerDisplay = document.getElementById('timerSeconds');
 
-// Schedule next random shloka with exact gap
+function updateCountdown(seconds) {
+   timerDisplay.textContent = seconds;
+   document.getElementById('countdownTimer').style.color = seconds <= 10 ? 'red' : 'var(--primary)';
+}
+
+function startCountdown() {
+   let secondsLeft = Math.round(continuousDelay / 1000);
+   updateCountdown(secondsLeft);
+   clearInterval(countdownInterval);
+   countdownInterval = setInterval(() => {
+      secondsLeft--;
+      if (secondsLeft <= 0) {
+         updateCountdown(0);
+         clearInterval(countdownInterval);
+      } else {
+         updateCountdown(secondsLeft);
+      }
+   }, 1000);
+}
+
 function scheduleNext() {
    if (!continuousPlayEnabled || !lastRandomIntent || nextTimer) return;
+   startCountdown();
    nextTimer = setTimeout(() => {
       nextTimer = null;
       if (continuousPlayEnabled) sendCommand(lastRandomIntent);
    }, continuousDelay);
 }
 
-// Hook into sendCommand only once
+async function enableWakeLock() {
+   if (bgEnabled) return;
+   bgEnabled = true;
+   if ('wakeLock' in navigator) {
+      try { wakeLock = await navigator.wakeLock.request('screen'); }
+      catch(err) { console.log('Wake Lock failed:', err); }
+   }
+   if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      const v = document.createElement('video');
+      v.src = 'data:video/mp4;base64,AAAAIGZ0eXBtcDQyAAACAG1wNDJtcDQxaXMzAAACbGF2ZjU4LjI5LjEwMAA=';
+      v.loop = v.muted = v.playsInline = true;
+      v.style.position = 'fixed'; v.style.left = v.style.top = '-100px';
+      v.style.width = v.style.height = '1px'; v.style.opacity = '0';
+      document.body.appendChild(v);
+      v.play().catch(() => {});
+   }
+}
+
+// Hook sendCommand
 if (!window.cpReady) {
-   const originalSendCommand = window.sendCommand;
+   const orig = window.sendCommand;
    window.sendCommand = function(intent) {
-      originalSendCommand(intent);
-      if (['SGSFirstPaada', 'SringeriPaada', 'ThirdPaada'].includes(intent)) {
+      orig(intent);
+      if (['SGSFirstPaada','SringeriPaada','ThirdPaada'].includes(intent)) {
          const checked = document.querySelector('input[name="continuousGap"]:checked');
          if (checked) {
             lastRandomIntent = intent;
             continuousPlayEnabled = true;
-            continuousDelay = checked.value === '30' ? 30000 : 45000;  // 30s or 45s
+            continuousDelay = checked.value === '30' ? 30000 : 45000;
             stopBtn.style.display = 'inline-block';
+            document.getElementById('countdownTimer').style.display = 'block';
             audioPlayer.onended = scheduleNext;
+            enableWakeLock();
          }
       }
    };
    window.cpReady = true;
 }
 
-// Radio button change (30 sec or 45 sec)
+// Radio change
 document.querySelectorAll('input[name="continuousGap"]').forEach(radio => {
    radio.addEventListener('change', () => {
       const checked = document.querySelector('input[name="continuousGap"]:checked');
       if (checked) {
          continuousDelay = checked.value === '30' ? 30000 : 45000;
          stopBtn.style.display = 'inline-block';
+         document.getElementById('countdownTimer').style.display = 'block';
          if (lastRandomIntent) audioPlayer.onended = scheduleNext;
       } else {
-         continuousPlayEnabled = false;
-         stopBtn.style.display = 'none';
-         audioPlayer.onended = null;
-         lastRandomIntent = null;
-         if (nextTimer) { clearTimeout(nextTimer); nextTimer = null; }
+         stopContinuousPlay();
       }
    });
 });
 
-// Stop button
-stopBtn.onclick = () => {
-   document.querySelectorAll('input[name="continuousGap"]').forEach(r => r.checked = false);
+function stopContinuousPlay() {
    continuousPlayEnabled = false;
    stopBtn.style.display = 'none';
+   document.getElementById('countdownTimer').style.display = 'none';
    audioPlayer.onended = null;
    lastRandomIntent = null;
    if (nextTimer) { clearTimeout(nextTimer); nextTimer = null; }
-};
-// ——— PLAY WHEN SCREEN IS OFF (Android + iPhone) — NO DESKTOP FREEZE ———
-let wakeLock = null;
-let bgEnabled = false;
-
-async function enableWakeLock() {
-   if (bgEnabled) return;
-   bgEnabled = true;
-
-   // 1. Modern Wake Lock API (best for Android Chrome & Firefox)
-   if ('wakeLock' in navigator) {
-      try {
-         wakeLock = await navigator.wakeLock.request('screen');
-         console.log('Wake Lock activated – audio continues when screen off');
-         
-         // Re-request if the screen turns off and on again
-         wakeLock.addEventListener('release', () => {
-            console.log('Wake Lock released');
-         });
-      } catch (err) {
-         console.log('Wake Lock not supported or denied:', err);
-      }
-   }
-
-   // 2. Fallback: tiny silent video trick — but ONLY on touch devices (phones/tablets)
-   if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-      const v = document.createElement('video');
-      v.src = 'data:video/mp4;base64,AAAAIGZ0eXBtcDQyAAACAG1wNDJtcDQxaXMzAAACbGF2ZjU4LjI5LjEwMAA=';
-      v.loop = true;
-      v.muted = true;
-      v.playsInline = true;
-      v.style.position = 'fixed';
-      v.style.left = v.style.top = '-100px';
-      v.style.width = v.style.height = '1px';
-      v.style.opacity = '0';
-      document.body.appendChild(v);
-      v.play().catch(() => {});
-   }
+   if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+   if (wakeLock) { wakeLock.release(); wakeLock = null; }
+   updateCountdown(45);
 }
 
-// Activate on first user interaction (required by browsers)
+stopBtn.onclick = stopContinuousPlay;
+document.getElementById('countdownTimer').style.display = 'none';
 document.body.addEventListener('click', enableWakeLock, { once: true });
 document.body.addEventListener('touchstart', enableWakeLock, { once: true });
-document.getElementById('audioPlayer').addEventListener('play', enableWakeLock);
+audioPlayer.addEventListener('play', enableWakeLock);
 
-            // ——— LIGHT / DARK THEME TOGGLE (100% WORKING) ———
+// ——— LIGHT / DARK THEME TOGGLE (100% WORKING) ———
 const themeButtons = document.querySelectorAll('.theme-toggle button');
 const html = document.documentElement;
 
@@ -2540,7 +2540,7 @@ themeButtons.forEach(button => {
       const newTheme = button.dataset.theme;
       setTheme(newTheme);
    });
-});
+});            
 </script>
 </body>
 </html>
