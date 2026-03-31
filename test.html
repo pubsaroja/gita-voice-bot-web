@@ -698,20 +698,24 @@
     box-sizing: border-box;
 }
 
+/* === CHAPTER BUTTONS - FORCE STYLES FOR ALL BROWSERS === */
 .chapter-buttons {
     display: flex !important;
     flex-wrap: wrap !important;
     gap: 8px !important;
     justify-content: center !important;
     max-width: 620px !important;
-    margin: 12px auto 0 !important;
+    margin: 15px auto 0 !important;
     width: 100% !important;
     box-sizing: border-box !important;
+    padding: 0 10px !important;
 }
 
 .chapter-btn {
     width: 52px !important;
     height: 52px !important;
+    min-width: 52px !important;
+    min-height: 52px !important;
     padding: 0 !important;
     font-size: 17px !important;
     font-weight: bold !important;
@@ -721,17 +725,17 @@
     border-radius: 10px !important;
     cursor: pointer !important;
     transition: all 0.3s ease !important;
-    flex-shrink: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    min-width: 48px !important;
-    min-height: 48px !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important; /* subtle depth */
 }
 
 .chapter-btn:hover {
     background-color: var(--button-bg) !important;
     color: var(--button-text) !important;
+    transform: translateY(-2px) !important;
 }
       </style>
    </head>
