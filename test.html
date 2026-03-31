@@ -697,33 +697,40 @@
     box-sizing: border-box;
 }
 
+.chapter-buttons {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    justify-content: center !important;
+    max-width: 620px !important;
+    margin: 12px auto 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
 .chapter-btn {
-    width: 52px;
-    height: 52px;
-    padding: 0;
-    font-size: 17px;
-    font-weight: bold;
-    background-color: var(--card-bg);
-    color: var(--text-color);
-    border: 2px solid var(--card-border);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    flex-shrink: 0;           /* prevents shrinking */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 52px !important;
+    height: 52px !important;
+    padding: 0 !important;
+    font-size: 17px !important;
+    font-weight: bold !important;
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border: 2px solid var(--card-border) !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
 }
 
 .chapter-btn:hover {
-    background-color: var(--button-bg);
-    color: var(--button-text);
-}
-
-/* Extra safety for older browsers / Safari */
-.chapter-buttons > button {
-    min-width: 48px;
-    min-height: 48px;
+    background-color: var(--button-bg) !important;
+    color: var(--button-text) !important;
 }
       </style>
    </head>
