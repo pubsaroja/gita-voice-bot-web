@@ -13,7 +13,7 @@
          body { font-family: Outfit, sans-serif; text-align: center; padding: 20px; background-color: var(--bg-color); color: var(--text-color); margin: 0; }
          .page-frame { max-width: 900px; margin: 8px auto; padding: 12px; border: 2px solid var(--card-border); border-radius: 10px; background: var(--card-bg); box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
 
-         /* TOP BUTTONS - SANKHU & CHAKRA */
+         /* SANKHU & CHAKRA HOVER EFFECTS */
          .top-buttons { display: flex; justify-content: center; gap: 10px; max-width: 600px; margin: 0 auto; }
          .top-buttons button {
             width: 150px; height: 150px; border-radius: 25%; border: none; background-color: var(--button-bg); color: var(--button-text);
@@ -23,13 +23,13 @@
          .top-buttons button.sringeri-button:hover, .top-buttons button.third-paada-button:hover { background-image: url('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/main/chakra.png'); background-color: transparent !important; color: transparent !important; }
 
          /* DISPLAY BOXES */
-         .language-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 18px auto; padding: 16px; border: 2px solid var(--card-border); border-radius: 14px; background: var(--card-bg); max-width: 600px; margin-left: auto; margin-right: auto; }
-         .shloka-text { font-size: 1.5em; line-height: 1.8; min-height: 3em; display: none; text-align: center; white-space: pre-line; }
+         .language-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 18px auto; padding: 16px; border: 2px solid var(--card-border); border-radius: 14px; background: var(--card-bg); max-width: 600px; margin: 10px auto; }
+         .shloka-text { font-size: 1.5em; line-height: 1.8; min-height: 3em; display: none; text-align: center; white-space: pre-line; padding: 10px; }
          .visible { display: block !important; }
          
-         /* CHAPTER GRID */
-         .chapter-btn-grid { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin-top: 10px; }
-         .chapter-btn { width: 52px; height: 52px; font-weight: bold; border: 2px solid var(--card-border); border-radius: 10px; background: var(--card-bg); cursor: pointer; }
+         /* MERGED CHAPTER GRID */
+         .chapter-btn-grid { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin-top: 15px; }
+         .chapter-btn { width: 52px; height: 52px; font-weight: bold; border: 2px solid var(--card-border); border-radius: 10px; background: var(--card-bg); cursor: pointer; font-family: Outfit; }
          .chapter-btn:hover { background-color: var(--button-bg); color: white; }
          
          .theme-toggle { position: fixed; top: 10px; right: 10px; z-index: 1001; }
@@ -70,12 +70,20 @@
             <div id="shlokaDisplay" class="shloka-text visible">Your Shloka will appear here.</div>
          </div>
 
-         <div class="chapter-btn-grid">
-            <script>
-               for(let i=1; i<=18; i++) {
-                  document.write(`<button class="chapter-btn" onclick="handleChapterSelect(${i})">${i}</button>`);
-               }
-            </script>
+         <div style="margin-top:20px;">
+            <div style="margin-bottom:10px;">
+               <strong>Random Shloka from Chapter:</strong><br>
+               <input type="radio" name="padaType" value="1" id="p1" checked> <label for="p1">1st Paada</label>
+               <input type="radio" name="padaType" value="13" id="p13"> <label for="p13">1st/3rd Paada</label>
+               <input type="radio" name="padaType" value="3" id="p3"> <label for="p3">3rd Paada</label>
+            </div>
+            <div class="chapter-btn-grid">
+               <script>
+                  for(let i=1; i<=18; i++) {
+                     document.write(`<button class="chapter-btn" onclick="handleChapterSelect(${i})">${i}</button>`);
+                  }
+               </script>
+            </div>
          </div>
       </div>
 
@@ -83,6 +91,7 @@
          const audioPlayer = document.getElementById('audioPlayer');
          let currentShlokaData = null;
 
+         // CORE COMMUNICATION LOGIC
          async function sendCommand(command) {
             try {
                const response = await fetch(`/command?cmd=${command}`);
@@ -93,30 +102,39 @@
                   currentShlokaData = data;
                   updateShlokaDisplay();
                }
-            } catch (err) { console.error("Error fetching command:", err); }
+            } catch (err) { console.error("Network Error:", err); }
          }
 
-         function updateShlokaDisplay() {
-            if (!currentShlokaData) return;
-            const langs = ['telugu', 'devanagari', 'english', 'kannada', 'tamil'];
-            let text = "";
-            langs.forEach(lang => {
-               if (document.getElementById(lang).checked && currentShlokaData[lang]) {
-                  text += currentShlokaData[lang] + "\n\n";
-               }
-            });
-            document.getElementById('shlokaDisplay').innerText = text || "Select a language";
+         // DYNAMIC TEXT FILTERING
+         async function updateShlokaDisplay() {
+            try {
+               const response = await fetch('/shloka-info');
+               const data = await response.json();
+               currentShlokaData = data;
+               
+               const langs = ['telugu', 'devanagari', 'english', 'kannada', 'tamil'];
+               let text = "";
+               langs.forEach(lang => {
+                  if (document.getElementById(lang).checked && data[lang]) {
+                     text += data[lang] + "\n\n";
+                  }
+               });
+               document.getElementById('shlokaDisplay').innerText = text || "Select a language";
+            } catch (err) { console.error("Text Sync Error:", err); }
          }
 
+         // MERGED BUTTON HANDLER
          function handleChapterSelect(chapter) {
-            sendCommand(`Chapter${chapter}`);
+            const type = document.querySelector('input[name="padaType"]:checked').value;
+            // Sends command like "Chapter5_Type3" to your server
+            sendCommand(`Chapter${chapter}_Type${type}`);
          }
 
          function setTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
          }
 
-         // Mobile Wake Lock Logic
+         // MOBILE WAKE LOCK
          function enableWakeLock() {
             audioPlayer.play().catch(() => {});
             if (navigator.maxTouchPoints > 0) {
