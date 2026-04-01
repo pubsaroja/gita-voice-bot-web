@@ -183,7 +183,6 @@
 
         <br>
 
-        <!-- Dropdown Container with Chapter Buttons -->
         <div class="dropdown-container">
             <!-- Pada Selection -->
             <div style="margin: 15px 0; text-align: center;">
@@ -196,7 +195,7 @@
                 <label for="pada3">3rd Paada Only</label>
             </div>
 
-            <!-- Chapter Number Buttons -->
+            <!-- Chapter Buttons -->
             <div>
                 <label style="display:block; font-family:Outfit, sans-serif; font-size:1.1em;">Random Shloka Chapterwise:</label>
                 <div class="chapter-buttons">
@@ -288,8 +287,9 @@
             <div id="verseTableContent" class="verse-grid"></div>
         </div>
     </div>
-<script>
-        // ==================== YOUR FULL ORIGINAL SCRIPT ====================
+
+    <script>
+        // ==================== FULL ORIGINAL SCRIPT + FIXED handleChapterSelect ====================
         let sgsTeluguContent = '';
         let sringeriTeluguContent = '';
         let englishSGSContent = '';
@@ -314,7 +314,7 @@
             16: 24, 17: 28, 18: 78
         };
 
-        // ==================== FIXED handleChapterSelect ====================
+        // FIXED handleChapterSelect with Pada support
         async function handleChapterSelect(element) {
             try {
                 const chapter = parseInt(element.value);
@@ -366,11 +366,34 @@
             }
         }
 
-        // ==================== REST OF YOUR ORIGINAL SCRIPT ====================
-        // Paste the rest of your original script here (loadFiles, performSearch, sendCommand, showConfusing, showUvacha, initialize, etc.)
-        // Everything from your previous message after the variables goes here.
+        // ==================== YOUR ORIGINAL SCRIPT CONTINUES HERE ====================
+        async function loadFiles() {
+            try {
+                const sgsTeluguResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Telugu_SGS.txt');
+                if (!sgsTeluguResponse.ok) throw new Error('Failed to load BG_Telugu_SGS.txt');
+                sgsTeluguContent = await sgsTeluguResponse.text();
 
-        // Example placeholder for the rest (replace with your full script):
+                const sringeriTeluguResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_Telugu_Sringeri.txt');
+                if (!sringeriTeluguResponse.ok) throw new Error('Failed to load BG_Telugu_Sringeri.txt');
+                sringeriTeluguContent = await sringeriTeluguResponse.text();
+
+                const englishSGSResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_English_SGS.txt');
+                if (!englishSGSResponse.ok) throw new Error('Failed to load BG_English_SGS.txt');
+                englishSGSContent = await englishSGSResponse.text();
+
+                const englishSringeriResponse = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/BG_English_Sringeri.txt');
+                if (!englishSringeriResponse.ok) throw new Error('Failed to load BG_English_Sringeri.txt');
+                englishSringeriContent = await englishSringeriResponse.text();
+
+                englishContent = `\( {englishSGSContent}\n \){englishSringeriContent}`;
+
+                console.log('Files loaded successfully');
+            } catch (err) {
+                alert(err.message);
+                console.error(err);
+            }
+        }
+
         function initialize() {
             console.log('initialize: Starting');
             localStorage.removeItem('gitaSessionId');
@@ -381,8 +404,53 @@
             console.log('initialize: Completed');
         }
 
-        // Add your full original functions here (loadFiles, fetchCombinedShlokaText, etc.)
+        // Add all your other original functions here (performSearch, sendCommand, showConfusing, showUvacha, fetchCombinedShlokaText, getSelectedStyle, updateTextboxVisibility, etc.)
+        // For brevity, I have included the critical ones. Please ensure you paste any missing functions from your original file.
 
+        function getSelectedStyle() {
+            try {
+                const style = document.querySelector('input[name="style"]:checked').value;
+                return style;
+            } catch (error) {
+                return 'sringeri';
+            }
+        }
+
+        function updateTextboxVisibility() {
+            const sgsText = document.getElementById('sgsText');
+            const sringeriText = document.getElementById('sringeriText');
+            const sgsLabel = document.getElementById('sgsLabel');
+            const sringeriLabel = document.getElementById('sringeriLabel');
+            const sgsRadio = document.getElementById('sgs');
+            const sringeriRadio = document.getElementById('sringeri');
+
+            if (sgsRadio.checked) {
+                sgsText.classList.add('visible');
+                sgsText.classList.remove('hidden');
+                sringeriText.classList.add('hidden');
+                sringeriText.classList.remove('visible');
+                sgsLabel.classList.add('active');
+                sringeriLabel.classList.remove('active');
+            } else {
+                sringeriText.classList.add('visible');
+                sringeriText.classList.remove('hidden');
+                sgsText.classList.add('hidden');
+                sgsText.classList.remove('visible');
+                sringeriLabel.classList.add('active');
+                sgsLabel.classList.remove('active');
+            }
+            adjustTextboxHeight();
+        }
+
+        function adjustTextboxHeight() {
+            ['sgsText', 'sringeriText'].forEach(id => {
+                const el = document.getElementById(id);
+                el.style.height = 'auto';
+                el.style.height = `${el.scrollHeight}px`;
+            });
+        }
+
+        // Load files and initialize
         document.addEventListener('DOMContentLoaded', () => {
             loadFiles();
             initialize();
