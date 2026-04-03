@@ -1,8 +1,7 @@
-
 <!DOCTYPE html>
 <!--
   ================================================================
-  BHAGAVAD GITA BOT  (test.html)
+  BHAGAVAD GITA BOT
   ================================================================
   Author  : Dr. P. Udayabhaskar
   Purpose : Interactive web app to listen, understand, and
@@ -931,12 +930,11 @@
     <!-- ── Previous / Full / Next Navigation ────────────────── -->
     <!-- Previous and Next load audio but do not auto-play.       -->
     <!-- Full plays the complete current shloka immediately.       -->
-    <div class="player-container"
-         style="grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;">
-      <button onclick="handlePreviousShloka()">Previous</button>
-      <button onclick="sendCommand('FullShloka')">Full</button>
-      <button onclick="handleNextShloka()">Next</button>
-    </div>
+         <div class="player-container" style="grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 20px auto 0; max-width: 600px;">
+            <button onclick="handlePreviousShloka()" style="width:100%; height:48px; font-size:1.05em;">Previous</button>
+            <button onclick="sendCommand('FullShloka')" style="width:100%; height:48px; font-size:1.05em;">Full</button>
+            <button onclick="handleNextShloka()" style="width:100%; height:48px; font-size:1.05em;">Next</button>
+         </div>
 
     <!-- ── Language Selection Checkboxes ─────────────────────── -->
     <!-- Toggling a language immediately re-fetches the current   -->
@@ -1011,7 +1009,9 @@
       <!-- Toggle button opens/closes the chapter picker below -->
       <button id="mainChapterBtn"
               onclick="toggleSpecificShlokaSelector()"
-              style="width:100%; padding:14px; font-size:1.1em; font-weight:600;
+			  data-intro="Choose any chapter and then select a specific shloka number to play"
+              data-title="Specific Shloka Selection"
+			  style="width:100%; padding:14px; font-size:1.1em; font-weight:600;
                      background:var(--button-bg); color:var(--button-text);
                      border:none; border-radius:8px; cursor:pointer;">
         Select a Shloka from the Chapter
@@ -1055,6 +1055,8 @@
       <!-- Toggle button opens/closes the Parayana picker below -->
       <button id="randomContinuousBtn"
               onclick="toggleParayanaSelector()"
+			  data-intro="Play one random shloka or the entire chapter continuously"
+              data-title="Random or Continuous Parayana"
               style="width:100%; padding:14px; font-size:1.1em; font-weight:600;
                      background:var(--button-bg); color:var(--button-text);
                      border:none; border-radius:8px; cursor:pointer;">
@@ -2834,77 +2836,97 @@
      * Creates a fresh Intro.js tour by scanning the DOM for all elements
      * carrying data-intro / data-title attributes (added in DOM order).
      */
-    function buildTourInstance() {
-      if (typeof introJs === 'undefined' || typeof introJs.tour !== 'function') {
-        console.error('Intro.js library not loaded or tour API unavailable');
+ function buildTourInstance() {
+    if (typeof introJs === 'undefined' || typeof introJs.tour !== 'function') {
+        console.error('Intro.js not loaded');
         return null;
-      }
-
-      const t = introJs.tour();
-      t.setOptions({
-        showProgress:       true,
-        showBullets:        false,
+    }
+    const t = introJs.tour();
+    t.setOptions({
+        showProgress: true,
+        showBullets: false,
         exitOnOverlayClick: true,
         disableInteraction: false,
-        nextLabel:          'Next',
-        prevLabel:          'Back',
-        skipLabel:          'Skip',
-        doneLabel:          'Done',
-        tooltipClass:       'introjs-tooltip--custom',
-        highlightClass:     'introjs-highlight--custom'
-      });
+        nextLabel: 'Next',
+        prevLabel: 'Back',
+        skipLabel: 'Skip',
+        doneLabel: 'Done'
+    });
 
-      // Build steps from every element with a data-intro attribute
-      Array.from(document.querySelectorAll('[data-intro]')).forEach(el => {
-        const intro = el.getAttribute('data-intro') || '';
-        const title = el.getAttribute('data-title')  || '';
-        try { t.addStep({ element: el, title, intro }); }
-        catch (_) { /* Skip elements Intro.js cannot highlight */ }
-      });
+    // Add steps for new selector buttons
+    const mainChapterBtn = document.getElementById('mainChapterBtn');
+    const randomContinuousBtn = document.getElementById('randomContinuousBtn');
 
-      return t;
+    if (mainChapterBtn) {
+        t.addStep({
+            element: mainChapterBtn,
+            title: 'Select Specific Shloka',
+            intro: 'Click here to choose a chapter and then a specific shloka number.'
+        });
     }
+    if (randomContinuousBtn) {
+        t.addStep({
+            element: randomContinuousBtn,
+            title: 'Random or Continuous Parayana',
+            intro: 'Click here for random shloka or continuous playback of an entire chapter.'
+        });
+    }
+
+    // Add all other elements that have data-intro
+    const stepEls = Array.from(document.querySelectorAll('[data-intro]'));
+    stepEls.forEach(el => {
+        const intro = el.getAttribute('data-intro') || '';
+        const title = el.getAttribute('data-title') || '';
+        if (el.id !== 'mainChapterBtn' && el.id !== 'randomContinuousBtn') {
+            try { t.addStep({ element: el, title, intro }); } catch (_) {}
+        }
+    });
+
+    return t;
+}
 
     /**
      * toggleInstructions()
      * Launches the guided tour.  Pauses any ongoing audio first.
      * Restores the Help button text and UI when the tour exits.
      */
-    function toggleInstructions() {
-      try {
+ function toggleInstructions() {
+    try {
         console.log('toggleInstructions (tour) called');
-        const instructionsButton = document.getElementById('instructionsButton');
-        const audioPlayer        = document.getElementById('audioPlayer');
 
-        // Abort Confusing playback and pause audio
+        const instructionsButton = document.getElementById('instructionsButton');
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        // Cancel any ongoing playback
         isConfusingPlaying = false;
         confusingPlayId++;
-        if (audioPlayer && !audioPlayer.paused) audioPlayer.pause();
+        if (audioPlayer && !audioPlayer.paused) {
+            audioPlayer.pause();
+        }
         isContinuousPlaying = false;
 
+        // Build fresh tour
         tourInstance = buildTourInstance();
         if (!tourInstance) return;
 
-        // Reset UI when tour exits for any reason
         const resetUI = () => {
-          isTourActive = false;
-          if (instructionsButton) instructionsButton.textContent = 'Help';
-          adjustTextboxHeight();
-          updateTextboxVisibility();
+            isTourActive = false;
+            if (instructionsButton) instructionsButton.textContent = 'Help';
+            adjustTextboxHeight();
+            updateTextboxVisibility();
         };
-        tourInstance.onbeforeexit(() => resetUI());
-        tourInstance.onexit(()       => resetUI());
-        tourInstance.oncomplete(()   => resetUI());
 
-        instructionsButton.textContent = 'Close Tour';
+        tourInstance.onbeforeexit(() => resetUI());
+        tourInstance.onexit(() => resetUI());
+        tourInstance.oncomplete(() => resetUI());
+
+        if (instructionsButton) instructionsButton.textContent = 'Close Tour';
         isTourActive = true;
         tourInstance.start();
-      } catch (error) {
-        console.error('Error in toggleInstructions (tour):', error);
-      }
+    } catch (error) {
+        console.error('Error in toggleInstructions:', error);
     }
-
-
+}
     // ── 10. BUTTON ICON STATE ON PLAY / END ───────────────────────────
 
     // Toggle "clicked" CSS class on top buttons for CSS transitions
