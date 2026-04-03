@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   ================================================================
-  BHAGAVAD GITA BOT
+  BHAGAVAD GITA BOT  (test.html)
   ================================================================
   Author  : Dr. P. Udayabhaskar
   Purpose : Interactive web app to listen, understand, and
@@ -1904,55 +1904,54 @@
      * and returns a formatted string with word-by-word and overall meaning.
      * Tries multiple key names to handle variations in the JSON schema.
      */
-    async function fetchShlokaMeaning(chapter, verse) {
-      try {
-        console.log(`fetchShlokaMeaning called: chapter=${chapter}, verse=${verse}`);
-        const url      = 'https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/meanings.txt';
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-
-        const data  = await response.json();
-        const key1  = `${chapter}.${verse}`;
-        const key2  = `${chapter}-${verse}`;
-        const entry = data[key1] || data[key2];
-
-        if (entry) {
-          let meaningText = `${chapter}.${verse} Meaning:\n\nప్రతిపదార్థం(Word-to-Word Meaning):\n`;
-
-          // Try multiple possible key names in the JSON entry
-          const w2wKeys     = ['ప్రతిపదార్థం', 'ప్రతిపదార్థము', 'WordToWord', 'Word-to-Word', 'WordMeaning'];
-          const overallKeys = ['అర్థం', 'అర్థము', 'సారాంశం', 'సారాంశము', 'Overall', 'OverallMeaning', 'Meaning'];
-
-          let wordToWord = null;
-          for (const k of w2wKeys) { if (entry[k]) { wordToWord = entry[k]; break; } }
-
-          if (wordToWord) {
-            if (typeof wordToWord === 'object') {
-              // Object: { word: meaning, ... }
-              for (const [word, meaning] of Object.entries(wordToWord)) {
-                meaningText += `${word}: ${meaning}\n`;
-              }
-            } else {
-              meaningText += `${wordToWord}\n`;
-            }
-          } else {
-            meaningText += 'Word-to-word meaning not available\n';
-          }
-
-          let overall = null;
-          for (const k of overallKeys) { if (entry[k]) { overall = entry[k]; break; } }
-          meaningText += `\nఅర్థం (Overall Meaning):\n${overall || 'Overall meaning not available'}`;
-          return meaningText;
-        } else {
-          return `Meaning for ${chapter}.${verse} not found`;
+// Updated fetchShlokaMeaning using meanings_extended.json
+// Always shows ప్రతిపదార్థం and అర్థము
+// Always shows పదవిచ్ఛేదం and అన్వయం (as requested)
+async function fetchShlokaMeaning(chapter, verse) {
+    try {
+        const response = await fetch('https://raw.githubusercontent.com/pubsaroja/bhagavad-gita-bot/refs/heads/main/meanings_extended.json');
+        if (!response.ok) throw new Error('Failed to load meanings');
+        
+        const data = await response.json();
+        const key = `${chapter}.${verse}`;
+        const entry = data[key];
+        
+        if (!entry) {
+            return `${key} – Meaning not found in extended data`;
         }
-      } catch (error) {
-        console.error(`Error loading meaning for ${chapter}.${verse}: ${error.message}`);
-        return `Error loading meaning for ${chapter}.${verse}: ${error.message}`;
-      }
+
+        let txt = `${key} Meaning:\n\n`;
+
+        // ప్రతిపదార్థం (Word-by-word)
+        txt += `ప్రతిపదార్థం (Word-by-word):\n`;
+        if (entry["ప్రతిపదార్థం"] && typeof entry["ప్రతిపదార్థం"] === 'object') {
+            for (const [word, meaning] of Object.entries(entry["ప్రతిపదార్థం"])) {
+                txt += `${word} : ${meaning}\n`;
+            }
+        } else {
+            txt += (entry["ప్రతిపదార్థం"] || 'Not available') + '\n';
+        }
+
+        // అర్థము (Overall meaning)
+        txt += `\nఅర్థము (Overall meaning):\n`;
+        txt += (entry["అర్థము"] || 'Not available') + '\n';
+
+        // పదవిచ్ఛేదం (always show now)
+        if (entry["పదవిచ్ఛేదం"]) {
+            txt += `\nపదవిచ్ఛేదం:\n${entry["పదవిచ్ఛేదం"]}\n`;
+        }
+
+        // అన్వయం (always show now)
+        if (entry["అన్వయం"]) {
+            txt += `\nఅన్వయం:\n${entry["అన్వయం"]}\n`;
+        }
+
+        return txt;
+    } catch (e) {
+        console.error('Error loading extended meaning:', e);
+        return `Error loading meaning for ${chapter}.${verse}: ${e.message}`;
     }
-
-
+}
     // ── 7. UI EVENT HANDLERS ──────────────────────────────────────────
 
     /**
