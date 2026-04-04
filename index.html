@@ -1,8 +1,7 @@
-
 <!DOCTYPE html>
 <!--
   ================================================================
-  BHAGAVAD GITA BOT  (index.html)
+  BHAGAVAD GITA BOT  (test.html)
   ================================================================
   Author  : Dr. P. Udayabhaskar
   Purpose : Interactive web app to listen, understand, and
@@ -1071,11 +1070,11 @@
         <div style="margin-bottom:12px; text-align:center;">
           <label style="margin:0 15px; font-size:1.05em;">
             <input type="radio" name="parayanaMode" value="random" checked>
-            Random
+            Random Shloka
           </label>
           <label style="margin:0 15px; font-size:1.05em;">
             <input type="radio" name="parayanaMode" value="continuous">
-            Continuous
+            Continuous Parayana
           </label>
         </div>
 
@@ -2151,16 +2150,10 @@ async function fetchShlokaMeaning(chapter, verse) {
      * Advances one verse, fetches and displays its text, then loads
      * (but does NOT auto-play) the audio — mirroring handlePreviousShloka().
      * The user must press Full or the native player controls to hear it.
-     *
-     * Wrapping logic:
-     *   • Last verse of a chapter  → verse 1 of the next chapter
-     *   • After chapter 18        → wraps back to chapter 1, verse 1
      */
     async function handleNextShloka() {
       try {
         console.log('handleNextShloka called');
-
-        // Cancel all other active modes
         isConfusingPlaying    = false;
         confusingPlayId++;
         isContinuousPlaying   = false;
@@ -2175,14 +2168,12 @@ async function fetchShlokaMeaning(chapter, verse) {
           let chapter = Math.floor(context.parameters.chapter);
           let verse   = Math.floor(context.parameters.verse) + 1;
 
-          // Advance to next chapter if past last verse; wrap at chapter 18
           if (verse > verseCounts[chapter]) {
             chapter++;
             if (chapter > 18) chapter = 1;
             verse = 1;
           }
 
-          // Persist updated position so Meanings / Previous work immediately
           currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
           currentContext.push({
             name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
@@ -2195,16 +2186,14 @@ async function fetchShlokaMeaning(chapter, verse) {
             }
           });
           localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-          console.log('handleNextShloka: Updated context:', JSON.stringify(currentContext));
 
-          // Fetch and display shloka text in both styles
           const sgsShloka      = await fetchCombinedShlokaText(chapter, verse, 'sgs');
           const sringeriShloka = await fetchCombinedShlokaText(chapter, verse, 'sringeri');
           sgsText.innerText      = sgsShloka      || `Shloka ${chapter}.${verse} not found`;
           sringeriText.innerText = sringeriShloka || `Shloka ${chapter}.${verse} not found`;
           adjustTextboxHeight();
 
-          // Load audio into player WITHOUT calling play() — user plays manually
+          // Load audio WITHOUT calling play() — user plays manually
           const folder      = getSelectedStyle() === 'sringeri' ? 'AudioFullSringeri' : 'AudioFullSGS';
           const audioPlayer = document.getElementById('audioPlayer');
           audioPlayer.src   = `${baseUrl}/${folder}/${chapter}.${verse}.mp3`;
@@ -2218,7 +2207,6 @@ async function fetchShlokaMeaning(chapter, verse) {
           adjustTextboxHeight();
           updateTextboxVisibility();
         }
-
       } catch (error) {
         console.error('Error in handleNextShloka:', error);
         document.getElementById('sgsText').innerText      = `Error in next shloka: ${error.message}`;
@@ -2829,8 +2817,9 @@ async function fetchShlokaMeaning(chapter, verse) {
     function handleParayanaSelection(chapter) {
       const mode = document.querySelector('input[name="parayanaMode"]:checked').value;
       if (mode === 'random') {
+        // playFull=false → plays a random quarter Paada (1 or 3), not full shloka
         const verse = Math.floor(Math.random() * verseCounts[chapter]) + 1;
-        selectAndPlayShloka(chapter, verse);
+        selectAndPlayShloka(chapter, verse, false);
       } else {
         // Sequential Parayana: chain verses through onended
         isContinuousPlaying = true;
@@ -2849,12 +2838,20 @@ async function fetchShlokaMeaning(chapter, verse) {
     }
 
     /**
-     * selectAndPlayShloka(chapter, verse)
+     * selectAndPlayShloka(chapter, verse, playFull)
      * Shared play function used by both selectors.
      * Closes any open selector panels, updates context, displays
-     * the shloka text, and auto-plays the full audio.
+     * the shloka text, and plays the audio.
+     *
+     * @param {number}  chapter   1–18
+     * @param {number}  verse     verse number within chapter
+     * @param {boolean} playFull  true  → play full shloka (used by Specific
+     *                                    Shloka selector and Continuous Parayana)
+     *                            false → play a random quarter Paada 1 or 3
+     *                                    (used by Random Shloka mode, matching
+     *                                    the behaviour of the three top buttons)
      */
-    async function selectAndPlayShloka(chapter, verse) {
+    async function selectAndPlayShloka(chapter, verse, playFull = true) {
       // Close both selector panels and reset their toggle buttons
       document.getElementById('specificChapterContainer').style.display = 'none';
       document.getElementById('parayanaContainer').style.display        = 'none';
@@ -2881,7 +2878,12 @@ async function fetchShlokaMeaning(chapter, verse) {
       adjustTextboxHeight();
       updateTextboxVisibility();
 
-      const audioUrl      = await fetchAudioUrl(chapter, verse, null, true);
+      // Determine audio quarter:
+      //   playFull = true  → full shloka (isFull flag to fetchAudioUrl)
+      //   playFull = false → random Paada 1 or 3 (quiz-style, same as top buttons)
+      const quarter  = playFull ? null            : 'pada1_or_pada3';
+      const isFull   = playFull ? true            : false;
+      const audioUrl = await fetchAudioUrl(chapter, verse, quarter, isFull);
       const audioPlayerEl = document.getElementById('audioPlayer');
       if (audioUrl && !audioUrl.error) {
         audioPlayerEl.src = audioUrl;
@@ -2917,9 +2919,9 @@ async function fetchShlokaMeaning(chapter, verse) {
         doneLabel: 'Done'
     });
 
-    // ── Build steps in strict top-to-bottom DOM order ───────────────
+    // Build steps in strict top-to-bottom DOM order.
     // querySelectorAll('[data-intro]') returns elements in document order,
-    // so one single pass guarantees the tour flows top-to-bottom:
+    // so one pass guarantees the tour flows top-to-bottom:
     // Theme → Top buttons → Audio player → Style → Meanings / Help /
     // Confusing / Uvacha → Select Shloka → Parayana → Search.
     Array.from(document.querySelectorAll('[data-intro]')).forEach(el => {
