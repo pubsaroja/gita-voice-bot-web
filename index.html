@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <!--
   ================================================================
@@ -1283,6 +1284,12 @@
     let parayanaTimingsSringeri = null;  // Sringeri chapter timing data
     let parayanaTimerId         = null;  // setInterval handle for text-sync polling
 
+    // Pre-fetched shloka text cache used during Parayana playback.
+    // Populated by startParayanaWithSync() before audio starts so
+    // the polling interval never makes network requests mid-play.
+    // Structure: { "1": { sgs: "...", sringeri: "..." }, "2": { … }, … }
+    let parayanaTextCache = {};
+
     // Chapter remembered across the dual-selector UI
     let currentSelectedChapter = null;
 
@@ -1343,8 +1350,8 @@
         englishContent = `${englishSGSContent}\n${englishSringeriContent}`;
 
         // ── Load Parayana timing maps ─────────────────────────────────
-        // JSON files map each shloka → start-time in the unsplit chapter MP3.
-        // Non-fatal: app still works via fallback if files are missing.
+        // JSON files map each shloka to its start-time in the unsplit
+        // chapter MP3. Non-fatal if not yet uploaded to GitHub.
         try {
           const [sgsTResp, sringeriTResp] = await Promise.all([
             fetch(`${base}/shloka_timings_sgs.json`),
@@ -2178,16 +2185,10 @@ async function fetchShlokaMeaning(chapter, verse) {
      * Advances one verse, fetches and displays its text, then loads
      * (but does NOT auto-play) the audio — mirroring handlePreviousShloka().
      * The user must press Full or the native player controls to hear it.
-     *
-     * Wrapping:
-     *   • Last verse of a chapter  → verse 1 of the next chapter
-     *   • After chapter 18         → wraps back to chapter 1, verse 1
      */
     async function handleNextShloka() {
       try {
         console.log('handleNextShloka called');
-
-        // Cancel all other active modes
         isConfusingPlaying    = false;
         confusingPlayId++;
         isContinuousPlaying   = false;
@@ -2202,42 +2203,32 @@ async function fetchShlokaMeaning(chapter, verse) {
         if (context?.parameters && Number.isInteger(context.parameters.chapter)) {
           let chapter = Math.floor(context.parameters.chapter);
           let verse   = Math.floor(context.parameters.verse) + 1;
-
-          // Advance chapter if past last verse; wrap after chapter 18
           if (verse > verseCounts[chapter]) {
             chapter++;
             if (chapter > 18) chapter = 1;
             verse = 1;
           }
 
-          // Persist updated position immediately
           currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
           currentContext.push({
             name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
             lifespanCount: 5,
-            parameters: {
-              chapter:        parseInt(chapter),
-              verse:          parseInt(verse),
-              style:          getSelectedStyle(),
-              showingMeaning: false
-            }
+            parameters: { chapter: parseInt(chapter), verse: parseInt(verse),
+                          style: getSelectedStyle(), showingMeaning: false }
           });
           localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-          console.log('handleNextShloka: Updated context:', JSON.stringify(currentContext));
 
-          // Fetch and display text in both styles
           const sgsShloka      = await fetchCombinedShlokaText(chapter, verse, 'sgs');
           const sringeriShloka = await fetchCombinedShlokaText(chapter, verse, 'sringeri');
           sgsText.innerText      = sgsShloka      || `Shloka ${chapter}.${verse} not found`;
           sringeriText.innerText = sringeriShloka || `Shloka ${chapter}.${verse} not found`;
           adjustTextboxHeight();
 
-          // Load audio into player WITHOUT calling play()
+          // Load audio WITHOUT calling play() — user plays manually
           const folder      = getSelectedStyle() === 'sringeri' ? 'AudioFullSringeri' : 'AudioFullSGS';
           const audioPlayer = document.getElementById('audioPlayer');
           audioPlayer.src   = `${baseUrl}/${folder}/${chapter}.${verse}.mp3`;
           audioPlayer.load();
-
           updateTextboxVisibility();
 
         } else {
@@ -2246,7 +2237,6 @@ async function fetchShlokaMeaning(chapter, verse) {
           adjustTextboxHeight();
           updateTextboxVisibility();
         }
-
       } catch (error) {
         console.error('Error in handleNextShloka:', error);
         document.getElementById('sgsText').innerText      = `Error in next shloka: ${error.message}`;
@@ -2852,20 +2842,18 @@ async function fetchShlokaMeaning(chapter, verse) {
      * handleParayanaSelection(chapter)
      * Entry point when a chapter button is tapped in the Parayana panel.
      *
-     * Two modes (controlled by the parayanaMode radio):
      *   random     → pick one random verse, play a random quarter Paada
      *                (same quiz behaviour as the three top buttons)
-     *   continuous → play the full unsplit chapter MP3 seamlessly with
-     *                live shloka text sync via startParayanaWithSync()
+     *   continuous → seamless chapter audio with live text sync via
+     *                startParayanaWithSync()
      */
     function handleParayanaSelection(chapter) {
       const mode = document.querySelector('input[name="parayanaMode"]:checked').value;
       if (mode === 'random') {
-        // playFull=false → plays random Paada 1 or 3, not the full shloka
+        // playFull=false → random Paada 1 or 3, not the full shloka
         const verse = Math.floor(Math.random() * verseCounts[chapter]) + 1;
         selectAndPlayShloka(chapter, verse, false);
       } else {
-        // Continuous Parayana: seamless chapter audio + live text sync
         startParayanaWithSync(chapter);
       }
     }
@@ -2873,14 +2861,19 @@ async function fetchShlokaMeaning(chapter, verse) {
     /**
      * startParayanaWithSync(chapter)
      * Plays the unsplit chapter MP3 from SGSParayana / SringeriParayana
-     * and polls audioPlayer.currentTime every 500 ms to advance the
-     * displayed shloka text in real time using the pre-built timing map.
+     * with zero-latency shloka text updates.
+     *
+     * Key design — eliminates the per-verse pause:
+     *   All shloka texts for the chapter are fetched IN PARALLEL before
+     *   audio starts and stored in parayanaTextCache.  The 500 ms polling
+     *   interval then does only an instant cache lookup — no network I/O
+     *   during playback — so text updates feel instantaneous.
      *
      * Graceful fallback:
-     *   If timing JSON for this chapter is unavailable, falls back to
-     *   shloka-by-shloka sequential play so Parayana always works.
+     *   If timing JSON is unavailable the function falls back to the old
+     *   shloka-by-shloka method so Parayana always works.
      *
-     * Audio files expected at:
+     * Audio files expected at GitHub:
      *   SGSParayana/<chapter>.mp3        e.g. SGSParayana/1.mp3
      *   SringeriParayana/<chapter>.mp3
      */
@@ -2905,6 +2898,32 @@ async function fetchShlokaMeaning(chapter, verse) {
         playNext();
         return;
       }
+
+      // ── Pre-fetch ALL shloka texts before audio starts ────────────
+      // This is the critical step that eliminates the per-verse pause.
+      // All verses are fetched in parallel so total wait ≈ one request.
+      const totalVerses = verseCounts[chapter];
+      const sgsText      = document.getElementById('sgsText');
+      const sringeriText = document.getElementById('sringeriText');
+
+      sgsText.innerText      = `Loading chapter ${chapter} texts…`;
+      sringeriText.innerText = `Loading chapter ${chapter} texts…`;
+      updateTextboxVisibility();
+
+      parayanaTextCache = {}; // Clear any previous chapter's cache
+
+      const verseNums = Array.from({ length: totalVerses }, (_, i) => i + 1);
+      await Promise.all(verseNums.map(async (v) => {
+        const [sgsT, sringeriT] = await Promise.all([
+          fetchCombinedShlokaText(chapter, v, 'sgs'),
+          fetchCombinedShlokaText(chapter, v, 'sringeri')
+        ]);
+        parayanaTextCache[String(v)] = {
+          sgs:      sgsT      || `Shloka ${chapter}.${v} not found`,
+          sringeri: sringeriT || `Shloka ${chapter}.${v} not found`
+        };
+      }));
+      console.log(`startParayanaWithSync: pre-fetched ${totalVerses} shlokas for chapter ${chapter}`);
 
       // ── Main path: seamless chapter audio + live text sync ────────
       isContinuousPlaying = true;
@@ -2939,17 +2958,16 @@ async function fetchShlokaMeaning(chapter, verse) {
         return;
       }
 
-      // Show shloka 1 immediately
+      // Show verse 1 immediately from cache — no network wait
       let currentVerse = 1;
-      await showParayanaVerse(chapter, currentVerse, style);
+      showParayanaVerseFromCache(chapter, currentVerse, style);
 
-      // Stop any previous polling interval
+      // Stop any leftover polling interval
       if (parayanaTimerId) clearInterval(parayanaTimerId);
 
       /**
        * getCurrentVerse(currentTimeSec)
-       * Binary search through entries[] to find the shloka whose
-       * startSec is the largest value ≤ currentTimeSec.
+       * Binary search → largest startSec ≤ currentTimeSec.
        */
       function getCurrentVerse(currentTimeSec) {
         let lo = 0, hi = entries.length - 1, result = entries[0].verse;
@@ -2965,8 +2983,8 @@ async function fetchShlokaMeaning(chapter, verse) {
         return result;
       }
 
-      // ── Poll every 500 ms; update text only when verse changes ────
-      parayanaTimerId = setInterval(async () => {
+      // ── Poll every 500 ms; instant cache lookup, no network I/O ──
+      parayanaTimerId = setInterval(() => {
         if (!isContinuousPlaying) {
           clearInterval(parayanaTimerId);
           parayanaTimerId = null;
@@ -2975,7 +2993,7 @@ async function fetchShlokaMeaning(chapter, verse) {
         const verse = getCurrentVerse(audioPlayer.currentTime);
         if (verse !== currentVerse) {
           currentVerse = verse;
-          await showParayanaVerse(chapter, currentVerse, style);
+          showParayanaVerseFromCache(chapter, currentVerse, style);
         }
       }, 500);
 
@@ -2987,54 +3005,50 @@ async function fetchShlokaMeaning(chapter, verse) {
     }
 
     /**
-     * showParayanaVerse(chapter, verse, style)
-     * Updates both text panes and shloka-context for one verse during
-     * Parayana playback, without touching the audio player.
+     * showParayanaVerseFromCache(chapter, verse, style)
+     * Instantly updates both text panes from the pre-fetched cache
+     * and keeps shloka-context current — no async, no network request.
      *
      * @param {number} chapter  1–18
      * @param {number} verse    current verse number
      * @param {string} style    'sgs' | 'sringeri'
      */
-    async function showParayanaVerse(chapter, verse, style) {
-      const sgsText      = document.getElementById('sgsText');
-      const sringeriText = document.getElementById('sringeriText');
+    function showParayanaVerseFromCache(chapter, verse, style) {
+      const cached    = parayanaTextCache[String(verse)];
+      const sgsEl     = document.getElementById('sgsText');
+      const sringeriEl= document.getElementById('sringeriText');
+
+      if (cached) {
+        sgsEl.innerText      = cached.sgs;
+        sringeriEl.innerText = cached.sringeri;
+      } else {
+        sgsEl.innerText      = `Shloka ${chapter}.${verse} not found`;
+        sringeriEl.innerText = `Shloka ${chapter}.${verse} not found`;
+      }
+      adjustTextboxHeight();
 
       // Keep context current so Meanings / Next / Previous work correctly
       currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
       currentContext.push({
         name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
         lifespanCount: 5,
-        parameters: {
-          chapter:        parseInt(chapter),
-          verse:          parseInt(verse),
-          style,
-          showingMeaning: false
-        }
+        parameters: { chapter: parseInt(chapter), verse: parseInt(verse),
+                      style, showingMeaning: false }
       });
       localStorage.setItem('gitaContext', JSON.stringify(currentContext));
-
-      const sgsShloka      = await fetchCombinedShlokaText(chapter, verse, 'sgs');
-      const sringeriShloka = await fetchCombinedShlokaText(chapter, verse, 'sringeri');
-      sgsText.innerText      = sgsShloka      || `Shloka ${chapter}.${verse} not found`;
-      sringeriText.innerText = sringeriShloka || `Shloka ${chapter}.${verse} not found`;
-      adjustTextboxHeight();
       updateTextboxVisibility();
     }
 
     /**
      * selectAndPlayShloka(chapter, verse, playFull)
      * Shared play function used by the Specific Shloka selector,
-     * the Random Shloka mode, and the Continuous Parayana fallback.
-     *
-     * Closes selector panels, updates context, displays text, plays audio.
+     * Random Shloka mode, and Continuous Parayana fallback.
      *
      * @param {number}  chapter   1–18
      * @param {number}  verse     verse number within chapter
-     * @param {boolean} playFull  true  → play full shloka audio (default)
-     *                                    used by Specific Shloka selector
-     *                            false → play a random Paada 1 or 3
-     *                                    used by Random Shloka mode,
-     *                                    matching the three top buttons
+     * @param {boolean} playFull  true  → full shloka audio (default)
+     *                            false → random Paada 1 or 3 (quiz style,
+     *                                    same as the three top buttons)
      */
     async function selectAndPlayShloka(chapter, verse, playFull = true) {
       // Close both selector panels and reset their toggle buttons
@@ -3063,10 +3077,9 @@ async function fetchShlokaMeaning(chapter, verse) {
       adjustTextboxHeight();
       updateTextboxVisibility();
 
-      // playFull=true  → full shloka audio
-      // playFull=false → random quarter Paada 1 or 3 (quiz style)
-      const quarter  = playFull ? null             : 'pada1_or_pada3';
-      const isFull   = playFull ? true             : false;
+      // playFull=true → full shloka; playFull=false → random Paada 1 or 3
+      const quarter  = playFull ? null : 'pada1_or_pada3';
+      const isFull   = playFull;
       const audioUrl = await fetchAudioUrl(chapter, verse, quarter, isFull);
       const audioPlayerEl = document.getElementById('audioPlayer');
       if (audioUrl && !audioUrl.error) {
@@ -3103,10 +3116,10 @@ async function fetchShlokaMeaning(chapter, verse) {
         doneLabel: 'Done'
     });
 
-    // ── Build tour steps in strict top-to-bottom DOM order ──────────
-    // querySelectorAll('[data-intro]') returns elements in document order,
-    // so one pass guarantees: Theme → Top buttons → Audio player → Style
-    // → Meanings/Help/Confusing/Uvacha → Select Shloka → Parayana → Search.
+    // Build steps in strict top-to-bottom DOM order.
+    // querySelectorAll('[data-intro]') returns elements in document order
+    // so one pass gives: Theme → Top buttons → Audio player → Style →
+    // Meanings/Help/Confusing/Uvacha → Select Shloka → Parayana → Search.
     Array.from(document.querySelectorAll('[data-intro]')).forEach(el => {
       const intro = el.getAttribute('data-intro') || '';
       const title = el.getAttribute('data-title') || '';
