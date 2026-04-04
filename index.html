@@ -2147,19 +2147,66 @@ async function fetchShlokaMeaning(chapter, verse) {
 
     /**
      * handleNextShloka()
-     * Advances one verse and delegates to selectAndPlayShloka()
-     * (which closes any open selectors and auto-plays the audio).
+     * Advances one verse, displays its text, and loads (but does NOT
+     * auto-play) the audio – the user presses Play manually.
+     * Mirrors handlePreviousShloka() behaviour exactly.
      */
     async function handleNextShloka() {
-      const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
-      let chapter = context ? Math.floor(context.parameters.chapter) : 1;
-      let verse   = context ? Math.floor(context.parameters.verse) + 1 : 1;
-      if (verse > verseCounts[chapter]) {
-        chapter++;
-        verse = 1;
-        if (chapter > 18) chapter = 1; // Wrap from chapter 18 to 1
+      try {
+        console.log('handleNextShloka called');
+        isConfusingPlaying    = false;
+        confusingPlayId++;
+        isContinuousPlaying   = false;
+        isInstructionsVisible = false;
+        document.getElementById('instructionsButton').textContent = 'Help';
+
+        const context      = currentContext.find(ctx => ctx.name.includes('shloka-context'));
+        const sgsText      = document.getElementById('sgsText');
+        const sringeriText = document.getElementById('sringeriText');
+
+        if (context?.parameters && Number.isInteger(context.parameters.chapter)) {
+          let chapter = Math.floor(context.parameters.chapter);
+          let verse   = Math.floor(context.parameters.verse) + 1;
+          if (verse > verseCounts[chapter]) {
+            chapter++;
+            if (chapter > 18) chapter = 1; // Wrap from chapter 18 to 1
+            verse = 1;
+          }
+
+          currentContext = currentContext.filter(ctx => !ctx.name.includes('shloka-context'));
+          currentContext.push({
+            name: `projects/gita-voice-bot/agent/sessions/${sessionId}/contexts/shloka-context`,
+            lifespanCount: 5,
+            parameters: { chapter: parseInt(chapter), verse: parseInt(verse), style: getSelectedStyle(), showingMeaning: false }
+          });
+          localStorage.setItem('gitaContext', JSON.stringify(currentContext));
+          console.log('handleNextShloka: Updated context:', JSON.stringify(currentContext));
+
+          const sgsShloka      = await fetchCombinedShlokaText(chapter, verse, 'sgs');
+          const sringeriShloka = await fetchCombinedShlokaText(chapter, verse, 'sringeri');
+          sgsText.innerText      = sgsShloka      || `Shloka ${chapter}.${verse} not found`;
+          sringeriText.innerText = sringeriShloka || `Shloka ${chapter}.${verse} not found`;
+          adjustTextboxHeight();
+
+          // Load only – no auto-play for Next (user presses Play manually)
+          const folder      = getSelectedStyle() === 'sringeri' ? 'AudioFullSringeri' : 'AudioFullSGS';
+          const audioPlayer = document.getElementById('audioPlayer');
+          audioPlayer.src   = `${baseUrl}/${folder}/${chapter}.${verse}.mp3`;
+          audioPlayer.load();
+
+          updateTextboxVisibility();
+        } else {
+          sgsText.innerText      = 'Please select a Shloka first';
+          sringeriText.innerText = 'Please select a Shloka first';
+          adjustTextboxHeight();
+          updateTextboxVisibility();
+        }
+      } catch (error) {
+        console.error('Error in handleNextShloka:', error);
+        document.getElementById('sgsText').innerText      = `Error in next shloka: ${error.message}`;
+        document.getElementById('sringeriText').innerText = `Error in next shloka: ${error.message}`;
+        adjustTextboxHeight();
       }
-      await selectAndPlayShloka(chapter, verse);
     }
 
     /**
