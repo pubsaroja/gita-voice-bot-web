@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <!--
   ================================================================
@@ -1212,7 +1213,7 @@
     const verseCounts = {
       1: 47,  2: 72,  3: 43,  4: 42,  5: 29,
       6: 47,  7: 30,  8: 28,  9: 34, 10: 42,
-      11: 55, 12: 20, 13: 34, 14: 27, 15: 20,
+      11: 55, 12: 20, 13: 35, 14: 27, 15: 20,
       16: 24, 17: 28, 18: 78
     };
 
@@ -2169,7 +2170,7 @@ async function fetchShlokaMeaning(chapter, verse) {
           let verse   = Math.floor(context.parameters.verse) + 1;
           if (verse > verseCounts[chapter]) {
             chapter++;
-            if (chapter > 18) chapter = 1; // Wrap from chapter 18 to 1
+            if (chapter > 18) chapter = 1;
             verse = 1;
           }
 
@@ -2188,7 +2189,7 @@ async function fetchShlokaMeaning(chapter, verse) {
           sringeriText.innerText = sringeriShloka || `Shloka ${chapter}.${verse} not found`;
           adjustTextboxHeight();
 
-          // Load only – no auto-play for Next (user presses Play manually)
+          // Load only – no auto-play (user presses Play manually)
           const folder      = getSelectedStyle() === 'sringeri' ? 'AudioFullSringeri' : 'AudioFullSGS';
           const audioPlayer = document.getElementById('audioPlayer');
           audioPlayer.src   = `${baseUrl}/${folder}/${chapter}.${verse}.mp3`;
