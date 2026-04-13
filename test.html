@@ -230,8 +230,8 @@
       background-color: var(--button-bg);
       /* Force text to always show correctly */
       color: #ffffff !important;
-      font-family: 'IM Fell English', serif;
-      font-size: 16px;
+      font-family: 'Verdana', sans-serif;
+      font-size: 18px;
       font-weight: 400;
       line-height: 1.4;
       cursor: pointer;
@@ -276,7 +276,7 @@
 
     @media (max-width: 600px) {
       .top-buttons button {
-        font-size: 13px !important;
+        font-size: 1.5em !important;
         border-radius: 12px;
         flex: 1 1 calc(33.333% - 10px);
         max-width: none; height: auto;
@@ -573,7 +573,7 @@
       border: 1.5px solid var(--card-border-lt) !important;
       border-radius: 10px !important; padding: 14px 16px !important;
       text-align: center;
-      font-family: 'IM Fell English', serif;
+      font-family: 'Open Sans', sans-serif;
     }
 
     .continuous-play-box strong { font-size: 1rem; color: var(--header-color); letter-spacing: .04em; }
@@ -715,7 +715,7 @@
 
     <div style="font-size:2.6rem; line-height:1; font-family:'Noto Sans Devanagari',serif; color:#8b3a1e; margin-bottom:8px; filter:drop-shadow(0 2px 6px rgba(139,58,30,.3));">ॐ</div>
     <h1>Srimad Bhagavad Gita</h1>
-    <p style="font-style:italic; color:#7a5530; margin-top:4px; font-family:'Cormorant Garamond',serif; font-size:1.05rem;">Listen, understand and memorize Bhagavad Gita shlokas</p>
+    <p style="font-style:italic; color:#7a5530; margin-top:4px; font-family:'Cormorant Garamond',serif; font-size:1.05rem;font-weight: 600;">Listen, understand and memorize Bhagavad Gita shlokas</p>
     <div class="header-rule"></div>
 
     <!-- ── Top Playback Mode Buttons ──────────────────────────── -->
@@ -898,7 +898,7 @@
               onclick="toggleSpecificShlokaSelector()"
 			  data-intro="Choose any chapter and then select a specific shloka number to play"
               data-title="Specific Shloka Selection"
-			  style="width:100%; padding:14px; font-size:1.1em; font-weight:600;
+			  style="width:100%; padding:14px; font-size:1.1em; font-weight:500;
                      background:var(--button-bg); color:var(--button-text);
                      border:none; border-radius:8px; cursor:pointer;">
         Select a Shloka from the Chapter
@@ -906,7 +906,7 @@
 
       <!-- Chapter picker: hidden until the button above is clicked -->
       <div id="specificChapterContainer" style="display:none; margin-top:12px;">
-        <div style="font-weight:600; margin-bottom:8px; color:var(--header-color);">
+        <div style="font-weight:500; margin-bottom:8px; color:var(--header-color);">
           Select Chapter:
         </div>
         <!-- Chapter number buttons are injected here by renderSpecificChapterButtons() -->
@@ -917,7 +917,7 @@
         <!-- Verse grid: hidden until a chapter is selected -->
         <div id="specificVerseSection" style="display:none;">
           <div id="specificVerseLabel"
-               style="font-weight:600; margin:12px 0 8px; color:var(--header-color);">
+               style="font-weight:500; margin:12px 0 8px; color:var(--header-color);">
             Select the shloka number
           </div>
           <!-- Verse number buttons are injected here by showSpecificVerses() -->
@@ -944,7 +944,7 @@
               onclick="toggleParayanaSelector()"
 			  data-intro="Play one random shloka or the entire chapter continuously"
               data-title="Random or Continuous Parayana"
-              style="width:100%; padding:14px; font-size:1.1em; font-weight:600;
+              style="width:100%; padding:14px; font-size:1.1em; font-weight:500;
                      background:var(--button-bg); color:var(--button-text);
                      border:none; border-radius:8px; cursor:pointer;">
         Random Shloka or Continuous Parayana
