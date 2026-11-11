@@ -1178,6 +1178,9 @@
     // Chapter remembered across the dual-selector UI
     let currentSelectedChapter = null;
 
+    // Chapter used by the previous random-paada selection.
+    let lastRandomChapter = null;
+
     // Controls whether the "Select a Shloka" panel is open
     let isSpecificSelectorOpen = false;
 
@@ -1901,21 +1904,23 @@ async function fetchShlokaMeaning(chapter, verse) {
         const audioPlayer  = document.getElementById('audioPlayer');
         let chapter, verse, quarter, isFullForQuarter = false, autoplay = true;
 
-        if (intent === 'SGSFirstPaada') {
-          setSelectedStyle('sgs');    // Force SGS style for 1st Paada
-          quarter = 'pada1';
-          chapter = Math.floor(Math.random() * 18) + 1;
-          verse   = Math.floor(Math.random() * verseCounts[chapter]) + 1;
+        if (intent === 'SGSFirstPaada' || intent === 'SringeriPaada' || intent === 'ThirdPaada') {
+          if (intent === 'SGSFirstPaada') {
+            setSelectedStyle('sgs');    // Force SGS style for 1st Paada
+            quarter = 'pada1';
+          } else if (intent === 'SringeriPaada') {
+            quarter = 'pada1_or_pada3';
+          } else {
+            quarter = 'pada3';
+          }
 
-        } else if (intent === 'SringeriPaada') {
-          quarter = 'pada1_or_pada3';
-          chapter = Math.floor(Math.random() * 18) + 1;
-          verse   = Math.floor(Math.random() * verseCounts[chapter]) + 1;
-
-        } else if (intent === 'ThirdPaada') {
-          quarter = 'pada3';
-          chapter = Math.floor(Math.random() * 18) + 1;
-          verse   = Math.floor(Math.random() * verseCounts[chapter]) + 1;
+          // Choose a different chapter from the previous random selection.
+          // On the first selection, all 18 chapters are eligible.
+          const eligibleChapters = Array.from({ length: 18 }, (_, index) => index + 1)
+            .filter(ch => ch !== lastRandomChapter);
+          chapter = eligibleChapters[Math.floor(Math.random() * eligibleChapters.length)];
+          verse = Math.floor(Math.random() * verseCounts[chapter]) + 1;
+          lastRandomChapter = chapter;
 
         } else if (intent === 'NextFullShloka') {
           const context = currentContext.find(ctx => ctx.name.includes('shloka-context'));
@@ -3154,6 +3159,7 @@ async function fetchShlokaMeaning(chapter, verse) {
       document.getElementById('countdownTimer').style.display = 'none';
       audioPlayer.onended   = null;
       lastRandomIntent      = null;
+      lastRandomChapter     = null;
       if (nextTimer)         { clearTimeout(nextTimer);        nextTimer        = null; }
       if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
       if (wakeLock)          { wakeLock.release();             wakeLock         = null; }
